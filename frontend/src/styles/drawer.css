@@ -1,0 +1,98 @@
+.drawer {
+    position: fixed;
+    top: var(--header-height);
+    left: 0;
+    width: var(--drawer-width);
+    min-width: var(--drawer-width);
+    bottom: 0;
+    background-color: #d1e063;
+    padding: 20px;
+    box-sizing: border-box;
+    overflow-y: auto;
+  
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    flex: 0 0 var(--drawer-width);
+    transition: transform 0.3s ease-in-out;
+  }
+  
+  .drawer-menu {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    width: 100%;
+    text-align: center;
+  }
+  
+  .drawer-link {
+    display: block;
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 300;
+    font-size: 1.1rem;
+    color: #000;
+    text-decoration: none;
+    padding: 10px 0;
+    border-bottom: 1px solid #ffffff;
+    transition: background-color 0.3s, color 0.3s;
+  }
+  
+  .drawer-link:hover {
+    background-color: #ffffff;
+    color: #fff;
+  }
+  
+  @media (max-width: 768px) {
+    .drawer {
+      position: static; /* El Drawer empuja el contenido en lugar de superponerse */
+      width: 100%;
+      height: auto;
+      padding: 10px 0;
+      overflow-x: hidden;
+    }
+  }
+  
+  
+    .drawer-menu {
+      display: flex;
+      flex-wrap: wrap; /* Permite que los elementos pasen a la segunda fila */
+      justify-content: center;
+      gap: 10px; /* Espacio entre elementos */
+      padding: 0;
+      margin: 2px 0;
+    }
+  
+    .drawer-menu li {
+      flex: 1 1 45%; /* Cada item ocupará el 45% del ancho, dejando espacio para dos en una fila */
+      text-align: center;
+    }
+  
+    .drawer-link {
+      display: block;
+      padding: 10px;
+      margin-bottom: 10px;
+      border-bottom: none;
+      background: linear-gradient(145deg, #BEDAA1, #abbf9d); /* Gradiente para efecto 3D */
+      color: #000;
+      text-decoration: none;
+      border-radius: 5px;
+      box-shadow: 3px 3px 5px rgba(0, 0, 0, 0.2), /* Sombra exterior */
+              inset -2px -2px 4px rgba(0, 0, 0, 0.2), /* Sombra interior para profundidad */
+              inset 2px 2px 4px rgba(255, 255, 255, 0.3); /* Sombra interior para resaltar */
+      transition: transform 0.2s, box-shadow 0.2s; /* Transición suave */
+    }
+  
+    .drawer-link:hover {
+      transform: translateY(-2px); /* Efecto de levantarse al pasar el mouse */
+      box-shadow: 5px 5px 8px rgba(0, 0, 0, 0.3), /* Sombra más pronunciada */
+              inset -2px -2px 4px rgba(0, 0, 0, 0.2),
+              inset 2px 2px 4px rgba(255, 255, 255, 0.3);
+    }
+
+    .drawer-link:active {
+      transform: translateY(0); /* Efecto de ser presionado */
+      box-shadow: inset 2px 2px 4px rgba(0, 0, 0, 0.3),
+                  inset -2px -2px 4px rgba(255, 255, 255, 0.3);
+    }
+  
