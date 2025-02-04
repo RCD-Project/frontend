@@ -1,0 +1,89 @@
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap');
+
+:root {
+  --header-height: 80px;
+  --drawer-width: 250px;
+  --body-padding: 20px;
+  --header-fade-opacity: 1;
+  /* Valor inicial */
+}
+
+/* Contenedor principal: organiza Header y Main Content */
+.app-container {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  background-color: #ffffff;
+}
+
+/* Main Content: contenedor para Drawer y Body */
+.main-content {
+  display: flex;
+  flex: 1;
+  
+  margin-top: var(--header-height);
+  overflow: hidden;
+  /* Evita scrolls inesperados */
+}
+
+/* Body Content: contenedor donde se renderiza el contenido dinámico */
+.body-content {
+  margin-left: var(--drawer-width);
+  padding: 20px;
+  flex-grow: 1;
+  position: relative;
+  display: flex;
+  justify-content: center;
+  overflow-y: auto;
+  overflow-x: hidden;
+  box-sizing: border-box;
+  /* Permite scroll vertical si el contenido es largo */
+
+  /* Efecto de máscara para desvanecer el contenido debajo del header */
+  -webkit-mask-image: linear-gradient(to bottom,
+      rgba(0, 0, 0, var(--header-fade-opacity)) 0px,
+      rgba(0, 0, 0, 1) var(--header-height));
+  mask-image: linear-gradient(to bottom,
+      rgba(0, 0, 0, var(--header-fade-opacity)) 0px,
+      rgba(0, 0, 0, 1) var(--header-height));
+}
+
+/* Contenedor interno: limita el ancho y centra el contenido */
+.inner-content {
+  width: 100%;
+  max-width: 800px;
+  box-sizing: border-box;
+  font-family: 'Montserrat', sans-serif;
+}
+
+/* Media Query para dispositivos móviles */
+@media (max-width: 768px) {
+  :root {
+    --header-height: 70px;
+    /* Altura reducida para mobile */
+    --drawer-width: 100%;
+    /* El Drawer ocupará todo el ancho */
+    --body-padding: 10px;
+  }
+
+  /* Se apilan verticalmente el Drawer y el Body */
+  .main-content {
+    flex-direction: column;
+    margin-top: var(--header-height);
+  }
+
+  /* Body Content en mobile: ocupa el 100% del ancho sin margen lateral */
+  .body-content {
+    margin-left: 0;
+    padding: var(--body-padding);
+    -webkit-mask-image: none;
+    mask-image: none;
+    width: 100%;
+  }
+
+  .inner-content {
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+  }
+}

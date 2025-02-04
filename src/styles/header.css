@@ -1,0 +1,31 @@
+/* src/styles/header.css */
+@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Montserrat:wght@300;400&display=swap');
+
+.site-header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: var(--header-height);
+  background-color: #a8c948;
+  padding: 20px;
+  box-sizing: border-box;
+  text-align: center;
+  z-index: 100;
+  transition: opacity 0.3s ease;
+}
+
+.site-title {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 2.5rem;
+  color: #ffffff;
+  margin: 0;
+}
+
+.site-subtitle {
+  font-family: 'Montserrat', sans-serif;
+  font-weight: 400;
+  font-size: 1rem;
+  color: #ffffff;
+  margin: 5px 0 0;
+}
