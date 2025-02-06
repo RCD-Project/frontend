@@ -1,0 +1,8 @@
+.edit-cell {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100%; /* Usa toda la altura de la fila */
+  }
+
+  

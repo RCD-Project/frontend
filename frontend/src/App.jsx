@@ -9,6 +9,8 @@ import Body from "./components/body";
 import Clientes from "./pages/Clientes";
 import Coordinaciones from "./pages/Coordinaciones";
 import DetallesCliente from './pages/DetallesCliente';
+import EditarCliente from './pages/EditarCliente';
+
 
 
 import "./styles/App.css";
@@ -49,6 +51,7 @@ const App = () => {
               <Route path="/miperfil" element={<Miperfil />} />*/}
               <Route path="/altacliente" element={<AltaCliente />} />
               <Route path="/detallescliente" element={<DetallesCliente />} />
+              <Route path="/editarcliente" element={<EditarCliente />} />
 
 
             </Routes>

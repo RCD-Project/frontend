@@ -4,9 +4,7 @@ import { Button, TickIcon, Alert} from 'evergreen-ui';
 import { useState } from 'react';
 import '../styles/AltaCliente.css';
 
-
-const AltaCliente = () => {
-    const navigate = useNavigate();
+const EditarCliente = () => {
     return (
         <section className='alta-cliente'>
             <div className='input-group'>
@@ -28,7 +26,7 @@ const AltaCliente = () => {
                 Direccion fiscal: <TextInputs/>
             </div>
             <div className='input-group'>
-                RUT: <TextInputs/>
+                Root: <TextInputs/>
             </div>
             <div className='input-group'>
                 Mail: <TextInputs/>
@@ -45,10 +43,8 @@ const AltaCliente = () => {
                 Enviar
             </Button>
             </div>
-
         </section>
-    )
+    );
 };
 
-
-export default AltaCliente;
+export default EditarCliente;
