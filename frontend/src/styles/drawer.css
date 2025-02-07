@@ -5,7 +5,7 @@
     width: var(--drawer-width);
     min-width: var(--drawer-width);
     bottom: 0;
-    background-color: #a8c948;
+    background-color:#a8c948;
     padding: 20px;
     box-sizing: border-box;
     overflow-y: auto;
@@ -29,7 +29,7 @@
   .drawer-link {
     display: block;
     font-family: 'Montserrat', sans-serif;
-    font-weight: 300;
+    font-weight: 600;
     font-size: 1.1rem;
     color: #000;
     text-decoration: none;
@@ -39,7 +39,7 @@
   }
   
   .drawer-link:hover {
-    background-color: #ffffff;
+    background-color: transparent;
     color: #fff;
   }
   
@@ -73,26 +73,6 @@
       padding: 10px;
       margin-bottom: 10px;
       border-bottom: none;
-      background: linear-gradient(145deg, #BEDAA1, #d1e063); /* Gradiente para efecto 3D */
-      color: #000;
-      text-decoration: none;
-      border-radius: 5px;
-      box-shadow: 3px 3px 5px rgba(0, 0, 0, 0.4), /* Sombra exterior */
-              inset -2px -2px 4px rgba(0, 0, 0, 0.2), /* Sombra interior para profundidad */
-              inset 2px 2px 4px rgba(255, 255, 255, 0.3); /* Sombra interior para resaltar */
-      transition: transform 0.2s, box-shadow 0.2s; /* Transición suave */
-    }
-  
-    .drawer-link:hover {
-      transform: translateY(-2px); /* Efecto al pasar el mouse */
-      box-shadow: 5px 5px 8px rgba(0, 0, 0, 0.3), /* Sombra más pronunciada */
-              inset -2px -2px 4px rgba(0, 0, 0, 0.2),
-              inset 2px 2px 4px rgba(255, 255, 255, 0.3);
-    }
-
-    .drawer-link:active {
-      transform: translateY(0); /* Efecto de ser presionado */
-      box-shadow: inset 2px 2px 4px rgba(0, 0, 0, 0.3),
-                  inset -2px -2px 4px rgba(255, 255, 255, 0.3);
+      background: #a8c948
     }
   
