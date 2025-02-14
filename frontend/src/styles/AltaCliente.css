@@ -2,11 +2,11 @@
     max-width: 500px;
     margin: auto;
     padding: 20px;
-    background-color: #a8c948;
+    background-color: #999999;
     font-weight: bold;
-    color: #ffffff;
+    color: #000000;
     border-radius: 10px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 10px 50px rgba(0, 0, 0, 0.1);
 }
 .input-group {
     margin-bottom: 15px;
@@ -38,8 +38,9 @@
   }
   
   .custom-edit-icon svg {
-    color: green;
-    width: 16px;
+    margin-right: auto;
+    color: #a9c848;
+    width: 26px;
     height: 16px;
   }
 

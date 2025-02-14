@@ -1,68 +1,63 @@
 import { useState } from 'react';
-import { Table, IconButton, EyeOpenIcon, EditIcon, DeleteIcon } from 'evergreen-ui';
+import { Table, IconButton, EyeOpenIcon, EditIcon, DeleteIcon, toaster } from 'evergreen-ui';
 import { useNavigate } from 'react-router-dom';
-import '../styles/Tabla.css';
+import '../styles/Table.css';
 
-const Tabla = ({ clientes = [] }) => {
+const Tabla = ({ datos = [], columnas = [], onEliminar, filtroPlaceholder }) => {
   const [filtro, setFiltro] = useState("");
   const navigate = useNavigate();
 
-  const clientesFiltrados = clientes.filter((cliente) =>
-    cliente.nombre.toLowerCase().includes(filtro.toLowerCase())
+  // Filtrar los datos según el valor del filtro
+  const datosFiltrados = datos.filter((dato) =>
+    dato[filtroPlaceholder]?.toLowerCase().includes(filtro.toLowerCase())
   );
-
-  const eliminarCliente = (id) => {
-    const confirmacion = window.confirm("¿Seguro que deseas eliminar este cliente?");
-    if (confirmacion) {
-      setClientes(clientes.filter((cliente) => cliente.id !== id));
-      toaster.success("Cliente eliminado con éxito");
-    }
-  };
-
+  
 
   return (
-    <Table>
-      <Table.Head>
-        <Table.TextHeaderCell>Nombres</Table.TextHeaderCell>
-        <Table.TextHeaderCell>Fecha de ingreso</Table.TextHeaderCell>
-        <Table.TextHeaderCell>Cantidad de obras</Table.TextHeaderCell>
-        <Table.SearchHeaderCell 
-          onChange={(valor) => setFiltro(valor)} 
-          placeholder="Filtrar por nombre..."
-        />
-      </Table.Head>
-      <Table.Body height={240}>
-        {clientesFiltrados.map((cliente) => (
-          <Table.Row key={cliente.id} isSelectable>
-            <Table.TextCell>{cliente.ultimaActividad}</Table.TextCell>
-            <Table.TextCell isNumber>{cliente.cantidadObras}</Table.TextCell>
-            
-            <Table.TextCell className="view-cell">
-              <IconButton
-                icon={EyeOpenIcon} 
-                appearance="minimal"
-                onClick={navigate(`/detallescliente?id=${cliente.id}`)}
-              />
-            </Table.TextCell>
-            <Table.TextCell className="edit-cell">
-              <IconButton
-                icon={EditIcon} 
-                appearance="minimal"
-                onClick={navigate(`/editarcliente?id=${cliente.id}`)} 
-              />
-            </Table.TextCell>
-            <Table.TextCell className="delete-cell">
-              <IconButton
-                icon={DeleteIcon} 
-                appearance="minimal"
-                onClick={eliminarCliente(cliente.id)}
-              />
-            </Table.TextCell>
-          </Table.Row>
-        ))}
-      </Table.Body>
-    </Table>
-  );  
+    <div className="table-container">
+      <Table className="fullscreen-table">
+        <Table.Head>
+          {columnas.map((columna, index) => (
+            <Table.TextHeaderCell key={index}>{columna.titulo}</Table.TextHeaderCell>
+          ))}
+          <Table.SearchHeaderCell
+            onChange={(e) => setFiltro(e.target.value)}
+            placeholder={`Filtrar por ${filtroPlaceholder}...`}
+          />
+        </Table.Head>
+        <Table.Body height={240}>
+          {datosFiltrados.map((dato) => (
+            <Table.Row key={dato.id} isSelectable>
+              {columnas.map((columna, index) => (
+                <Table.TextCell key={index}>{dato[columna.clave]}</Table.TextCell>
+              ))}
+              <Table.TextCell className="view-cell">
+                <IconButton
+                  icon={EyeOpenIcon}
+                  appearance="minimal"
+                  onClick={() => navigate(`/detallescliente?id=${dato.id}`)}
+                />
+              </Table.TextCell>
+              <Table.TextCell className="edit-cell">
+                <IconButton
+                  icon={EditIcon}
+                  appearance="minimal"
+                  onClick={() => navigate(`/editarcliente?id=${dato.id}`)}
+                />
+              </Table.TextCell>
+              <Table.TextCell className="delete-cell">
+                <IconButton
+                  icon={DeleteIcon}
+                  appearance="minimal"
+                  onClick={() => onEliminar(dato.id)} // Usamos onEliminar desde el componente padre
+                />
+              </Table.TextCell>
+            </Table.Row>
+          ))}
+        </Table.Body>
+      </Table>
+    </div>
+  );
 };
 
 export default Tabla;

@@ -5,13 +5,13 @@ const perfiles = [
   { 
     id: 1, nombre: 'Pedro', ultimaActividad: '2022-12-01', cantidadObras: 50,
     direccion: 'Calle Falsa 123', contacto: '1234567890', nombreContacto: 'Juan Perez', 
-    razonSocial: 'Empresa 1', direccionFiscal: 'Calle Falsa 123', root: 'Root1', 
+    razonSocial: 'Empresa 1', direccionFiscal: 'Calle Falsa 123', RUT: 'RUT1', 
     email: 'pedro@email.com', cronograma: 'Cronograma 1'
   },
   { 
     id: 2, nombre: 'Juan', ultimaActividad: '2022-11-25', cantidadObras: 80,
     direccion: 'Calle Real 456', contacto: '9876543210', nombreContacto: 'Maria Garcia',
-    razonSocial: 'Empresa 2', direccionFiscal: 'Calle Real 456', root: 'Root2', 
+    razonSocial: 'Empresa 2', direccionFiscal: 'Calle Real 456', RUT: 'RUT2', 
     email: 'juan@email.com', cronograma: 'Cronograma 2'
   },
   // Puedes seguir añadiendo más clientes aquí si es necesario
@@ -57,7 +57,7 @@ const DetallesCliente = () => {
         <strong>Dirección Fiscal:</strong> {cliente.direccionFiscal}
       </div>
       <div className="input-group">
-        <strong>Root:</strong> {cliente.root}
+        <strong>RUT:</strong> {cliente.root}
       </div>
       <div className="input-group">
         <strong>Correo Electrónico:</strong> {cliente.email}

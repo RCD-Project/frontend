@@ -12,3 +12,4 @@ const Header = ({ opacity }) => {
 };
 
 export default Header;
+

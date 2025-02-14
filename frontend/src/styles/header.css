@@ -7,18 +7,19 @@
   left: 0;
   width: 100%;
   height: var(--header-height);
-  background-color: #a9c848;
-  padding: 20px;
+  background-color: #000000;
+  padding: 17px;
   box-sizing: border-box;
   text-align: center;
   z-index: 100;
   transition: opacity 0.3s ease;
 }
 
+
 .site-title {
   font-family: 'Bebas Neue', sans-serif;
   font-size: 2.5rem;
-  color: #000000;
+  color: #ffffff;
   margin: 0;
 }
 

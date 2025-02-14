@@ -1,33 +1,40 @@
-// src/pages/Home.jsx
-import React from 'react';
-import Tables from '../components/Table'
-import { Button, AddIcon } from 'evergreen-ui'
-import { useState, useEffect } from "react";
+import React, { useState } from 'react';
+import Tabla from '../components/Table';
+import { Button, AddIcon } from 'evergreen-ui';
 import { Link } from 'react-router-dom';
 
-
-const handleFilterChange = (e) => {
-  setEstadoFiltro(e.target.value);
-};
-
-const handleFilterSubmit = (e) => {
-  e.preventDefault();
-  // Aquí se podría hacer la llamada a la API con el filtro seleccionado
-};
-
 const Clientes = () => {
-  const [estadoFiltro, setEstadoFiltro] = useState('Filter...')
+  const [clientes, setClientes] = useState([
+    { id: 1, nombre: 'Juan Pérez', ultimaActividad: '2024-01-01', cantidadObras: 5 },
+    { id: 2, nombre: 'Ana López', ultimaActividad: '2024-02-01', cantidadObras: 3 },
+  ]);
+
+  const eliminarCliente = (id) => {
+    const confirmacion = window.confirm("¿Seguro que deseas eliminar este cliente?");
+    if (confirmacion) {
+      setClientes(clientes.filter((cliente) => cliente.id !== id));
+    }
+  };
+
+  const columnasClientes = [
+    { titulo: 'Nombres', clave: 'nombre' },
+    { titulo: 'Fecha de ingreso', clave: 'ultimaActividad' },
+    { titulo: 'Cantidad de obras', clave: 'cantidadObras' }
+  ];
 
   return (
-    //Agregar useEffect para cuando se filtre algo se realice dicho filtrado
-    
     <div>
-      <h1>Listado clientes</h1>
-      <Tables></Tables>
+      <h1>Listado de Clientes</h1>
+      <Tabla
+        datos={clientes}
+        columnas={columnasClientes}
+        onEliminar={eliminarCliente}
+        filtroPlaceholder="nombre" // Esto permite filtrar por la columna 'nombre'
+      />
       <Link to="/altacliente">
         <Button marginRight={16} intent="success">
           <AddIcon />
-          Añadir
+          Añadir Cliente
         </Button>
       </Link>
     </div>

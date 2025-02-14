@@ -8,16 +8,27 @@ import Body from "./components/body";
 
 import Clientes from "./pages/Clientes";
 import Coordinaciones from "./pages/Coordinaciones";
-import DetallesCliente from './pages/DetallesCliente';
-import EditarCliente from './pages/EditarCliente';
+import Transportistas from "./pages/Transportistas";
+import EmpresasGestoras from "./pages/EmpresasGestoras";
+import AltaClientes from "./pages/AltaClientes";
+import DetallesCliente from "./pages/DetallesCliente";
+import EditarCliente from "./pages/EditarCliente";
+import ListaDeObras from "./pages/ListaDeObras";
+import Informes from "./pages/Informes";
+import Solicitudes from "./pages/Solicitudes";
+import SolicitudesDeVisitas from "./pages/SolicitudesDeVisitas";
+import InformeDeTecnicos from "./pages/InformeDeTecnicos";
+import Formularios from "./pages/Formularios";
+
+
 
 
 
 import "./styles/App.css";
-import AltaCliente from "./pages/AltaClientes";
 
 const App = () => {
   const [headerOpacity, setHeaderOpacity] = useState(1);
+  const [drawerWidth, setDrawerWidth] = useState("var(--drawer-width)");
 
   useEffect(() => {
     const handleScroll = () => {
@@ -31,6 +42,7 @@ const App = () => {
         opacidadNueva
       );
     };
+    
 
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
@@ -40,23 +52,31 @@ const App = () => {
     <Router>
       <div className="app-container">
         <Header opacity={headerOpacity} />
-        <div className="main-content">
-          <Drawer />
+        <Drawer onWidthChange={setDrawerWidth} />
+        
+        <main className="body-content" style={{ marginLeft: drawerWidth }}>
+
           <Body>
             <Routes>
               <Route path="/" element={<Clientes />} />
               <Route path="/coordinaciones" element={<Coordinaciones />} />
-              {/*<Route path="/transportistas" element={<Transportistas />} />
-              <Route path="/empresas" element={<Empresas />} />
-              <Route path="/miperfil" element={<Miperfil />} />*/}
-              <Route path="/altacliente" element={<AltaCliente />} />
+              <Route path="/transportistas" element={<Transportistas />} />
+              <Route path="/empresasgestoras" element={<EmpresasGestoras />} />
+              <Route path="/altaclientes" element={<AltaClientes />} />
               <Route path="/detallescliente" element={<DetallesCliente />} />
               <Route path="/editarcliente" element={<EditarCliente />} />
+              <Route path="/listadeobras" element={<ListaDeObras />} />
+              <Route path="/informes" element={<Informes />} />
+              <Route path="/solicitudes" element={<Solicitudes />} />
+              <Route path="/solicitudesdevisitas" element={<SolicitudesDeVisitas />} />
+              <Route path="/informedetecnicos" element={<InformeDeTecnicos />} />
+              <Route path="/formularios" element={<Formularios />} />
+              {/*<Route path="/miperfil" element={<Miperfil />} />*/}
 
 
             </Routes>
           </Body>
-        </div>
+        </main>
       </div>
     </Router>
   );
