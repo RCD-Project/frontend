@@ -1,0 +1,40 @@
+.solicitudes-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.solicitudes-table {
+  width: 80%;
+}
+
+.acciones-container {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+}
+
+.icono-aceptar, .icono-rechazar, .icono-terminar {
+  cursor: pointer;
+  transition: transform 0.2s ease-in-out;
+}
+
+.icono-aceptar:hover {
+  transform: scale(1.1);
+  color: green;
+}
+
+.icono-rechazar:hover {
+  transform: scale(1.1);
+  color: red;
+}
+
+.icono-terminar:hover {
+  transform: scale(1.1);
+  color: blue;
+}
+
+.tabla-terminadas {
+  background-color: #f0f0f0;
+  opacity: 0.8;
+}

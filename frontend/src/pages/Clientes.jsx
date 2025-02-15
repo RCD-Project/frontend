@@ -1,6 +1,12 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import Tabla from '../components/Table';
-import { Button, AddIcon } from 'evergreen-ui';
+import { Button, IconButton, Menu, MenuItem } from '@mui/material';
+import MoreVertIcon from '@mui/icons-material/MoreVert';
+import VisibilityIcon from '@mui/icons-material/Visibility';
+import EditIcon from '@mui/icons-material/Edit';
+import DeleteIcon from '@mui/icons-material/Delete';
+import AddIcon from '@mui/icons-material/Add';
 import { Link } from 'react-router-dom';
 
 const Clientes = () => {
@@ -9,6 +15,8 @@ const Clientes = () => {
     { id: 2, nombre: 'Ana López', ultimaActividad: '2024-02-01', cantidadObras: 3 },
   ]);
 
+  const navigate = useNavigate(); // 🚀 Hook para la navegación
+
   const eliminarCliente = (id) => {
     const confirmacion = window.confirm("¿Seguro que deseas eliminar este cliente?");
     if (confirmacion) {
@@ -16,10 +24,36 @@ const Clientes = () => {
     }
   };
 
+  const [anchorEl, setAnchorEl] = useState(null);
+  const [selectedCliente, setSelectedCliente] = useState(null);
+
+  const handleMenuOpen = (event, cliente) => {
+    setAnchorEl(event.currentTarget);
+    setSelectedCliente(cliente);
+  };
+
+  const handleMenuClose = () => {
+    setAnchorEl(null);
+    setSelectedCliente(null);
+  };
+
   const columnasClientes = [
-    { titulo: 'Nombres', clave: 'nombre' },
-    { titulo: 'Fecha de ingreso', clave: 'ultimaActividad' },
-    { titulo: 'Cantidad de obras', clave: 'cantidadObras' }
+    { field: 'nombre', headerName: 'Nombres', flex: 1 },
+    { field: 'ultimaActividad', headerName: 'Fecha de ingreso', flex: 1 },
+    { field: 'cantidadObras', headerName: 'Cantidad de obras', flex: 1 },
+    {
+      field: 'acciones',
+      headerName: 'Acciones',
+      flex: 1,
+      sortable: false,
+      renderCell: (params) => (
+        <>
+          <IconButton onClick={(event) => handleMenuOpen(event, params.row)}>
+            <MoreVertIcon />
+          </IconButton>
+        </>
+      ),
+    },
   ];
 
   return (
@@ -28,15 +62,36 @@ const Clientes = () => {
       <Tabla
         datos={clientes}
         columnas={columnasClientes}
-        onEliminar={eliminarCliente}
-        filtroPlaceholder="nombre" // Esto permite filtrar por la columna 'nombre'
+        filtroClave="nombre"
+        filtroPlaceholder="Nombre del cliente"
       />
-      <Link to="/altacliente">
-        <Button marginRight={16} intent="success">
-          <AddIcon />
-          Añadir Cliente
-        </Button>
-      </Link>
+
+      <Menu
+        anchorEl={anchorEl}
+        open={Boolean(anchorEl)}
+        onClose={handleMenuClose}
+      >
+        <MenuItem onClick={() => { handleMenuClose(); navigate(`/detallescliente?id=${selectedCliente?.id}`); }}>
+          <VisibilityIcon /> Ver detalles
+        </MenuItem>
+        <MenuItem onClick={() => { handleMenuClose(); navigate(`/editarcliente?id=${selectedCliente?.id}`); }}>
+          <EditIcon /> Editar
+        </MenuItem>
+        <MenuItem onClick={() => { handleMenuClose(); eliminarCliente(selectedCliente?.id); }}>
+          <DeleteIcon style={{ color: 'red' }} /> Eliminar
+        </MenuItem>
+      </Menu>
+
+      <Button
+        variant="contained"
+        color="primary"
+        startIcon={<AddIcon />}
+        component={Link}
+        to="/altacliente"
+        style={{ marginTop: '20px' }}
+      >
+        Añadir Cliente
+      </Button>
     </div>
   );
 };

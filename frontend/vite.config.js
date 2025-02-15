@@ -1,12 +1,12 @@
-// vite.config.js
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 
-// Hacer explícito el soporte para JSX
+// Configuración correcta
 export default defineConfig({
   plugins: [react()],
-  esbuild: {
-    jsxFactory: 'React.createElement',
-    jsxFragment: 'React.Fragment'
-  }
+  resolve: {
+    alias: {
+      react: 'react',
+    },
+  },
 });

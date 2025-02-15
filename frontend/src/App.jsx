@@ -16,9 +16,15 @@ import EditarCliente from "./pages/EditarCliente";
 import ListaDeObras from "./pages/ListaDeObras";
 import Informes from "./pages/Informes";
 import Solicitudes from "./pages/Solicitudes";
-import SolicitudesDeVisitas from "./pages/SolicitudesDeVisitas";
+import Capacitaciones from "./pages/Capacitaciones";
 import InformeDeTecnicos from "./pages/InformeDeTecnicos";
 import Formularios from "./pages/Formularios";
+import DetallesObra from './pages/DetallesObra';
+import EditarObra from './pages/EditarObra';
+import DetallesTransportista from './pages/DetallesTransportista';
+import EditarTransportista from './pages/EditarTransportista';
+
+
 
 
 
@@ -68,9 +74,13 @@ const App = () => {
               <Route path="/listadeobras" element={<ListaDeObras />} />
               <Route path="/informes" element={<Informes />} />
               <Route path="/solicitudes" element={<Solicitudes />} />
-              <Route path="/solicitudesdevisitas" element={<SolicitudesDeVisitas />} />
+              <Route path="/capacitaciones" element={<Capacitaciones />} />
               <Route path="/informedetecnicos" element={<InformeDeTecnicos />} />
               <Route path="/formularios" element={<Formularios />} />
+              <Route path="/detallesobra" element={<DetallesObra />} />
+              <Route path="/editarobra" element={<EditarObra />} />
+              <Route path="/detalletransportista" element={<DetallesTransportista />} />
+              <Route path="/editartransportista" element={<EditarTransportista />} />
               {/*<Route path="/miperfil" element={<Miperfil />} />*/}
 
 

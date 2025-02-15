@@ -1,6 +1,5 @@
 import { useLocation } from 'react-router-dom';
 
-// Datos estáticos de ejemplo con propiedades en español
 const perfiles = [
   { 
     id: 1, nombre: 'Pedro', ultimaActividad: '2022-12-01', cantidadObras: 50,
@@ -14,15 +13,13 @@ const perfiles = [
     razonSocial: 'Empresa 2', direccionFiscal: 'Calle Real 456', RUT: 'RUT2', 
     email: 'juan@email.com', cronograma: 'Cronograma 2'
   },
-  // Puedes seguir añadiendo más clientes aquí si es necesario
 ];
 
 const DetallesCliente = () => {
   const location = useLocation();
   const queryParams = new URLSearchParams(location.search);
-  const id = queryParams.get('id'); // Obtener el id del cliente desde la query string
+  const id = queryParams.get('id');
 
-  // Buscar el perfil del cliente en el array estático "perfiles"
   const cliente = perfiles.find((perfil) => perfil.id === parseInt(id));
 
   if (!cliente) {
