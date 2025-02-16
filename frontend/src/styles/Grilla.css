@@ -1,0 +1,54 @@
+/* Asegura que el contenedor use más espacio y mantenga márgenes */
+.page-container {
+    width: 95%;
+    margin: auto;
+    margin-top: 20px;
+  }
+  
+  /* Mejora la separación entre títulos y contenido */
+  .section-title {
+    margin-top: 30px;
+    margin-bottom: 15px;
+    font-size: 1.4rem;
+    font-weight: bold;
+  }
+  
+  /* Ajusta la tabla para que ocupe más espacio */
+  .table-container {
+    width: 100%;
+    overflow-x: auto;
+    padding: 15px;
+    background: #f9f9f9;
+    border-radius: 8px;
+  }
+  
+  /* Alinea y distribuye los títulos de las columnas */
+  .table-header {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    font-size: 0.9rem;
+    font-weight: bold;
+    padding: 10px 0;
+    border-bottom: 2px solid gray;
+  }
+  
+  /* Ajusta las filas para que los checkboxes no se superpongan */
+  .table-row {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    padding: 8px 0;
+    border-bottom: 1px solid lightgray;
+  }
+  
+  /* Ajusta el tamaño de los checkboxes */
+  .table-checkbox {
+    transform: scale(1.2);
+  }
+  
+  /* Mejora los inputs de observaciones */
+  .input-field {
+    margin-top: 15px;
+  }
+  

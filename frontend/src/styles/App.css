@@ -46,10 +46,10 @@
 /* Body Content: contenedor donde se renderiza el contenido dinámico */
 .body-content {
   flex-grow: 1;
-  padding: 20px;
+  padding: 10px; /* Reducir padding para más espacio */
   box-sizing: border-box;
   margin-top: 20px;
-  transition: margin-left 0.3s ease;
+  width: 100%; /* Permitir que ocupe todo el ancho */
 
 /* Efecto de máscara para desvanecer el contenido debajo del header */
 -webkit-mask-image: linear-gradient(to bottom,
@@ -63,7 +63,7 @@
 /* Contenedor interno: limita el ancho y centra el contenido */
 .inner-content {
   width: 100%;
-  max-width: 800px;
+  max-width: 1000px;
   box-sizing: border-box;
   font-family: 'Montserrat', sans-serif;
 }

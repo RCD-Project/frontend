@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Tabla from '../components/Table';
 import { Button, IconButton, Menu, MenuItem } from '@mui/material';
@@ -10,12 +10,15 @@ import AddIcon from '@mui/icons-material/Add';
 import { Link } from 'react-router-dom';
 
 const Clientes = () => {
-  const [clientes, setClientes] = useState([
-    { id: 1, nombre: 'Juan Pérez', ultimaActividad: '2024-01-01', cantidadObras: 5 },
-    { id: 2, nombre: 'Ana López', ultimaActividad: '2024-02-01', cantidadObras: 3 },
-  ]);
+  const [clientes, setClientes] = useState([]);
+  const navigate = useNavigate();
 
-  const navigate = useNavigate(); // 🚀 Hook para la navegación
+  useEffect(() => {
+    fetch('http://localhost:8000/api/clientes/aprobados/')
+      .then((response) => response.json())
+      .then((data) => setClientes(data))
+      .catch((error) => console.error('Error al obtener clientes:', error));
+  }, []);
 
   const eliminarCliente = (id) => {
     const confirmacion = window.confirm("¿Seguro que deseas eliminar este cliente?");

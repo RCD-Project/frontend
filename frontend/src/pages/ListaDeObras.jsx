@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Tabla from '../components/Table';
 import { Button, IconButton, Menu, MenuItem } from '@mui/material';
@@ -10,14 +10,20 @@ import AddIcon from '@mui/icons-material/Add';
 import { Link } from 'react-router-dom';
 
 const ListaDeObras = () => {
-  const [obras, setObras] = useState([
-    { id: 1, nombre: 'Edificio Central', ubicacion: 'Montevideo' },
-    { id: 2, nombre: 'Puente Costanera', ubicacion: 'Canelones' },
-    { id: 3, nombre: 'Torre Norte', ubicacion: 'Maldonado' },
-    { id: 4, nombre: 'Hospital Nuevo', ubicacion: 'Paysandú' },
-  ]);
-
+  const [obras, setObras] = useState([]);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    fetch('http://localhost:8000/api/obras/aprobadas/')
+      .then(response => {
+        if (!response.ok) {
+          throw new Error('Error al obtener las obras aprobadas');
+        }
+        return response.json();
+      })
+      .then(data => setObras(data))
+      .catch(error => console.error('Error:', error));
+  }, []);
 
   const eliminarObra = (id) => {
     const confirmacion = window.confirm("¿Seguro que deseas eliminar esta obra?");
@@ -48,18 +54,16 @@ const ListaDeObras = () => {
       flex: 1,
       sortable: false,
       renderCell: (params) => (
-        <>
-          <IconButton onClick={(event) => handleMenuOpen(event, params.row)}>
-            <MoreVertIcon />
-          </IconButton>
-        </>
+        <IconButton onClick={(event) => handleMenuOpen(event, params.row)}>
+          <MoreVertIcon />
+        </IconButton>
       ),
     },
   ];
 
   return (
     <div>
-      <h1>Lista de Obras en Progreso</h1>
+      <h1>Lista de Obras Aprobadas</h1>
       <Tabla
         datos={obras}
         columnas={columnasObras}
@@ -67,11 +71,7 @@ const ListaDeObras = () => {
         filtroPlaceholder="Nombre de la obra"
       />
 
-      <Menu
-        anchorEl={anchorEl}
-        open={Boolean(anchorEl)}
-        onClose={handleMenuClose}
-      >
+      <Menu anchorEl={anchorEl} open={Boolean(anchorEl)} onClose={handleMenuClose}>
         <MenuItem onClick={() => { handleMenuClose(); navigate(`/detallesobra?id=${selectedObra?.id}`); }}>
           <VisibilityIcon /> Ver detalles
         </MenuItem>
