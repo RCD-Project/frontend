@@ -14,7 +14,7 @@ import { useFormStore } from "../context/FormContext";
 const Page5 = () => {
   const { data, updateData } = useFormStore();
 
-  // Valor por defecto para page5 con grilla de 5 filas x 4 columnas.
+  // Definimos un valor por defecto para page5 con grilla de 5 filas x 4 columnas.
   const defaultPage5 = {
     grilla: Array.from({ length: 5 }, () => Array(4).fill(false)),
     acopioContenedores: "",
@@ -33,15 +33,17 @@ const Page5 = () => {
     }
   }, [data.page5, updateData]);
 
+  // Maneja el cambio en el dropdown
   const handleDropdownChange = (event) => {
     updateData("page5", { ...data.page5, acopioContenedores: event.target.value });
   };
 
+  // Maneja el cambio en las observaciones
   const handleObservationChange = (event) => {
     updateData("page5", { ...data.page5, observaciones: event.target.value });
   };
 
-  // En cada fila se permitirá solo una opción (como radio buttons).
+  // Maneja el cambio de checkbox para que en cada fila solo se seleccione uno
   const handleCheckboxChange = (rowIndex, colIndex) => {
     const updatedRow = page5Data.grilla[rowIndex].map((_, i) => i === colIndex);
     const updatedGrilla = page5Data.grilla.map((row, i) => (i === rowIndex ? updatedRow : row));
@@ -82,48 +84,55 @@ const Page5 = () => {
         </Select>
       </FormControl>
 
-      {/* Mostrar la grilla solo si se selecciona "Si hay" */}
-      {data.page5?.acopioContenedores === "Si hay" && (
-        <>
-          <Typography variant="h6" sx={{ mt: 3 }}>
-            ¿Cómo se encuentra el Punto de Acopio?
-          </Typography>
-          <Grid container spacing={1} sx={{ mt: 2 }}>
-            {/* Encabezado */}
-            <Grid container item>
-              <Grid item xs={3} sx={{ fontWeight: "bold", textAlign: "center", p: 1 }}>
-                -
-              </Grid>
-              {titulosColumnas.map((titulo, index) => (
-                <Grid
-                  item
-                  xs={2.25}
-                  key={index}
-                  sx={{ textAlign: "center", fontWeight: "bold", p: 1 }}
-                >
-                  {titulo}
-                </Grid>
-              ))}
+      {/* Grilla: Estado del Punto de Acopio */}
+      <Typography variant="h6" sx={{ mt: 3 }}>
+        ¿Cómo se encuentra el Punto de Acopio?
+      </Typography>
+      <Grid container spacing={1} sx={{ mt: 2 }}>
+        {/* Encabezado */}
+        <Grid container item>
+          <Grid item xs={3} sx={{ fontWeight: "bold", textAlign: "center", p: 1 }}>
+            -
+          </Grid>
+          {titulosColumnas.map((titulo, index) => (
+            <Grid
+              item
+              xs={2.25}
+              key={index}
+              sx={{ textAlign: "center", fontWeight: "bold", p: 1 }}
+            >
+              {titulo}
             </Grid>
-            {/* Filas */}
-            {titulosFilas.map((fila, rowIndex) => (
-              <Grid container item key={rowIndex} alignItems="center">
-                <Grid item xs={3} sx={{ fontWeight: "bold", textAlign: "center", p: 1 }}>
-                  {fila}
-                </Grid>
-                {titulosColumnas.map((_, colIndex) => (
-                  <Grid item xs={2.25} key={colIndex} sx={{ textAlign: "center", p: 1 }}>
-                    <Checkbox
-                      checked={!!page5Data.grilla[rowIndex]?.[colIndex]}
-                      onChange={() => handleCheckboxChange(rowIndex, colIndex)}
-                    />
-                  </Grid>
-                ))}
+          ))}
+        </Grid>
+        {/* Filas */}
+        {titulosFilas.map((fila, rowIndex) => (
+          <Grid container item key={rowIndex} alignItems="center">
+            <Grid
+              item
+              xs={3}
+              sx={{ fontWeight: "bold", textAlign: "center", p: 1 }}
+            >
+              {fila}
+            </Grid>
+            {titulosColumnas.map((_, colIndex) => (
+              <Grid
+                item
+                xs={2.25}
+                key={colIndex}
+                sx={{ textAlign: "center", p: 1 }}
+              >
+                <Checkbox
+                  checked={!!page5Data.grilla[rowIndex]?.[colIndex]}
+                  onChange={() => handleCheckboxChange(rowIndex, colIndex)}
+                  // Si se selecciona "No hay" en el dropdown, deshabilitamos los checkboxes
+                  disabled={data.page5?.acopioContenedores === "No hay"}
+                />
               </Grid>
             ))}
           </Grid>
-        </>
-      )}
+        ))}
+      </Grid>
 
       {/* TextBox: Observaciones */}
       <TextField

@@ -102,7 +102,7 @@ const Page3 = () => {
         color="success"
         onClick={agregarGrilla}
         sx={{ mb: 2 }}
-        disabled={formData.puntoLimpio === "No hay"}
+        disabled={!formData.puntoLimpio || formData.puntoLimpio === "No hay"}
       >
         Agregar Punto Limpio
       </Button>

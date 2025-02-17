@@ -1,4 +1,6 @@
 import React, { useState } from "react";
+import { Button, Box } from "@mui/material";
+import { ArrowBack, ArrowForward } from "@mui/icons-material";
 import { useFormStore } from "../pages/context/FormContext";
 
 const pages = import.meta.glob("../pages/forms/*.jsx", { eager: true });
@@ -15,10 +17,7 @@ const Formularios = () => {
   const { data, updateData } = useFormStore();
   const [pageIndex, setPageIndex] = useState(data.pageIndex || 0);
 
-
   const CurrentPage = pageComponents[pageIndex];
-
-  
 
   if (!CurrentPage) return <div>No se encontró la página</div>;
 
@@ -32,16 +31,31 @@ const Formularios = () => {
   };
 
   return (
-    <div>
-      <CurrentPage 
-        defaultValues={data[pageIndex] || {}} 
-        saveData={handleNext} 
-      />
-      <button onClick={handlePrev} disabled={pageIndex === 0}>Anterior</button>
-      <button onClick={() => handleNext({})} disabled={pageIndex === pageComponents.length - 1}>
-        Siguiente
-      </button>
-    </div>
+    <Box sx={{ width: "100%", textAlign: "center", mt: 4 }}>
+      <CurrentPage defaultValues={data[pageIndex] || {}} saveData={handleNext} />
+      
+      <Box sx={{ display: "flex", justifyContent: "space-between", mt: 3 }}>
+        <Button
+          variant="contained"
+          color="success"
+          startIcon={<ArrowBack />}
+          onClick={handlePrev}
+          disabled={pageIndex === 0}
+        >
+          Anterior
+        </Button>
+
+        <Button
+          variant="contained"
+          color="success"
+          endIcon={<ArrowForward />}
+          onClick={() => handleNext({})}
+          disabled={pageIndex === pageComponents.length - 1}
+        >
+          Siguiente
+        </Button>
+      </Box>
+    </Box>
   );
 };
 

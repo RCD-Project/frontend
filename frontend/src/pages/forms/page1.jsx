@@ -119,10 +119,6 @@ const Page1 = ({ nextStep }) => {
             />
           ))}
         </FormGroup>
-
-        <Button type="submit" variant="contained" color="primary" fullWidth>
-          Siguiente
-        </Button>
       </form>
     </Container>
   );

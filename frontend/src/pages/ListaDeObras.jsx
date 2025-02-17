@@ -14,15 +14,18 @@ const ListaDeObras = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    fetch('http://localhost:8000/api/obras/aprobadas/')
-      .then(response => {
-        if (!response.ok) {
-          throw new Error('Error al obtener las obras aprobadas');
+    // Realizar la petición a la API de obras aprobadas
+    fetch("http://localhost:8000/api/obras/aprobadas/")
+      .then((res) => {
+        if (!res.ok) {
+          throw new Error(`Error HTTP: ${res.status}`);
         }
-        return response.json();
+        return res.json();
       })
-      .then(data => setObras(data))
-      .catch(error => console.error('Error:', error));
+      .then((data) => {
+        setObras(data); // Guardar obras en el estado
+      })
+      .catch((err) => console.error("Error al obtener obras aprobadas:", err));
   }, []);
 
   const eliminarObra = (id) => {
@@ -46,8 +49,8 @@ const ListaDeObras = () => {
   };
 
   const columnasObras = [
-    { field: 'nombre', headerName: 'Nombre', flex: 1 },
-    { field: 'ubicacion', headerName: 'Ubicación', flex: 1 },
+    { field: 'nombre_obra', headerName: 'Nombre', flex: 1 },
+    { field: 'direccion', headerName: 'Ubicación', flex: 1 },
     {
       field: 'acciones',
       headerName: 'Acciones',
@@ -63,7 +66,7 @@ const ListaDeObras = () => {
 
   return (
     <div>
-      <h1>Lista de Obras Aprobadas</h1>
+      <h1>Lista de Obras</h1>
       <Tabla
         datos={obras}
         columnas={columnasObras}

@@ -30,13 +30,12 @@ const titulosFilas = [
   "Oficina Técnica (jefe de obra, capataz, etc.)",
 ];
 const titulosLimpiezaColumnas = [
-  "Zona",
-  "Estado",
-  "Residuos",
-  "Orden",
-  "Observaciones",
+  "Correcta",
+  "Aceptable (con observaciones)",
+  "Incorrecta",
+  "No aplica",
 ];
-const titulosLimpiezaFilas = ["Área 1", "Área 2", "Área 3"];
+const titulosLimpiezaFilas = ["En terreno", "Por pisos"];
 
 const Page2 = () => {
   const { data, updateData } = useFormStore();

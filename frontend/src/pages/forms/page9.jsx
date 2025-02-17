@@ -1,22 +1,111 @@
-import { useState } from "react";
+import React from "react";
+import {
+  Box,
+  FormControl,
+  InputLabel,
+  MenuItem,
+  Select,
+  Typography,
+  Checkbox,
+  FormControlLabel,
+  TextField,
+} from "@mui/material";
+import { useFormStore } from "../context/FormContext";
 
-function Page2({ defaultValues, saveData }) {
-  const [formData, setFormData] = useState(defaultValues);
+const opcionesPapelCarton = [
+  "Vacio (no se ha clasificado o no se está generando)",
+  "Lleno (cambiar contenedor, trasladar a punto de acopio, coordinar retiro)",
+  "Falta proteccion intemperie",
+  "Contiene residuos que no corresponden",
+  "Sucio y/o contaminado",
+  "Poca compactacion",
+  "Poco accesible",
+  "No está implementada la fracción",
+  "Otro",
+];
 
-  const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+const Page9 = () => {
+  const { data, updateData } = useFormStore();
+  const pageIndex = "page9";
+
+  const storedData = data[pageIndex] || {};
+  const formData = {
+    papelCarton: storedData.papelCarton ?? "",
+    papelCartonOpciones: storedData.papelCartonOpciones ?? [],
+    papelCartonObservaciones: storedData.papelCartonObservaciones ?? "",
+    papelCartonOtro: storedData.papelCartonOtro ?? "",
+  };
+
+  const handleChange = (field, value) => {
+    updateData(pageIndex, { ...formData, [field]: value });
+  };
+
+  const handleCheckboxChange = (option) => {
+    const newOpciones = formData.papelCartonOpciones.includes(option)
+      ? formData.papelCartonOpciones.filter((item) => item !== option)
+      : [...formData.papelCartonOpciones, option];
+    handleChange("papelCartonOpciones", newOpciones);
   };
 
   return (
-    <div>
-      <h2>Formulario - Página 2</h2>
-      <label>
-        Nombre:
-        <input type="text" name="nombre" value={formData.nombre || ""} onChange={handleChange} />
-      </label>
-      <button onClick={() => saveData(formData)}>Guardar</button>
-    </div>
-  );
-}
+    <Box sx={{ width: "90%", margin: "auto", mt: 4 }}>
+      <Typography variant="h6" sx={{ mb: 2 }}>
+        Papel y Cartón
+      </Typography>
+      <FormControl fullWidth sx={{ mb: 3 }}>
+        <InputLabel>Seleccionar</InputLabel>
+        <Select
+          value={formData.papelCarton}
+          onChange={(e) => handleChange("papelCarton", e.target.value)}
+        >
+          <MenuItem value="Aplica">Aplica</MenuItem>
+          <MenuItem value="No aplica">No aplica</MenuItem>
+        </Select>
+      </FormControl>
 
-export default Page2;
+      {/* Mostrar checkboxes solo si se selecciona "Aplica" */}
+      {formData.papelCarton === "Aplica" && (
+        <Box sx={{ mb: 3, display: "flex", flexDirection: "column" }}>
+          {opcionesPapelCarton.map((option, index) => (
+            <FormControlLabel
+              key={index}
+              control={
+                <Checkbox
+                  checked={formData.papelCartonOpciones.includes(option)}
+                  onChange={() => handleCheckboxChange(option)}
+                />
+              }
+              label={option}
+            />
+          ))}
+          {/* Si se selecciona "Otro", se habilita un textbox para especificar */}
+          {formData.papelCartonOpciones.includes("Otro") && (
+            <TextField
+              label="Especificar Otro"
+              fullWidth
+              sx={{ mt: 2 }}
+              value={formData.papelCartonOtro}
+              onChange={(e) => handleChange("papelCartonOtro", e.target.value)}
+            />
+          )}
+        </Box>
+      )}
+
+      <Typography variant="h6" sx={{ mb: 2 }}>
+        Papel y Cartón - Otras observaciones / Sugerencias / Acciones a tomar
+      </Typography>
+      <TextField
+        label="Observaciones"
+        fullWidth
+        multiline
+        rows={4}
+        value={formData.papelCartonObservaciones}
+        onChange={(e) =>
+          handleChange("papelCartonObservaciones", e.target.value)
+        }
+      />
+    </Box>
+  );
+};
+
+export default Page9;
