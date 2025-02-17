@@ -42,7 +42,7 @@ const Clientes = () => {
 
   const columnasClientes = [
     { field: 'nombre', headerName: 'Nombres', flex: 1 },
-    { field: 'ultimaActividad', headerName: 'Fecha de ingreso', flex: 1 },
+    { field: 'fecha_ingreso', headerName: 'Fecha de ingreso', flex: 1 },
     { field: 'cantidadObras', headerName: 'Cantidad de obras', flex: 1 },
     {
       field: 'acciones',

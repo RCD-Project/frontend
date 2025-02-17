@@ -12,8 +12,9 @@ const pageComponents = Object.entries(pages)
   .map(([, module]) => module.default);
 
 const Formularios = () => {
-  const [pageIndex, setPageIndex] = useState(0);
   const { data, updateData } = useFormStore();
+  const [pageIndex, setPageIndex] = useState(data.pageIndex || 0);
+
 
   const CurrentPage = pageComponents[pageIndex];
 

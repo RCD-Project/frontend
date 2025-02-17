@@ -1,22 +1,52 @@
-import { useState } from "react";
+import React from "react";
+import { Box, TextField, Typography } from "@mui/material";
+import { useFormStore } from "../context/FormContext";
 
-function Page2({ defaultValues, saveData }) {
-  const [formData, setFormData] = useState(defaultValues);
+const Page6 = () => {
+  const { data, updateData } = useFormStore();
+  const pageIndex = "page6";
 
-  const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+  // Recuperamos los datos guardados o asignamos valores por defecto
+  const storedData = data[pageIndex] || {};
+  const formData = {
+    accionesTomadas: storedData.accionesTomadas ?? "",
+    otrasObservaciones: storedData.otrasObservaciones ?? "",
+  };
+
+  const handleChange = (field, value) => {
+    updateData(pageIndex, { ...formData, [field]: value });
   };
 
   return (
-    <div>
-      <h2>Formulario - Página 2</h2>
-      <label>
-        Nombre:
-        <input type="text" name="nombre" value={formData.nombre || ""} onChange={handleChange} />
-      </label>
-      <button onClick={() => saveData(formData)}>Guardar</button>
-    </div>
-  );
-}
+    <Box sx={{ width: "90%", margin: "auto", mt: 4 }}>
+      {/* Acciones tomadas */}
+      <Typography variant="h6" sx={{ mb: 2 }}>
+        Acciones tomadas - Gestiones realizadas el día de la visita. Ej: Se movió punto limpio / Se colocó señalética / etc.
+      </Typography>
+      <TextField
+        label="Acciones tomadas"
+        fullWidth
+        multiline
+        rows={4}
+        value={formData.accionesTomadas}
+        onChange={(e) => handleChange("accionesTomadas", e.target.value)}
+        sx={{ mb: 3 }}
+      />
 
-export default Page2;
+      {/* Otras observaciones generales */}
+      <Typography variant="h6" sx={{ mb: 2 }}>
+        Otras observaciones generales
+      </Typography>
+      <TextField
+        label="Otras observaciones"
+        fullWidth
+        multiline
+        rows={4}
+        value={formData.otrasObservaciones}
+        onChange={(e) => handleChange("otrasObservaciones", e.target.value)}
+      />
+    </Box>
+  );
+};
+
+export default Page6;

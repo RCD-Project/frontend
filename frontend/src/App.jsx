@@ -18,7 +18,7 @@ import Informes from "./pages/Informes";
 import Solicitudes from "./pages/Solicitudes";
 import Capacitaciones from "./pages/Capacitaciones";
 import InformeDeTecnicos from "./pages/InformeDeTecnicos";
-import Formularios from "./pages/Formularios";
+import ObrasList from "./pages/ZListaObrasTecnico";
 import DetallesObra from './pages/DetallesObra';
 import EditarObra from './pages/EditarObra';
 import DetallesTransportista from './pages/DetallesTransportista';
@@ -31,6 +31,7 @@ import EditarTransportista from './pages/EditarTransportista';
 
 
 import "./styles/App.css";
+import Formularios from "./pages/Formularios";
 
 const App = () => {
   const [headerOpacity, setHeaderOpacity] = useState(1);
@@ -76,6 +77,7 @@ const App = () => {
               <Route path="/solicitudes" element={<Solicitudes />} />
               <Route path="/capacitaciones" element={<Capacitaciones />} />
               <Route path="/informedetecnicos" element={<InformeDeTecnicos />} />
+              <Route path="/obraslist" element={<ObrasList />} />
               <Route path="/formularios" element={<Formularios />} />
               <Route path="/detallesobra" element={<DetallesObra />} />
               <Route path="/editarobra" element={<EditarObra />} />
