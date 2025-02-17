@@ -61,7 +61,7 @@ const Page1 = ({ nextStep }) => {
 
   return (
     <Container maxWidth="sm">
-      <h2>Formulario Técnico - Página 1</h2>
+      <h2>Observaciones generales en Obra</h2>
       <form onSubmit={handleSubmit}>
         <FormControl fullWidth margin="normal" required>
           <InputLabel>Técnico</InputLabel>

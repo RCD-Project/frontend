@@ -10,7 +10,7 @@ import Clientes from "./pages/Clientes";
 import Coordinaciones from "./pages/Coordinaciones";
 import Transportistas from "./pages/Transportistas";
 import EmpresasGestoras from "./pages/EmpresasGestoras";
-import AltaClientes from "./pages/AltaClientes";
+import AltaCliente from "./pages/AltaClientes";
 import DetallesCliente from "./pages/DetallesCliente";
 import EditarCliente from "./pages/EditarCliente";
 import ListaDeObras from "./pages/ListaDeObras";
@@ -69,9 +69,9 @@ const App = () => {
               <Route path="/coordinaciones" element={<Coordinaciones />} />
               <Route path="/transportistas" element={<Transportistas />} />
               <Route path="/empresasgestoras" element={<EmpresasGestoras />} />
-              <Route path="/altaclientes" element={<AltaClientes />} />
+              <Route path="/altacliente" element={<AltaCliente />} />
               <Route path="/detallescliente" element={<DetallesCliente />} />
-              <Route path="/editarcliente" element={<EditarCliente />} />
+              <Route path="/editarcliente" element={<AltaCliente />} />
               <Route path="/listadeobras" element={<ListaDeObras />} />
               <Route path="/informes" element={<Informes />} />
               <Route path="/solicitudes" element={<Solicitudes />} />
