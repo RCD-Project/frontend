@@ -10,6 +10,17 @@ import '../styles/Solicitudes.css';
 const Solicitudes = () => {
   const [solicitudes, setSolicitudes] = useState([]);
 
+  // Función para formatear la fecha a dd/MM/yyyy
+  const formatDate = (dateString) => {
+    if (!dateString) return 'Sin fecha';
+    const date = new Date(dateString);
+    return date.toLocaleDateString('es-ES', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+    });
+  };
+
   useEffect(() => {
     Promise.all([
       fetch('http://127.0.0.1:8000/api/clientes/solicitudes/')
@@ -18,37 +29,36 @@ const Solicitudes = () => {
         .then((res) => res.json()),
     ])
       .then(([clientesSolicitudes, obrasSolicitudes]) => {
-
         const clientesData = clientesSolicitudes.map((item) => ({
           ...item,
           tipo: 'cliente',
-
-          id: item.cliente_id 
-            ? `cliente-${item.cliente_id}` 
-            : `cliente-${item.cliente?.id || Math.random()}`,
-          nombre: item.cliente?.nombre || 'Sin nombre',
-          solicitante: item.cliente?.nombre || 'Sin solicitante',
+          id: item.cliente_id
+            ? `cliente-${item.cliente_id}`
+            : `cliente-${item.cliente?.cliente_id || Math.random()}`,
+          nombre:
+            item.cliente_nombre ||
+            (item.cliente && item.cliente.cliente_nombre) ||
+            'Sin nombre',
+          solicitante: item.cliente?.cliente_nombre || 'Sin solicitante',
+          fecha: formatDate(item.cliente?.fecha_solicitud || item.fecha_solicitud),
         }));
+
         const obrasData = obrasSolicitudes.map((item) => ({
           ...item,
           tipo: 'obra',
-
-          id: item.obra 
-            ? `obra-${item.obra}` 
+          id: item.obra
+            ? `obra-${item.obra}`
             : `obra-${item.obra?.obra || Math.random()}`,
-          nombre:
-            item.obra?.nombre_obra ||
-            item.obra?.nombre_constructora ||
-            'Sin nombre',
+          nombre: item.obra?.obra || item.obra || 'Sin nombre',
           solicitante: item.obra?.cliente?.nombre || 'Sin solicitante',
         }));
+
         setSolicitudes([...clientesData, ...obrasData]);
       })
       .catch((error) =>
         console.error('Error al obtener solicitudes:', error)
       );
   }, []);
-
 
   const aceptarSolicitud = (id) => {
     // Buscamos la solicitud en nuestro estado
@@ -59,11 +69,9 @@ const Solicitudes = () => {
     }
     let url = "";
     if (solicitud.tipo === "cliente") {
-
       const clientId = id.split('-')[1];
       url = `http://127.0.0.1:8000/api/clientes/solicitudes/${clientId}/aprobar/`;
     } else if (solicitud.tipo === "obra") {
-      // Extraemos el id numérico de la obra
       const obraId = id.split('-')[1];
       url = `http://127.0.0.1:8000/api/obras/solicitudes/${obraId}/aprobar/`;
     }
@@ -76,13 +84,14 @@ const Solicitudes = () => {
     })
       .then((response) => {
         if (response.ok) {
-
           setSolicitudes(
             solicitudes.map((sol) =>
               sol.id === id
                 ? {
                     ...sol,
-                    estado: "Aceptada",
+                    estado: "aceptado",
+                    // Actualizamos la fecha de aceptación con el formato deseado
+                    fecha: formatDate(new Date().toISOString()),
                     horaAceptacion: new Date().toLocaleTimeString(),
                   }
                 : sol
@@ -98,7 +107,41 @@ const Solicitudes = () => {
   };
 
   const rechazarSolicitud = (id) => {
-    setSolicitudes(solicitudes.filter((sol) => sol.id !== id));
+    // Buscamos la solicitud en nuestro estado
+    const solicitud = solicitudes.find((sol) => sol.id === id);
+    if (!solicitud) {
+      console.error("Solicitud no encontrada", id);
+      return;
+    }
+    let url = "";
+    if (solicitud.tipo === "cliente") {
+      const clientId = id.split('-')[1];
+      url = `http://127.0.0.1:8000/api/clientes/solicitudes/${clientId}/rechazar/`;
+    } else if (solicitud.tipo === "obra") {
+      const obraId = id.split('-')[1];
+      url = `http://127.0.0.1:8000/api/obras/solicitudes/${obraId}/rechazar/`;
+    }
+
+    fetch(url, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    })
+      .then((response) => {
+        if (response.ok) {
+          setSolicitudes(
+            solicitudes.map((sol) =>
+              sol.id === id ? { ...sol, estado: "Rechazado" } : sol
+            )
+          );
+        } else {
+          console.error("Error al rechazar la solicitud");
+        }
+      })
+      .catch((error) => {
+        console.error("Error en red:", error);
+      });
   };
 
   const marcarComoTerminada = (id) => {
@@ -139,23 +182,7 @@ const Solicitudes = () => {
   const columnasAceptadas = [
     { field: 'nombre', headerName: 'Nombre', flex: 1 },
     { field: 'solicitante', headerName: 'Solicitante', flex: 1 },
-    { field: 'horaAceptacion', headerName: 'Hora de Aceptación', flex: 1 },
-    {
-      field: 'acciones',
-      headerName: 'Acciones',
-      flex: 1,
-      sortable: false,
-      renderCell: (params) => (
-        <div className="acciones-container">
-          <IconButton
-            className="icono-terminar"
-            onClick={() => marcarComoTerminada(params.row.id)}
-          >
-            <DoneIcon color="primary" />
-          </IconButton>
-        </div>
-      ),
-    },
+    { field: 'fecha', headerName: 'Hora de Aceptación', flex: 1 },
   ];
 
   const columnasTerminadas = [
@@ -179,7 +206,9 @@ const Solicitudes = () => {
 
         <h1>Solicitudes Aceptadas</h1>
         <Tabla
-          datos={solicitudes.filter((sol) => sol.estado === 'Aceptada')}
+          datos={solicitudes.filter(
+            (sol) => sol.estado?.toLowerCase() === 'aceptado'
+          )}
           columnas={columnasAceptadas}
           filtroClave="nombre"
           filtroPlaceholder="Nombre del cliente"
@@ -195,7 +224,6 @@ const Solicitudes = () => {
           className="tabla-terminadas"
           getRowId={(row) => row.id}
         />
-
       </div>
     </div>
   );
