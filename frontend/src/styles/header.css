@@ -1,5 +1,9 @@
-/* src/styles/header.css */
 @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Montserrat:wght@300;400&display=swap');
+
+:root {
+  --header-height: 80px;
+  --logo-width: 100px;
+}
 
 .site-header {
   position: fixed;
@@ -10,23 +14,32 @@
   background-color: #999999;
   padding: 17px;
   box-sizing: border-box;
-  text-align: center;
   z-index: 100;
   transition: opacity 0.3s ease;
 }
 
+.header-container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 100%;
+}
+
+/* Elemento placeholder para equilibrar el espacio a la izquierda */
+.header-placeholder {
+  width: var(--logo-width);
+}
 
 .site-title {
   font-family: 'Bebas Neue', sans-serif;
   font-size: 2.5rem;
   color: #ffffff;
   margin: 0;
+  text-align: center;
+  flex: 1;
 }
 
-.site-subtitle {
-  font-family: 'Montserrat', sans-serif;
-  font-weight: 400;
-  font-size: 1rem;
-  color: #ffffff;
-  margin: 5px 0 0;
+.header-logo {
+  width: var(--logo-width);
+  height: auto;
 }

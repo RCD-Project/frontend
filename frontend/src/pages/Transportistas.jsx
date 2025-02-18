@@ -1,27 +1,31 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Tabla from '../components/Table';
-import { Button, IconButton, Menu, MenuItem } from '@mui/material';
+import { IconButton, Menu, MenuItem, Button } from '@mui/material';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
 import VisibilityIcon from '@mui/icons-material/Visibility';
-import EditIcon from '@mui/icons-material/Edit';
-import DeleteIcon from '@mui/icons-material/Delete';
-import AddIcon from '@mui/icons-material/Add';
-import { Link } from 'react-router-dom';
+import ToggleOnIcon from '@mui/icons-material/ToggleOn';
+import ToggleOffIcon from '@mui/icons-material/ToggleOff';
 
 const Transportistas = () => {
-  const [transportistas, setTransportistas] = useState([
-    { id: 1, nombre: 'Carlos Díaz', contacto: '123456789', tipoMaterial: 'Madera' },
-    { id: 2, nombre: 'Marta Gómez', contacto: '987654321', tipoMaterial: 'Plástico' },
-  ]);
-
+  const [transportistas, setTransportistas] = useState([]);
   const navigate = useNavigate();
 
-  const eliminarTransportista = (id) => {
-    const confirmacion = window.confirm("¿Seguro que deseas eliminar este transportista?");
-    if (confirmacion) {
-      setTransportistas(transportistas.filter((transportista) => transportista.id !== id));
-    }
+  useEffect(() => {
+    fetch('http://localhost:8000/api/transportistas/')
+      .then((response) => response.json())
+      .then((data) => setTransportistas(data))
+      .catch((error) => console.error('Error al obtener transportistas:', error));
+  }, []);
+
+  const toggleEstado = (id) => {
+    setTransportistas((prevTransportistas) =>
+      prevTransportistas.map((transportista) =>
+        transportista.id === id
+          ? { ...transportista, estado: transportista.estado === 'activo' ? 'inactivo' : 'activo' }
+          : transportista
+      )
+    );
   };
 
   const [anchorEl, setAnchorEl] = useState(null);
@@ -40,7 +44,8 @@ const Transportistas = () => {
   const columnasTransportistas = [
     { field: 'nombre', headerName: 'Nombre', flex: 1 },
     { field: 'contacto', headerName: 'Contacto', flex: 1 },
-    { field: 'tipoMaterial', headerName: 'Tipo de material', flex: 1 },
+    { field: 'tipoMaterial', headerName: 'Tipo de Material', flex: 1 },
+    { field: 'estado', headerName: 'Estado', flex: 1 },
     {
       field: 'acciones',
       headerName: 'Acciones',
@@ -58,41 +63,30 @@ const Transportistas = () => {
 
   return (
     <div>
-      <h1>Listado de Transportistas</h1>
+      <h1>Transportistas Activos</h1>
       <Tabla
-        datos={transportistas}
+        datos={transportistas.filter((t) => t.estado === 'activo')}
         columnas={columnasTransportistas}
         filtroClave="nombre"
         filtroPlaceholder="Nombre del transportista"
       />
 
-      {/* Menú de Acciones */}
-      <Menu
-        anchorEl={anchorEl}
-        open={Boolean(anchorEl)}
-        onClose={handleMenuClose}
-      >
+      <h1>Transportistas Inactivos</h1>
+      <Tabla
+        datos={transportistas.filter((t) => t.estado === 'inactivo')}
+        columnas={columnasTransportistas}
+        filtroClave="nombre"
+        filtroPlaceholder="Nombre del transportista"
+      />
+
+      <Menu anchorEl={anchorEl} open={Boolean(anchorEl)} onClose={handleMenuClose}>
         <MenuItem onClick={() => { handleMenuClose(); navigate(`/detalletransportista?id=${selectedTransportista?.id}`); }}>
           <VisibilityIcon /> Ver detalles
         </MenuItem>
-        <MenuItem onClick={() => { handleMenuClose(); navigate(`/editartransportista?id=${selectedTransportista?.id}`); }}>
-          <EditIcon /> Editar
-        </MenuItem>
-        <MenuItem onClick={() => { handleMenuClose(); eliminarTransportista(selectedTransportista?.id); }}>
-          <DeleteIcon style={{ color: 'red' }} /> Eliminar
+        <MenuItem onClick={() => { handleMenuClose(); toggleEstado(selectedTransportista?.id); }}>
+          {selectedTransportista?.estado === 'activo' ? <ToggleOffIcon /> : <ToggleOnIcon />} Cambiar estado
         </MenuItem>
       </Menu>
-
-      <Link to="/altatransportista">
-        <Button
-          variant="contained"
-          color="primary"
-          startIcon={<AddIcon />}
-          style={{ marginTop: '20px' }}
-        >
-          Añadir Transportista
-        </Button>
-      </Link>
     </div>
   );
 };

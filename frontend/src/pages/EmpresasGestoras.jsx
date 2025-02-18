@@ -83,16 +83,16 @@ const EmpresasGestoras = () => {
         </MenuItem>
       </Menu>
 
-      <Link to="/altaempresa">
         <Button
           variant="contained"
           color="primary"
           startIcon={<AddIcon />}
+          component={Link}
+          to="/altaempresas"
           style={{ marginTop: '20px' }}
         >
           Añadir Empresa
         </Button>
-      </Link>
     </div>
   );
 };

@@ -17,12 +17,15 @@ import ListaDeObras from "./pages/ListaDeObras";
 import Informes from "./pages/Informes";
 import Solicitudes from "./pages/Solicitudes";
 import Capacitaciones from "./pages/Capacitaciones";
-import InformeDeTecnicos from "./pages/InformeDeTecnicos";
-import ObrasList from "./pages/ZListaObrasTecnico";
+import ObrasList from "./pages/ListaObrasTecnico";
+import AltaObra from './pages/AltaObra';
 import DetallesObra from './pages/DetallesObra';
 import EditarObra from './pages/EditarObra';
 import DetallesTransportista from './pages/DetallesTransportista';
 import EditarTransportista from './pages/EditarTransportista';
+import AltaTransportistas from './pages/AltaTransportistas';
+import AltaEmpresas from './pages/AltaEmpresas';
+import AltaCapacitaciones from './pages/AltaCapacitaciones';
 
 
 
@@ -76,14 +79,18 @@ const App = () => {
               <Route path="/informes" element={<Informes />} />
               <Route path="/solicitudes" element={<Solicitudes />} />
               <Route path="/capacitaciones" element={<Capacitaciones />} />
-              <Route path="/informedetecnicos" element={<InformeDeTecnicos />} />
               <Route path="/obraslist" element={<ObrasList />} />
               <Route path="/formularios" element={<Formularios />} />
+              <Route path="/altaobra" element={<AltaObra />} />
               <Route path="/detallesobra" element={<DetallesObra />} />
               <Route path="/editarobra" element={<EditarObra />} />
               <Route path="/detalletransportista" element={<DetallesTransportista />} />
               <Route path="/editartransportista" element={<EditarTransportista />} />
-              {/*<Route path="/miperfil" element={<Miperfil />} />*/}
+              <Route path="/altatransportistas" element={<AltaTransportistas />} />
+              <Route path="/altaempresas" element={<AltaEmpresas />} />
+              <Route path="/altacapacitaciones" element={<AltaCapacitaciones />} />
+              {/*
+              Route path="/miperfil" element={<Miperfil />} />*/}
 
 
             </Routes>

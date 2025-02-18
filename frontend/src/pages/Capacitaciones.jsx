@@ -27,16 +27,16 @@ const Capacitaciones = () => {
         filtroPlaceholder="Nombre del cliente"
       />
       
-      <Link to="/altacapacitacion">
         <Button
           variant="contained"
           color="primary"
           startIcon={<AddIcon />}
+          component={Link}
+          to="/altacapacitaciones"
           style={{ marginTop: '20px' }}
         >
           Añadir Capacitación
         </Button>
-      </Link>
     </div>
   );
 };

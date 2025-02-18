@@ -196,15 +196,6 @@ const Solicitudes = () => {
           getRowId={(row) => row.id}
         />
 
-        <Link to="/altasolicitud">
-          <Button
-            variant="contained"
-            color="primary"
-            style={{ marginTop: "20px" }}
-          >
-            Añadir Solicitud
-          </Button>
-        </Link>
       </div>
     </div>
   );

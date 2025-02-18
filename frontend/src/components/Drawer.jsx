@@ -13,7 +13,6 @@ const menuItems = [
   { path: "/transportistas", label: "Transportistas", icon: <Truck size={24} /> },
   { path: "/empresasgestoras", label: "Empresa Gestora", icon: <Factory size={24} /> },
   { path: "/capacitaciones", label: "Capacitaciones", icon: <Eye size={24} /> },
-  { path: "/informedetecnicos", label: "Informe de Técnicos", icon: <FileCog size={24} /> },
   { path: "/obraslist", label: "Formularios", icon: <Users size={24} /> },
 ];
   

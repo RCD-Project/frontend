@@ -4,20 +4,16 @@ import { LocalizationProvider, DatePicker } from '@mui/x-date-pickers';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { useNavigate } from 'react-router-dom';
 
-const steps = ['Información General', 'Detalles Fiscales'];
+const steps = ['Información de la Capacitación'];
 
-const AltaCliente = () => {
+const AltaCapacitaciones = () => {
   const [activeStep, setActiveStep] = useState(0);
   const [formData, setFormData] = useState({
-    nombre: '',
-    direccion: '',
-    contacto: '',
-    nombreContacto: '',
-    mail: '',
-    fechaIngreso: null,
-    razonSocial: '',
-    direccionFiscal: '',
-    rut: '',
+    fecha: null,
+    motivo: '',
+    obra: '',
+    tecnico: '',
+    comentario: '',
   });
 
   const navigate = useNavigate();
@@ -35,7 +31,7 @@ const AltaCliente = () => {
   };
 
   const handleDateChange = (newValue) => {
-    setFormData({ ...formData, fechaIngreso: newValue });
+    setFormData({ ...formData, fecha: newValue });
   };
 
   const handleSubmit = (event) => {
@@ -46,7 +42,7 @@ const AltaCliente = () => {
 
   return (
     <Container maxWidth="sm">
-      <Typography variant="h4" gutterBottom>Alta Cliente</Typography>
+      <Typography variant="h4" gutterBottom>Alta Capacitación</Typography>
       <Stepper activeStep={activeStep} alternativeLabel>
         {steps.map((label, index) => (
           <Step key={index}>
@@ -55,32 +51,23 @@ const AltaCliente = () => {
         ))}
       </Stepper>
       <form onSubmit={handleSubmit}>
-        <Grid container spacing={1}>
+        <Grid container spacing={2}>
           {activeStep === 0 && (
-            <>
-              <Grid item xs={12}><TextField label="Nombre" fullWidth name="nombre" value={formData.nombre} onChange={handleChange} required/></Grid>
-              <Grid item xs={12}><TextField label="Dirección" fullWidth name="direccion" value={formData.direccion} onChange={handleChange} required/></Grid>
-              <Grid item xs={12}><TextField label="Contacto" fullWidth name="contacto" value={formData.contacto} onChange={handleChange} required/></Grid>
-              <Grid item xs={12}><TextField label="Nombre de Contacto" fullWidth name="nombreContacto" value={formData.nombreContacto} onChange={handleChange} required/></Grid>
-              <Grid item xs={12}><TextField label="Email" type="email" fullWidth name="mail" value={formData.mail} onChange={handleChange} required/></Grid>
-            </>
-          )}
-
-          {activeStep === 1 && (
             <>
               <Grid item xs={12}>
                 <LocalizationProvider dateAdapter={AdapterDayjs}>
                   <DatePicker
-                    label="Fecha de Ingreso"
-                    value={formData.fechaIngreso}
+                    label="Fecha"
+                    value={formData.fecha}
                     onChange={handleDateChange}
                     renderInput={(params) => <TextField {...params} fullWidth required />}
                   />
                 </LocalizationProvider>
               </Grid>
-              <Grid item xs={12}><TextField label="Razón Social" fullWidth name="razonSocial" value={formData.razonSocial} onChange={handleChange} required/></Grid>
-              <Grid item xs={12}><TextField label="Dirección Fiscal" fullWidth name="direccionFiscal" value={formData.direccionFiscal} onChange={handleChange} required/></Grid>
-              <Grid item xs={12}><TextField label="RUT" fullWidth name="rut" value={formData.rut} onChange={handleChange} required/></Grid>
+              <Grid item xs={12}><TextField label="Motivo" fullWidth name="motivo" value={formData.motivo} onChange={handleChange} required/></Grid>
+              <Grid item xs={12}><TextField label="Obra" fullWidth name="obra" value={formData.obra} onChange={handleChange} required/></Grid>
+              <Grid item xs={12}><TextField label="Técnico" fullWidth name="tecnico" value={formData.tecnico} onChange={handleChange} required/></Grid>
+              <Grid item xs={12}><TextField label="Comentario" fullWidth multiline rows={4} name="comentario" value={formData.comentario} onChange={handleChange}/></Grid>
             </>
           )}
         </Grid>
@@ -94,4 +81,4 @@ const AltaCliente = () => {
   );
 };
 
-export default AltaCliente;
+export default AltaCapacitaciones;
