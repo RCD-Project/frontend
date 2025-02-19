@@ -6,6 +6,7 @@ import MoreVertIcon from '@mui/icons-material/MoreVert';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import ToggleOnIcon from '@mui/icons-material/ToggleOn';
 import ToggleOffIcon from '@mui/icons-material/ToggleOff';
+import AddIcon from '@mui/icons-material/Add';
 
 const Transportistas = () => {
   const [transportistas, setTransportistas] = useState([]);
@@ -78,6 +79,16 @@ const Transportistas = () => {
         filtroClave="nombre"
         filtroPlaceholder="Nombre del transportista"
       />
+
+      <Button
+        variant="contained"
+        color="primary"
+        startIcon={<AddIcon />}
+        onClick={() => navigate('/altatransportistas')}
+        style={{ marginTop: '20px' }}
+      >
+        Añadir Transportista
+      </Button>
 
       <Menu anchorEl={anchorEl} open={Boolean(anchorEl)} onClose={handleMenuClose}>
         <MenuItem onClick={() => { handleMenuClose(); navigate(`/detalletransportista?id=${selectedTransportista?.id}`); }}>

@@ -1,68 +1,98 @@
 import { useLocation } from 'react-router-dom';
+import { Card, CardContent, Typography, Grid, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Divider } from '@mui/material';
+import '../styles/DetallesCliente.css';
 
 const perfiles = [
-  { 
-    id: 1, nombre: 'Pedro', ultimaActividad: '2022-12-01', cantidadObras: 50,
-    direccion: 'Calle Falsa 123', contacto: '1234567890', nombreContacto: 'Juan Perez', 
-    razonSocial: 'Empresa 1', direccionFiscal: 'Calle Falsa 123', RUT: 'RUT1', 
-    email: 'pedro@email.com', cronograma: 'Cronograma 1'
+  {
+    id: 1,
+    nombre: 'Pedro',
+    fechaIngreso: '2022-12-01',
+    cantidadObras: 50,
+    direccion: 'Calle Falsa 123',
+    contacto: '1234567890',
+    nombreContacto: 'Juan Perez',
+    razonSocial: 'Empresa 1',
+    direccionFiscal: 'Calle Falsa 123',
+    RUT: 'RUT1',
+    email: 'pedro@email.com',
+    obras: ['Obra A', 'Obra B', 'Obra C']
   },
-  { 
-    id: 2, nombre: 'Juan', ultimaActividad: '2022-11-25', cantidadObras: 80,
-    direccion: 'Calle Real 456', contacto: '9876543210', nombreContacto: 'Maria Garcia',
-    razonSocial: 'Empresa 2', direccionFiscal: 'Calle Real 456', RUT: 'RUT2', 
-    email: 'juan@email.com', cronograma: 'Cronograma 2'
-  },
+  {
+    id: 22,
+    nombre: 'Juan',
+    fechaIngreso: '2022-11-25',
+    cantidadObras: 80,
+    direccion: 'Calle Real 456',
+    contacto: '9876543210',
+    nombreContacto: 'Maria Garcia',
+    razonSocial: 'Empresa 2',
+    direccionFiscal: 'Calle Real 456',
+    RUT: 'RUT2',
+    email: 'juan@email.com',
+    obras: ['Obra X', 'Obra Y', 'Obra Z']
+  }
 ];
 
 const DetallesCliente = () => {
   const location = useLocation();
   const queryParams = new URLSearchParams(location.search);
   const id = queryParams.get('id');
-
   const cliente = perfiles.find((perfil) => perfil.id === parseInt(id));
 
   if (!cliente) {
-    return <div>Cliente no encontrado</div>;
+    return <Typography variant="h6" color="error" align="center">Cliente no encontrado</Typography>;
   }
 
   return (
-    <section className="detalle-cliente">
-      <h1>Detalles del Cliente: {cliente.nombre}</h1>
-      <div className="input-group">
-        <strong>Nombre:</strong> {cliente.nombre}
-      </div>
-      <div className="input-group">
-        <strong>Fecha de Ingreso:</strong> {cliente.ultimaActividad}
-      </div>
-      <div className="input-group">
-        <strong>Cantidad de Obras:</strong> {cliente.cantidadObras}
-      </div>
-      <div className="input-group">
-        <strong>Dirección:</strong> {cliente.direccion}
-      </div>
-      <div className="input-group">
-        <strong>Contacto:</strong> {cliente.contacto}
-      </div>
-      <div className="input-group">
-        <strong>Nombre de Contacto:</strong> {cliente.nombreContacto}
-      </div>
-      <div className="input-group">
-        <strong>Razón Social:</strong> {cliente.razonSocial}
-      </div>
-      <div className="input-group">
-        <strong>Dirección Fiscal:</strong> {cliente.direccionFiscal}
-      </div>
-      <div className="input-group">
-        <strong>RUT:</strong> {cliente.root}
-      </div>
-      <div className="input-group">
-        <strong>Correo Electrónico:</strong> {cliente.email}
-      </div>
-      <div className="input-group">
-        <strong>Cronograma:</strong> {cliente.cronograma}
-      </div>
-    </section>
+    <Card className="cliente-card">
+      <CardContent>
+        <Typography variant="h4" align="center" className="cliente-nombre">
+          {cliente.nombre}
+        </Typography>
+        <Divider className="cliente-divider" />
+        <Grid container spacing={2}>
+          {[ 
+            { label: "Fecha de Ingreso", value: cliente.fechaIngreso },
+            { label: "Cantidad de Obras", value: cliente.cantidadObras },
+            { label: "Dirección", value: cliente.direccion },
+            { label: "Contacto", value: cliente.contacto },
+            { label: "Nombre de Contacto", value: cliente.nombreContacto },
+            { label: "Razón Social", value: cliente.razonSocial },
+            { label: "Dirección Fiscal", value: cliente.direccionFiscal },
+            { label: "RUT", value: cliente.RUT },
+            { label: "Correo Electrónico", value: cliente.email }
+          ].map((item, index) => (
+            <Grid item xs={12} sm={6} key={index}>
+              <Paper className="cliente-info">
+                <Typography className="cliente-label">{item.label}</Typography>
+                <Typography className="cliente-valor">{item.value}</Typography>
+              </Paper>
+            </Grid>
+          ))}
+        </Grid>
+        
+        {/* Tabla de Obras */}
+        <Typography variant="h5" align="center" className="cliente-obras-titulo">
+          Obras Asociadas
+        </Typography>
+        <TableContainer component={Paper} className="cliente-tabla-container">
+          <Table>
+            <TableHead>
+              <TableRow>
+                <TableCell align="center" className="cliente-tabla-header">Nombre de la Obra</TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {cliente.obras.map((obra, index) => (
+                <TableRow key={index}>
+                  <TableCell align="center" className="cliente-tabla-dato">{obra}</TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </TableContainer>
+      </CardContent>
+    </Card>
   );
 };
 

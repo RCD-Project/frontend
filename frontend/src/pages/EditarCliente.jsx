@@ -1,189 +1,123 @@
-import React, { useState } from 'react';
-import { Container, TextField, Button, Grid, Typography } from '@mui/material';
+import React, { useState, useEffect } from "react";
+import { Container, TextField, Button, Grid, Typography, Stepper, Step, StepLabel, Paper } from "@mui/material";
+import { LocalizationProvider, DatePicker } from "@mui/x-date-pickers";
+import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
+import dayjs from "dayjs";
+import { useNavigate, useLocation } from "react-router-dom";
 
-const AltaCliente = () => {
-  const [nombre, setNombre] = useState('');
-  const [direccion, setDireccion] = useState('');
-  const [contacto, setContacto] = useState('');
-  const [nombreContacto, setNombreContacto] = useState('');
-  const [fechaIngreso, setFechaIngreso] = useState('');
-  const [razonSocial, setRazonSocial] = useState('');
-  const [direccionFiscal, setDireccionFiscal] = useState('');
-  const [rut, setRut] = useState('');
-  const [mail, setMail] = useState('');
-  const [cronograma, setCronograma] = useState('');
+const steps = ["Información General", "Detalles Fiscales", "Contacto"];
 
-  const handleSubmit = async (event) => {
-    event.preventDefault();
-    
-    // Construimos el objeto que se enviará al backend
-    const data = {
-      nombre,
-      direccion,
-      contacto,
-      nombre_contacto: nombreContacto,
-      // Asegúrate que el formato de la fecha sea el esperado por el backend (ej. "YYYY-MM-DD")
-      fecha_ingreso: fechaIngreso,
-      razon_social: razonSocial,
-      direccion_fiscal: direccionFiscal,
-      rut,
-      mail,
-      cronograma,
-    };
+const EditarCliente = () => {
+  const [activeStep, setActiveStep] = useState(0);
+  const [formData, setFormData] = useState({
+    nombre: "",
+    direccion: "",
+    contacto: "",
+    nombreContacto: "",
+    mail: "",
+    fechaIngreso: null,
+    razonSocial: "",
+    direccionFiscal: "",
+    rut: "",
+  });
 
-    try {
-      const response = await fetch('http://localhost:8000/api/clientes/registro/', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(data),
-      });
+  const navigate = useNavigate();
+  const location = useLocation();
+  const queryParams = new URLSearchParams(location.search);
+  const id = queryParams.get("id");
 
-      if (response.ok) {
-        console.log('Cliente creado exitosamente');
-        // Aquí puedes limpiar el formulario o redirigir al usuario
-      } else {
-        console.error('Error al crear el cliente');
-      }
-    } catch (error) {
-      console.error('Error de red:', error);
+  useEffect(() => {
+    if (id) {
+      const clienteEjemplo = {
+        id: 1,
+        nombre: "Pedro",
+        direccion: "Calle Falsa 123",
+        contacto: "1234567890",
+        nombreContacto: "Juan Perez",
+        mail: "pedro@email.com",
+        fechaIngreso: dayjs("2022-12-01"),
+        razonSocial: "Empresa 1",
+        direccionFiscal: "Calle Falsa 123",
+        rut: "RUT1",
+      };
+      setFormData(clienteEjemplo);
     }
+  }, [id]);
+
+  const handleNext = () => {
+    setActiveStep((prevStep) => prevStep + 1);
+  };
+
+  const handleBack = () => {
+    setActiveStep((prevStep) => prevStep - 1);
+  };
+
+  const handleChange = (e) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+
+  const handleDateChange = (newValue) => {
+    setFormData({ ...formData, fechaIngreso: newValue });
+  };
+
+  const handleSubmit = (event) => {
+    event.preventDefault();
+    console.log("Datos actualizados:", formData);
+    navigate("/clientes");
   };
 
   return (
-    <Container maxWidth="sm">
-      <Typography variant="h4" component="h1" gutterBottom>
-        Alta Cliente
-      </Typography>
-      <form onSubmit={handleSubmit}>
-        <Grid container spacing={2}>
-          {/* Nombre */}
-          <Grid item xs={12}>
-            <TextField
-              label="Nombre"
-              fullWidth
-              value={nombre}
-              onChange={(e) => setNombre(e.target.value)}
-              required
-            />
+    <Container maxWidth="md">
+      <Paper elevation={3} sx={{ padding: 6, marginTop: 6, borderRadius: 3 }}>
+        <Typography variant="h3" gutterBottom>Editar Cliente</Typography>
+        <Stepper activeStep={activeStep} alternativeLabel>
+          {steps.map((label, index) => (
+            <Step key={index}>
+              <StepLabel>{label}</StepLabel>
+            </Step>
+          ))}
+        </Stepper>
+        <form onSubmit={handleSubmit}>
+          <Grid container spacing={3}>
+            {activeStep === 0 && (
+              <>
+                <Grid item xs={12}><TextField label="Nombre" fullWidth name="nombre" value={formData.nombre} onChange={handleChange} required/></Grid>
+                <Grid item xs={12}><TextField label="Dirección" fullWidth name="direccion" value={formData.direccion} onChange={handleChange} required/></Grid>
+                <Grid item xs={12}><TextField label="Contacto" fullWidth name="contacto" value={formData.contacto} onChange={handleChange} required/></Grid>
+              </>
+            )}
+            {activeStep === 1 && (
+              <>
+                <Grid item xs={12}><TextField label="Razón Social" fullWidth name="razonSocial" value={formData.razonSocial} onChange={handleChange} required/></Grid>
+                <Grid item xs={12}><TextField label="Dirección Fiscal" fullWidth name="direccionFiscal" value={formData.direccionFiscal} onChange={handleChange} required/></Grid>
+                <Grid item xs={12}><TextField label="RUT" fullWidth name="rut" value={formData.rut} onChange={handleChange} required/></Grid>
+              </>
+            )}
+            {activeStep === 2 && (
+              <>
+                <Grid item xs={12}>
+                  <LocalizationProvider dateAdapter={AdapterDayjs}>
+                    <DatePicker
+                      label="Fecha de Ingreso"
+                      value={formData.fechaIngreso || null}
+                      onChange={handleDateChange}
+                      renderInput={(params) => <TextField {...params} fullWidth required />}
+                    />
+                  </LocalizationProvider>
+                </Grid>
+                <Grid item xs={12}><TextField label="Email" type="email" fullWidth name="mail" value={formData.mail} onChange={handleChange} required/></Grid>
+              </>
+            )}
           </Grid>
-
-          {/* Dirección */}
-          <Grid item xs={12}>
-            <TextField
-              label="Dirección"
-              fullWidth
-              value={direccion}
-              onChange={(e) => setDireccion(e.target.value)}
-              required
-            />
+          <Grid container spacing={3} justifyContent="space-between" style={{ marginTop: '30px' }}>
+            {activeStep !== 0 && (<Button onClick={handleBack} size="large">Atrás</Button>)}
+            {activeStep < steps.length - 1 && (<Button onClick={handleNext} size="large">Siguiente</Button>)}
+            {activeStep === steps.length - 1 && (<Button type="submit" variant="contained" color="primary" size="large">Guardar Cambios</Button>)}
           </Grid>
-
-          {/* Contacto */}
-          <Grid item xs={12}>
-            <TextField
-              label="Contacto"
-              fullWidth
-              value={contacto}
-              onChange={(e) => setContacto(e.target.value)}
-              required
-            />
-          </Grid>
-
-          {/* Nombre de Contacto */}
-          <Grid item xs={12}>
-            <TextField
-              label="Nombre de Contacto"
-              fullWidth
-              value={nombreContacto}
-              onChange={(e) => setNombreContacto(e.target.value)}
-              required
-            />
-          </Grid>
-
-          {/* Fecha de Ingreso */}
-          <Grid item xs={12}>
-            <TextField
-              label="Fecha de Ingreso"
-              type="date"
-              fullWidth
-              value={fechaIngreso}
-              onChange={(e) => setFechaIngreso(e.target.value)}
-              required
-              InputLabelProps={{
-                shrink: true,
-              }}
-            />
-          </Grid>
-
-          {/* Razón Social */}
-          <Grid item xs={12}>
-            <TextField
-              label="Razón Social"
-              fullWidth
-              value={razonSocial}
-              onChange={(e) => setRazonSocial(e.target.value)}
-              required
-            />
-          </Grid>
-
-          {/* Dirección Fiscal */}
-          <Grid item xs={12}>
-            <TextField
-              label="Dirección Fiscal"
-              fullWidth
-              value={direccionFiscal}
-              onChange={(e) => setDireccionFiscal(e.target.value)}
-              required
-            />
-          </Grid>
-
-          {/* RUT */}
-          <Grid item xs={12}>
-            <TextField
-              label="RUT"
-              fullWidth
-              value={rut}
-              onChange={(e) => setRut(e.target.value)}
-              required
-            />
-          </Grid>
-
-          {/* Email */}
-          <Grid item xs={12}>
-            <TextField
-              label="Email"
-              type="email"
-              fullWidth
-              value={mail}
-              onChange={(e) => setMail(e.target.value)}
-              required
-            />
-          </Grid>
-
-          {/* Cronograma */}
-          <Grid item xs={12}>
-            <TextField
-              label="Cronograma"
-              fullWidth
-              multiline
-              rows={4}
-              value={cronograma}
-              onChange={(e) => setCronograma(e.target.value)}
-            />
-          </Grid>
-
-          {/* Botón de envío */}
-          <Grid item xs={12}>
-            <Button variant="contained" color="primary" type="submit" fullWidth>
-              Crear Cliente
-            </Button>
-          </Grid>
-        </Grid>
-      </form>
+        </form>
+      </Paper>
     </Container>
   );
 };
 
-export default AltaCliente;
+export default EditarCliente;
