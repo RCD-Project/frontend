@@ -2,6 +2,7 @@ import React from "react";
 import {
   Container,
   FormControl,
+  TextField,
   InputLabel,
   Select,
   MenuItem,
@@ -26,17 +27,20 @@ const motivos = [
 const Page1 = ({ nextStep }) => {
   const { data, updateData } = useFormStore();
 
-  // Cargar datos desde el estado global
+  // Se cargan los datos guardados en el estado global
   const safeFormData = {
     tecnico: data?.page1?.tecnico || "",
-    obraId: data?.page1?.obraId || "", // Se usa el ID de la obra seleccionada
+    obra: data?.page1?.obra || "", // Nombre de la obra
     fecha: data?.page1?.fecha || null,
     motivos: data?.page1?.motivos || [],
     otroMotivo: data?.page1?.otroMotivo || "",
   };
 
-  // Obtener las obras aprobadas desde el estado global (evita lista estática)
-  const obrasDisponibles = data?.page1?.obrasDisponibles || [];
+  // Calcula el string a mostrar combinando nombre y dirección
+  const obraDisplay =
+    safeFormData.obra && data?.page1?.direccion
+      ? `${safeFormData.obra} - ${data.page1.direccion}`
+      : safeFormData.obra;
 
   const handleChange = (field, value) => {
     updateData("page1", { ...safeFormData, [field]: value });
@@ -52,7 +56,7 @@ const Page1 = ({ nextStep }) => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (!safeFormData.tecnico || !safeFormData.obraId || !safeFormData.fecha) {
+    if (!safeFormData.tecnico || !safeFormData.obra || !safeFormData.fecha) {
       alert("Todos los campos obligatorios deben completarse");
       return;
     }
@@ -77,21 +81,15 @@ const Page1 = ({ nextStep }) => {
           </Select>
         </FormControl>
 
-        <FormControl fullWidth margin="normal" required>
-          <InputLabel>Obra / Dirección</InputLabel>
-          <Select
-            value={safeFormData.obraId}
-            onChange={(e) => handleChange("obraId", e.target.value)}
-          >
-            {obrasDisponibles.map((obra) => (
-              <MenuItem key={obra.id} value={obra.id}>
-                {" "}
-                {/* Cambié `obras` por `obra` */}
-                {`${obra.nombre_obra} - ${obra.direccion}`}
-              </MenuItem>
-            ))}
-          </Select>
-        </FormControl>
+        {/* Se muestra el nombre y la dirección de la obra de forma no editable */}
+        <TextField
+          label="Obra / Dirección"
+          value={obraDisplay}
+          fullWidth
+          margin="normal"
+          disabled
+          required
+        />
 
         <LocalizationProvider dateAdapter={AdapterDayjs}>
           <DatePicker

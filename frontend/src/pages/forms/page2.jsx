@@ -56,18 +56,13 @@ const Page2 = () => {
     updateData(pageIndex, { ...formData, [field]: value });
   };
 
+  // Al seleccionar un checkbox, se guarda el valor de la columna seleccionada.
   const handleCheckboxChange = (field, row, col, columns) => {
-    // Resetea toda la fila y marca solo la opción seleccionada
-    const newRowState = Object.fromEntries(
-      columns.map((_, index) => [index, false])
-    );
-    newRowState[col] = true;
     handleChange(field, {
       ...formData[field],
-      [row]: newRowState,
+      [row]: columns[col],
     });
   };
-
 
   return (
     <Box sx={{ width: "90%", margin: "auto", mt: 4 }}>
@@ -126,7 +121,9 @@ const Page2 = () => {
                   sx={{ textAlign: "center", p: 1 }}
                 >
                   <Checkbox
-                    checked={!!formData.participacion[fila]?.[colIndex]}
+                    checked={
+                      formData.participacion[fila] === titulosColumnas[colIndex]
+                    }
                     onChange={() =>
                       handleCheckboxChange(
                         "participacion",
@@ -205,7 +202,9 @@ const Page2 = () => {
                   sx={{ textAlign: "center", p: 1 }}
                 >
                   <Checkbox
-                    checked={!!formData.limpieza[fila]?.[colIndex]}
+                    checked={
+                      formData.limpieza[fila] === titulosLimpiezaColumnas[colIndex]
+                    }
                     onChange={() =>
                       handleCheckboxChange(
                         "limpieza",

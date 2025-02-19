@@ -13,7 +13,7 @@ const Transportistas = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    fetch('http://localhost:8000/api/transportistas/')
+    fetch('http://localhost:8000/api/transportistas/lista/')
       .then((response) => response.json())
       .then((data) => setTransportistas(data))
       .catch((error) => console.error('Error al obtener transportistas:', error));
@@ -45,7 +45,7 @@ const Transportistas = () => {
   const columnasTransportistas = [
     { field: 'nombre', headerName: 'Nombre', flex: 1 },
     { field: 'contacto', headerName: 'Contacto', flex: 1 },
-    { field: 'tipoMaterial', headerName: 'Tipo de Material', flex: 1 },
+    { field: 'tipo_material', headerName: 'Tipo de Material', flex: 1 },
     { field: 'estado', headerName: 'Estado', flex: 1 },
     {
       field: 'acciones',

@@ -37,19 +37,24 @@ const ObrasList = () => {
   const handleSelectObra = (obra) => {
     updateData("page1", {
       ...data.page1,
+      // Guarda el nombre de la obra para mostrarlo o usarlo en otro lugar
       obra: obra.nombre_obra,
+      // Guarda el ID de la obra (o la obra completa si lo prefieres)
       obraId: obra.id,
       direccion: obra.direccion,
-    },
-    console.log("Datos almacenados en Zustand:", data.page1)
-    );
+      // Si deseas que en el formulario se pueda seleccionar otra obra,
+      // guarda la lista de obras aprobadas
+      obrasDisponibles: obras,
+    });
   
-    updateData("pageIndex", 0); // Asegurar que comienza en la primera página
+    updateData("pageIndex", 0); // Reinicia el índice de página en el formulario
   
+    // Navega a la ruta del formulario (puedes ajustar el retraso o eliminarlo si no es necesario)
     setTimeout(() => {
       navigate("../Formularios");
-    }, 100); // Pequeño retraso para asegurar que el estado se actualice
+    }, 100);
   };
+  
   
 
   return (

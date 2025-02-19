@@ -54,13 +54,11 @@ const Page4 = () => {
     handleChange("puntosLimpiosEdificio", value);
   };
 
+  // Al hacer clic en el checkbox se guarda el valor de la columna
   const handleGridCheckboxChange = (row, col) => {
-    const newRowState = {};
-    titulosColumnas.forEach((_, i) => (newRowState[i] = false));
-    newRowState[col] = true;
     handleChange("grillaPuntosLimpiosPisos", {
       ...formData.grillaPuntosLimpiosPisos,
-      [row]: newRowState,
+      [row]: titulosColumnas[col],
     });
   };
 
@@ -127,7 +125,8 @@ const Page4 = () => {
                     >
                       <Checkbox
                         checked={
-                          !!formData.grillaPuntosLimpiosPisos[fila]?.[colIndex]
+                          formData.grillaPuntosLimpiosPisos[fila] ===
+                          titulosColumnas[colIndex]
                         }
                         onChange={() =>
                           handleGridCheckboxChange(fila, colIndex)

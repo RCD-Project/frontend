@@ -38,7 +38,7 @@ const Page3 = () => {
   const formData = {
     puntoLimpio: storedData.puntoLimpio ?? "",
     puntoLimpioObservaciones: storedData.puntoLimpioObservaciones ?? "",
-    // Nos aseguramos de que sea un array, si no lo es, usamos un array vacío
+    // Nos aseguramos de que sea un array; si no, usamos un array vacío
     grillaPuntosLimpios: Array.isArray(storedData.grillaPuntosLimpios)
       ? storedData.grillaPuntosLimpios
       : [],
@@ -48,15 +48,11 @@ const Page3 = () => {
     updateData(pageIndex, { ...formData, [field]: value });
   };
 
-  const handleCheckboxChange = (index, row, col) => {
+  // Al hacer clic, se asigna el valor de la columna (ejemplo: "Correcta") a la fila
+  const handleCheckboxChange = (index, fila, col) => {
     const newGrilla = [...formData.grillaPuntosLimpios];
     newGrilla[index] = newGrilla[index] || {};
-
-    const newRowState = {};
-    titulosColumnas.forEach((_, i) => (newRowState[i] = false));
-
-    newRowState[col] = true;
-    newGrilla[index][row] = newRowState;
+    newGrilla[index][fila] = titulosColumnas[col];
     handleChange("grillaPuntosLimpios", newGrilla);
   };
 
@@ -137,7 +133,8 @@ const Page3 = () => {
                 {titulosColumnas.map((_, colIndex) => (
                   <Grid item xs={2.25} key={colIndex} sx={{ textAlign: "center", p: 1 }}>
                     <Checkbox
-                      checked={!!formData.grillaPuntosLimpios[grillaIndex]?.[fila]?.[colIndex]}
+                      // Se marca el checkbox si el valor guardado en esa fila es igual al de la columna
+                      checked={formData.grillaPuntosLimpios[grillaIndex]?.[fila] === titulosColumnas[colIndex]}
                       onChange={() => handleCheckboxChange(grillaIndex, fila, colIndex)}
                     />
                   </Grid>

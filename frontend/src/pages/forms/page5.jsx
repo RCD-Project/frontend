@@ -11,17 +11,35 @@ import {
 } from "@mui/material";
 import { useFormStore } from "../context/FormContext";
 
+// Definimos las columnas y filas
+const titulosColumnas = [
+  "Correcta",
+  "A mejorar (Con observaciones)",
+  "Incorrecta",
+  "No aplica",
+];
+const titulosFilas = [
+  "Ubicación",
+  "Estructura",
+  "Tipo de Contenedor",
+  "Estado Contenedores (bolsones, etc)",
+  "Señalética",
+];
+
 const Page5 = () => {
   const { data, updateData } = useFormStore();
 
-  // Definimos un valor por defecto para page5 con grilla de 5 filas x 4 columnas.
+  // Valor por defecto: la grilla es un objeto donde cada clave es el nombre de la fila
   const defaultPage5 = {
-    grilla: Array.from({ length: 5 }, () => Array(4).fill(false)),
+    grilla: titulosFilas.reduce((acc, fila) => {
+      acc[fila] = "";
+      return acc;
+    }, {}),
     acopioContenedores: "",
     observaciones: "",
   };
 
-  // Usamos page5Data para evitar leer de undefined.
+  // Si no existe, usamos el valor por defecto
   const page5Data = data.page5 || defaultPage5;
 
   // Inicializamos page5 en el estado global si aún no existe.
@@ -43,26 +61,16 @@ const Page5 = () => {
     updateData("page5", { ...data.page5, observaciones: event.target.value });
   };
 
-  // Maneja el cambio de checkbox para que en cada fila solo se seleccione uno
-  const handleCheckboxChange = (rowIndex, colIndex) => {
-    const updatedRow = page5Data.grilla[rowIndex].map((_, i) => i === colIndex);
-    const updatedGrilla = page5Data.grilla.map((row, i) => (i === rowIndex ? updatedRow : row));
-    updateData("page5", { ...data.page5, grilla: updatedGrilla });
+  // Actualiza la grilla: para la fila indicada (clave) se guarda el string de la columna seleccionada.
+  const handleCheckboxChange = (fila, colIndex) => {
+    updateData("page5", {
+      ...data.page5,
+      grilla: {
+        ...page5Data.grilla,
+        [fila]: titulosColumnas[colIndex],
+      },
+    });
   };
-
-  const titulosColumnas = [
-    "Correcta",
-    "A mejorar (Con observaciones)",
-    "Incorrecta",
-    "No aplica",
-  ];
-  const titulosFilas = [
-    "Ubicacion",
-    "Estructura",
-    "Tipo de Contenedor",
-    "Estado Contenedores (bolsones, etc)",
-    "Señalética",
-  ];
 
   return (
     <div>
@@ -106,26 +114,16 @@ const Page5 = () => {
           ))}
         </Grid>
         {/* Filas */}
-        {titulosFilas.map((fila, rowIndex) => (
-          <Grid container item key={rowIndex} alignItems="center">
-            <Grid
-              item
-              xs={3}
-              sx={{ fontWeight: "bold", textAlign: "center", p: 1 }}
-            >
+        {titulosFilas.map((fila) => (
+          <Grid container item key={fila} alignItems="center">
+            <Grid item xs={3} sx={{ fontWeight: "bold", textAlign: "center", p: 1 }}>
               {fila}
             </Grid>
             {titulosColumnas.map((_, colIndex) => (
-              <Grid
-                item
-                xs={2.25}
-                key={colIndex}
-                sx={{ textAlign: "center", p: 1 }}
-              >
+              <Grid item xs={2.25} key={colIndex} sx={{ textAlign: "center", p: 1 }}>
                 <Checkbox
-                  checked={!!page5Data.grilla[rowIndex]?.[colIndex]}
-                  onChange={() => handleCheckboxChange(rowIndex, colIndex)}
-                  // Si se selecciona "No hay" en el dropdown, deshabilitamos los checkboxes
+                  checked={page5Data.grilla[fila] === titulosColumnas[colIndex]}
+                  onChange={() => handleCheckboxChange(fila, colIndex)}
                   disabled={data.page5?.acopioContenedores === "No hay"}
                 />
               </Grid>
