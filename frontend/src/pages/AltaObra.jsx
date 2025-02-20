@@ -35,12 +35,10 @@ const AltaObra = () => {
     localidad: '',
     barrio: '',
     direccion: '',
-    // Se agrega el campo para la cantidad de visitas
     visitasMes: '',
     inicioObra: null,
     duracionObra: '',
     etapaObra: '',
-    // Eliminamos "estado" ya que no forma parte del modelo Obra
     jefeObra: '',
     emailJefe: '',
     telefonoJefe: '',
@@ -53,15 +51,12 @@ const AltaObra = () => {
     imagen: null,
     pedido: '',
   });
-  // Puntos limpios que se asociarán a la obra
   const [puntosLimpios, setPuntosLimpios] = useState([]);
   const [openDialog, setOpenDialog] = useState(false);
-  // Datos para un nuevo Punto Limpio (se omiten puntaje y clasificación en el formulario, se asignan por defecto)
   const [nuevoPunto, setNuevoPunto] = useState({
     accesibilidad: '', cantidad: '', metrosCuadrados: '', estructura: '',
     tipoContenedor: '', senaletica: '', observaciones: ''
   });
-  // Materiales (tipos) seleccionados para el Punto Limpio actual
   const [selectedMaterials, setSelectedMaterials] = useState([]);
 
   const navigate = useNavigate();
@@ -130,45 +125,51 @@ const AltaObra = () => {
       imagenes: formData.imagen,
       cronograma: "Sin cronograma",
       pedido: formData.pedido || "No especificado",
-      puntos_limpios: puntosLimpios.map(punto => ({
-        accesibilidad: punto.accesibilidad,
-        ubicacion: "No especificado",
-        metros_cuadrados: punto.metrosCuadrados,
-        estructura: punto.estructura,
-        tipo_contenedor: punto.tipoContenedor,
-        señaletica: punto.senaletica === "Existe",
-        observaciones: punto.observaciones,
-        puntaje: 0,
-        clasificacion: "no_aplica",
-        materiales: punto.materiales,
-      })),
+      puntos_limpios: puntosLimpios.map(punto => {
+        const puntoData = {
+          accesibilidad: punto.accesibilidad,
+          ubicacion: "No especificado",
+          metros_cuadrados: punto.metrosCuadrados,
+          estructura: punto.estructura,
+          tipo_contenedor: punto.tipoContenedor,
+          señaletica: punto.senaletica === "Existe",
+          observaciones: punto.observaciones,
+          puntaje: 0,
+          clasificacion: "no_aplica",
+          materiales: punto.materiales,
+        };
+        // Si se selecciona "Peligrosos", se envía ventilacion: "Necesario"
+        if (punto.materiales.includes("peligrosos")) {
+          puntoData.ventilacion = "Necesario";
+        }
+        return puntoData;
+      }),
     };
 
     console.log("Datos enviados:", obraData);
 
     fetch("http://127.0.0.1:8000/api/obras/registro/", {
-  method: "POST",
-  headers: { "Content-Type": "application/json" },
-  body: JSON.stringify(obraData),
-})
-  .then((res) => {
-    if (!res.ok) {
-      return res.text().then((errorText) => {
-        console.error("Respuesta de error:", errorText);
-        throw new Error(errorText);
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(obraData),
+    })
+      .then((res) => {
+        if (!res.ok) {
+          return res.text().then((errorText) => {
+            console.error("Respuesta de error:", errorText);
+            throw new Error(errorText);
+          });
+        }
+        return res.json();
+      })
+      .then((data) => {
+        console.log("Obra creada:", data);
+        navigate("/listadeobras", { state: { successMessage: data.mensaje } });
+      })
+      .catch((err) => {
+        console.error("Error al dar de alta la obra:", err);
+        alert("Error al dar de alta la obra:\n" + err.message);
       });
-    }
-    return res.json();
-  })
-  .then((data) => {
-    console.log("Obra creada:", data);
-    navigate("/listartransportistas");
-  })
-  .catch((err) => {
-    console.error("Error al dar de alta la obra:", err);
-    alert("Error al dar de alta la obra:\n" + err.message);
-  });
-
   };
 
   return (

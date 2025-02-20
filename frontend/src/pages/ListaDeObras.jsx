@@ -1,20 +1,22 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation, Link } from 'react-router-dom';
 import Tabla from '../components/Table';
-import { Button, IconButton, Menu, MenuItem } from '@mui/material';
+import { Button, IconButton, Menu, MenuItem, Alert } from '@mui/material';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import AddIcon from '@mui/icons-material/Add';
-import { Link } from 'react-router-dom';
 
 const ListaDeObras = () => {
   const [obras, setObras] = useState([]);
   const navigate = useNavigate();
+  const location = useLocation();
+
+  // Extraemos el mensaje de éxito (si lo hay) del estado de navegación
+  const successMessage = location.state?.successMessage || "";
 
   useEffect(() => {
-    // Realizar la petición a la API de obras aprobadas
     fetch("http://127.0.0.1:8000/api/obras/aprobadas/")
       .then((res) => {
         if (!res.ok) {
@@ -23,7 +25,7 @@ const ListaDeObras = () => {
         return res.json();
       })
       .then((data) => {
-        setObras(data); // Guardar obras en el estado
+        setObras(data);
       })
       .catch((err) => console.error("Error al obtener obras aprobadas:", err));
   }, []);
@@ -33,25 +35,20 @@ const ListaDeObras = () => {
     if (confirmacion) {
       fetch(`http://127.0.0.1:8000/api/obras/${id}/eliminar/`, {
         method: 'DELETE',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json' },
       })
         .then((res) => {
           if (!res.ok) {
             throw new Error(`Error HTTP: ${res.status}`);
           }
-          // Si la API retorna 204 (No Content) o algún JSON, puedes adaptar esto:
-          return res.text(); // o res.json();
+          return res.text();
         })
         .then(() => {
-          // Actualizar el estado eliminando la obra
           setObras(obras.filter((obra) => obra.id !== id));
         })
         .catch((err) => console.error("Error al eliminar obra:", err));
     }
   };
-  
 
   const [anchorEl, setAnchorEl] = useState(null);
   const [selectedObra, setSelectedObra] = useState(null);
@@ -85,6 +82,10 @@ const ListaDeObras = () => {
   return (
     <div>
       <h1>Lista de Obras</h1>
+      
+      {/* Mostrar el mensaje de éxito si existe */}
+      { successMessage && <Alert severity="success" sx={{ mb: 2 }}>{successMessage}</Alert> }
+      
       <Tabla
         datos={obras}
         columnas={columnasObras}
@@ -105,22 +106,18 @@ const ListaDeObras = () => {
       </Menu>
 
       <Button
-  variant="contained"
-  startIcon={<AddIcon />}
-  component={Link}
-  to="/altaobra"
-  sx={{
-    marginTop: '20px',
-    backgroundColor: '#abbf9d', // Verde personalizado
-    '&:hover': {
-      backgroundColor: '#d1e063', // Color al hacer hover
-    },
-  }}
->
-  Añadir Obra
-</Button>
-
-
+        variant="contained"
+        startIcon={<AddIcon />}
+        component={Link}
+        to="/altaobra"
+        sx={{
+          marginTop: '20px',
+          backgroundColor: '#abbf9d',
+          '&:hover': { backgroundColor: '#d1e063' },
+        }}
+      >
+        Añadir Obra
+      </Button>
     </div>
   );
 };

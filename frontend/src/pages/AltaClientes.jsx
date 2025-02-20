@@ -1,5 +1,16 @@
 import React, { useState } from "react";
-import { Container, TextField, Button, Grid, Typography, Stepper, Step, StepLabel, Paper } from "@mui/material";
+import {
+  Container,
+  TextField,
+  Button,
+  Grid,
+  Typography,
+  Stepper,
+  Step,
+  StepLabel,
+  Paper,
+  Alert,
+} from "@mui/material";
 import { LocalizationProvider, DatePicker } from "@mui/x-date-pickers";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import dayjs from "dayjs";
@@ -13,14 +24,15 @@ const AltaCliente = () => {
     nombre: "",
     direccion: "",
     contacto: "",
-    nombreContacto: "",
+    nombre_contacto: "",
     mail: "",
-    fechaIngreso: null,
-    razonSocial: "",
-    direccionFiscal: "",
+    fecha_ingreso: null,
+    razon_social: "",
+    direccion_fiscal: "",
     rut: "",
+    cronograma: "",
   });
-
+  const [successMessage, setSuccessMessage] = useState("");
   const navigate = useNavigate();
 
   const handleNext = () => {
@@ -36,19 +48,63 @@ const AltaCliente = () => {
   };
 
   const handleDateChange = (newValue) => {
-    setFormData({ ...formData, fechaIngreso: newValue });
+    setFormData({ ...formData, fecha_ingreso: newValue });
   };
 
   const handleSubmit = (event) => {
     event.preventDefault();
-    console.log("Enviando formulario:", formData);
-    navigate("/");
+
+    // Convertir la fecha a formato "YYYY-MM-DD" si existe
+    const clientData = {
+      ...formData,
+      fecha_ingreso: formData.fecha_ingreso
+        ? formData.fecha_ingreso.toISOString().split("T")[0]
+        : null,
+    };
+
+    console.log("Enviando formulario:", clientData);
+
+    fetch("http://127.0.0.1:8000/api/clientes/registro/", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(clientData),
+    })
+      .then((res) => {
+        if (!res.ok) {
+          return res.text().then((errorText) => {
+            console.error("Respuesta de error:", errorText);
+            throw new Error(errorText);
+          });
+        }
+        return res.json();
+      })
+      .then((data) => {
+        console.log("Cliente registrado:", data);
+        setSuccessMessage("Cliente registrado con éxito.");
+        // Redirigir a la lista de clientes y pasar un mensaje de éxito
+        navigate("/listadeclientes", {
+          state: { successMessage: "Cliente registrado con éxito." },
+        });
+      })
+      .catch((err) => {
+        console.error("Error al dar de alta el cliente:", err);
+        alert("Error al dar de alta el cliente:\n" + err.message);
+      });
   };
 
   return (
     <Container maxWidth="md">
       <Paper elevation={3} sx={{ padding: 6, marginTop: 6, borderRadius: 3 }}>
-        <Typography variant="h3" gutterBottom>Alta Cliente</Typography>
+        <Typography variant="h3" gutterBottom>
+          Alta Cliente
+        </Typography>
+
+        {successMessage && (
+          <Alert severity="success" sx={{ mb: 2 }}>
+            {successMessage}
+          </Alert>
+        )}
+
         <Stepper activeStep={activeStep} alternativeLabel>
           {steps.map((label, index) => (
             <Step key={index}>
@@ -56,21 +112,94 @@ const AltaCliente = () => {
             </Step>
           ))}
         </Stepper>
+
         <form onSubmit={handleSubmit}>
           <Grid container spacing={3}>
             {activeStep === 0 && (
               <>
-                <Grid item xs={12}><TextField label="Nombre" fullWidth name="nombre" value={formData.nombre} onChange={handleChange} required/></Grid>
-                <Grid item xs={12}><TextField label="Dirección" fullWidth name="direccion" value={formData.direccion} onChange={handleChange} required/></Grid>
-                <Grid item xs={12}><TextField label="Contacto" fullWidth name="contacto" value={formData.contacto} onChange={handleChange} required/></Grid>
-                <Grid item xs={12}><TextField label="Nombre de Contacto" fullWidth name="nombreContacto" value={formData.nombreContacto} onChange={handleChange} required/></Grid>
+                <Grid item xs={12}>
+                  <TextField
+                    label="Nombre"
+                    fullWidth
+                    name="nombre"
+                    value={formData.nombre}
+                    onChange={handleChange}
+                    required
+                  />
+                </Grid>
+                <Grid item xs={12}>
+                  <TextField
+                    label="Dirección"
+                    fullWidth
+                    name="direccion"
+                    value={formData.direccion}
+                    onChange={handleChange}
+                    required
+                  />
+                </Grid>
+                <Grid item xs={12}>
+                  <TextField
+                    label="Contacto"
+                    fullWidth
+                    name="contacto"
+                    value={formData.contacto}
+                    onChange={handleChange}
+                    required
+                  />
+                </Grid>
+                <Grid item xs={12}>
+                  <TextField
+                    label="Nombre de Contacto"
+                    fullWidth
+                    name="nombre_contacto"
+                    value={formData.nombre_contacto}
+                    onChange={handleChange}
+                    required
+                  />
+                </Grid>
               </>
             )}
             {activeStep === 1 && (
               <>
-                <Grid item xs={12}><TextField label="Razón Social" fullWidth name="razonSocial" value={formData.razonSocial} onChange={handleChange} required/></Grid>
-                <Grid item xs={12}><TextField label="Dirección Fiscal" fullWidth name="direccionFiscal" value={formData.direccionFiscal} onChange={handleChange} required/></Grid>
-                <Grid item xs={12}><TextField label="RUT" fullWidth name="rut" value={formData.rut} onChange={handleChange} required/></Grid>
+                <Grid item xs={12}>
+                  <TextField
+                    label="Razón Social"
+                    fullWidth
+                    name="razon_social"
+                    value={formData.razon_social}
+                    onChange={handleChange}
+                    required
+                  />
+                </Grid>
+                <Grid item xs={12}>
+                  <TextField
+                    label="Dirección Fiscal"
+                    fullWidth
+                    name="direccion_fiscal"
+                    value={formData.direccion_fiscal}
+                    onChange={handleChange}
+                    required
+                  />
+                </Grid>
+                <Grid item xs={12}>
+                  <TextField
+                    label="RUT"
+                    fullWidth
+                    name="rut"
+                    value={formData.rut}
+                    onChange={handleChange}
+                    required
+                  />
+                </Grid>
+                <Grid item xs={12}>
+                  <TextField
+                    label="Cronograma"
+                    fullWidth
+                    name="cronograma"
+                    value={formData.cronograma}
+                    onChange={handleChange}
+                  />
+                </Grid>
               </>
             )}
             {activeStep === 2 && (
@@ -79,20 +208,49 @@ const AltaCliente = () => {
                   <LocalizationProvider dateAdapter={AdapterDayjs}>
                     <DatePicker
                       label="Fecha de Ingreso"
-                      value={formData.fechaIngreso || null}
+                      value={formData.fecha_ingreso || null}
                       onChange={handleDateChange}
-                      renderInput={(params) => <TextField {...params} fullWidth required />}
+                      renderInput={(params) => (
+                        <TextField {...params} fullWidth required />
+                      )}
                     />
                   </LocalizationProvider>
                 </Grid>
-                <Grid item xs={12}><TextField label="Email" type="email" fullWidth name="mail" value={formData.mail} onChange={handleChange} required/></Grid>
+                <Grid item xs={12}>
+                  <TextField
+                    label="Email"
+                    type="email"
+                    fullWidth
+                    name="mail"
+                    value={formData.mail}
+                    onChange={handleChange}
+                    required
+                  />
+                </Grid>
               </>
             )}
           </Grid>
-          <Grid container spacing={3} justifyContent="space-between" style={{ marginTop: '30px' }}>
-            {activeStep !== 0 && (<Button onClick={handleBack} size="large">Atrás</Button>)}
-            {activeStep < steps.length - 1 && (<Button onClick={handleNext} size="large">Siguiente</Button>)}
-            {activeStep === steps.length - 1 && (<Button type="submit" variant="contained" color="primary" size="large">Finalizar</Button>)}
+          <Grid
+            container
+            spacing={3}
+            justifyContent="space-between"
+            sx={{ marginTop: "30px" }}
+          >
+            {activeStep !== 0 && (
+              <Button onClick={handleBack} size="large">
+                Atrás
+              </Button>
+            )}
+            {activeStep < steps.length - 1 && (
+              <Button onClick={handleNext} size="large">
+                Siguiente
+              </Button>
+            )}
+            {activeStep === steps.length - 1 && (
+              <Button type="submit" variant="contained" color="primary" size="large">
+                Finalizar
+              </Button>
+            )}
           </Grid>
         </form>
       </Paper>

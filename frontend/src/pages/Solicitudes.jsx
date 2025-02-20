@@ -50,7 +50,7 @@ const Solicitudes = () => {
             ? `obra-${item.obra}`
             : `obra-${item.obra?.obra || Math.random()}`,
           nombre: item.obra?.obra || item.obra || 'Sin nombre',
-          solicitante: item.obra?.cliente?.nombre || 'Sin solicitante',
+          solicitante: item.cliente  || 'Sin solicitante',
         }));
 
         setSolicitudes([...clientesData, ...obrasData]);
@@ -154,7 +154,7 @@ const Solicitudes = () => {
 
   const columnasPendientes = [
     { field: 'nombre', headerName: 'Nombre', flex: 1 },
-    { field: 'nombre', headerName: 'Solicitante', flex: 1 },
+    { field: 'solicitante', headerName: 'Solicitante', flex: 1 },
     {
       field: 'acciones',
       headerName: 'Acciones',
