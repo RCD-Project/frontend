@@ -29,7 +29,13 @@ const Capacitaciones = () => {
       
         <Button
           variant="contained"
-          color="primary"
+          sx={{
+            marginTop: '20px',
+            backgroundColor: '#abbf9d', // Verde personalizado
+            '&:hover': {
+              backgroundColor: '#d1e063', // Color al hacer hover
+            },
+          }}
           startIcon={<AddIcon />}
           component={Link}
           to="/altacapacitaciones"

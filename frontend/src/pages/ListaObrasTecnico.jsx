@@ -80,7 +80,12 @@ const ObrasList = () => {
                   <TableCell align="center">
                     <Button
                       variant="contained"
-                      color="primary"
+                      sx={{
+                        backgroundColor: '#abbf9d', // Verde personalizado
+                        '&:hover': {
+                          backgroundColor: '#d1e063', // Color al hacer hover
+                        },
+                      }}
                       onClick={() => handleSelectObra(obra)
                       }
                     >

@@ -20,13 +20,35 @@ const Transportistas = () => {
   }, []);
 
   const toggleEstado = (id) => {
-    setTransportistas((prevTransportistas) =>
-      prevTransportistas.map((transportista) =>
-        transportista.id === id
-          ? { ...transportista, estado: transportista.estado === 'activo' ? 'inactivo' : 'activo' }
-          : transportista
-      )
-    );
+    // Encontrar el transportista seleccionado
+    const transportista = transportistas.find((t) => t.id === id);
+    const newEstado = transportista.estado === 'activo' ? 'inactivo' : 'activo';
+
+    // Llamada a la API para actualizar el estado
+    fetch(`http://127.0.0.1:8000/api/transportistas/modificar/${id}/`, {
+      method: 'PATCH', // O 'PATCH' según lo que requiera tu API
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ estado: newEstado }),
+    })
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error(`Error HTTP: ${response.status}`);
+        }
+        return response.json();
+      })
+      .then((data) => {
+        // Actualizar el estado local para reflejar el cambio
+        setTransportistas((prevTransportistas) =>
+          prevTransportistas.map((t) =>
+            t.id === id ? { ...t, estado: newEstado } : t
+          )
+        );
+      })
+      .catch((error) => {
+        console.error("Error al actualizar el estado del transportista:", error);
+      });
   };
 
   const [anchorEl, setAnchorEl] = useState(null);
@@ -53,11 +75,9 @@ const Transportistas = () => {
       flex: 1,
       sortable: false,
       renderCell: (params) => (
-        <>
-          <IconButton onClick={(event) => handleMenuOpen(event, params.row)}>
-            <MoreVertIcon />
-          </IconButton>
-        </>
+        <IconButton onClick={(event) => handleMenuOpen(event, params.row)}>
+          <MoreVertIcon />
+        </IconButton>
       ),
     },
   ];
@@ -82,19 +102,34 @@ const Transportistas = () => {
 
       <Button
         variant="contained"
-        color="primary"
+        sx={{
+          marginTop: '20px',
+          backgroundColor: '#abbf9d', // Verde personalizado
+          '&:hover': {
+            backgroundColor: '#d1e063', // Color al hacer hover
+          },
+        }}
         startIcon={<AddIcon />}
         onClick={() => navigate('/altatransportistas')}
-        style={{ marginTop: '20px' }}
       >
         Añadir Transportista
       </Button>
 
       <Menu anchorEl={anchorEl} open={Boolean(anchorEl)} onClose={handleMenuClose}>
-        <MenuItem onClick={() => { handleMenuClose(); navigate(`/detalletransportista?id=${selectedTransportista?.id}`); }}>
+        <MenuItem
+          onClick={() => {
+            handleMenuClose();
+            navigate(`/detalletransportista?id=${selectedTransportista?.id}`);
+          }}
+        >
           <VisibilityIcon /> Ver detalles
         </MenuItem>
-        <MenuItem onClick={() => { handleMenuClose(); toggleEstado(selectedTransportista?.id); }}>
+        <MenuItem
+          onClick={() => {
+            handleMenuClose();
+            toggleEstado(selectedTransportista?.id);
+          }}
+        >
           {selectedTransportista?.estado === 'activo' ? <ToggleOffIcon /> : <ToggleOnIcon />} Cambiar estado
         </MenuItem>
       </Menu>

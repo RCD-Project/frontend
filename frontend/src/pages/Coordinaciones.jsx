@@ -83,7 +83,17 @@ const FormularioCoordinaciones = () => {
           </Grid>
         </Grid>
         <Grid container justifyContent="center" style={{ marginTop: '20px' }}>
-          <Button type="submit" variant="contained" color="primary">Enviar Coordinación</Button>
+          <Button 
+          type="submit" 
+          variant="contained" 
+          sx={{
+            marginTop: '20px',
+            backgroundColor: '#abbf9d', // Verde personalizado
+            '&:hover': {
+              backgroundColor: '#d1e063', // Color al hacer hover
+            },
+          }}
+          >Enviar Coordinación</Button>
         </Grid>
       </form>
     </Container>

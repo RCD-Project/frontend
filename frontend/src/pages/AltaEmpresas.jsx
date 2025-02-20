@@ -12,25 +12,48 @@ const AltaEmpresasGestoras = () => {
     contacto: '',
     email: '',
   });
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
 
   const navigate = useNavigate();
 
   const handleNext = () => {
-    setActiveStep((prevStep) => prevStep + 1);
+    setActiveStep(prevStep => prevStep + 1);
   };
 
   const handleBack = () => {
-    setActiveStep((prevStep) => prevStep - 1);
+    setActiveStep(prevStep => prevStep - 1);
   };
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = (event) => {
+  const handleSubmit = async (event) => {
     event.preventDefault();
-    console.log('Enviando formulario:', formData);
-    navigate('/');
+    setLoading(true);
+    setError(null);
+    try {
+      const response = await fetch('http://127.0.0.1:8000/api/empresas/registro/', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(formData)
+      });
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Error al registrar la empresa gestora');
+      }
+      const data = await response.json();
+      console.log('Empresa gestora registrada:', data);
+      navigate('/empresasgestoras');
+    } catch (error) {
+      console.error('Error:', error);
+      setError(error.message);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -47,17 +70,63 @@ const AltaEmpresasGestoras = () => {
         <Grid container spacing={2}>
           {activeStep === 0 && (
             <>
-              <Grid item xs={12}><TextField label="Nombre" fullWidth name="nombre" value={formData.nombre} onChange={handleChange} required/></Grid>
-              <Grid item xs={12}><TextField label="Ubicación" fullWidth name="ubicacion" value={formData.ubicacion} onChange={handleChange} required/></Grid>
-              <Grid item xs={12}><TextField label="Contacto" fullWidth name="contacto" value={formData.contacto} onChange={handleChange} required/></Grid>
-              <Grid item xs={12}><TextField label="Email" type="email" fullWidth name="email" value={formData.email} onChange={handleChange} required/></Grid>
+              <Grid item xs={12}>
+                <TextField 
+                  label="Nombre" 
+                  fullWidth 
+                  name="nombre" 
+                  value={formData.nombre} 
+                  onChange={handleChange} 
+                  required 
+                />
+              </Grid>
+              <Grid item xs={12}>
+                <TextField 
+                  label="Ubicación" 
+                  fullWidth 
+                  name="ubicacion" 
+                  value={formData.ubicacion} 
+                  onChange={handleChange} 
+                  required 
+                />
+              </Grid>
+              <Grid item xs={12}>
+                <TextField 
+                  label="Contacto" 
+                  fullWidth 
+                  name="contacto" 
+                  value={formData.contacto} 
+                  onChange={handleChange} 
+                  required 
+                />
+              </Grid>
+              <Grid item xs={12}>
+                <TextField 
+                  label="Email" 
+                  type="email" 
+                  fullWidth 
+                  name="email" 
+                  value={formData.email} 
+                  onChange={handleChange} 
+                  required 
+                />
+              </Grid>
             </>
           )}
         </Grid>
+        {error && (
+          <Typography color="error" style={{ marginTop: '10px' }}>
+            {error}
+          </Typography>
+        )}
         <Grid container spacing={2} justifyContent="space-between" style={{ marginTop: '20px' }}>
           {activeStep !== 0 && (<Button onClick={handleBack}>Atrás</Button>)}
           {activeStep < steps.length - 1 && (<Button onClick={handleNext}>Siguiente</Button>)}
-          {activeStep === steps.length - 1 && (<Button type="submit" variant="contained" color="primary">Finalizar</Button>)}
+          {activeStep === steps.length - 1 && (
+            <Button type="submit" variant="contained" color="primary" disabled={loading}>
+              {loading ? 'Registrando...' : 'Finalizar'}
+            </Button>
+          )}
         </Grid>
       </form>
     </Container>

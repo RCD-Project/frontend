@@ -154,7 +154,7 @@ const Solicitudes = () => {
 
   const columnasPendientes = [
     { field: 'nombre', headerName: 'Nombre', flex: 1 },
-    { field: 'solicitante', headerName: 'Solicitante', flex: 1 },
+    { field: 'nombre', headerName: 'Solicitante', flex: 1 },
     {
       field: 'acciones',
       headerName: 'Acciones',
@@ -166,7 +166,7 @@ const Solicitudes = () => {
             className="icono-aceptar"
             onClick={() => aceptarSolicitud(params.row.id)}
           >
-            <CheckCircleIcon color="success" />
+            <CheckCircleIcon sx={{ color: '#a8c948' }} />
           </IconButton>
           <IconButton
             className="icono-rechazar"

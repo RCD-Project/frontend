@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Tabla from '../components/Table';
 import { Button, IconButton, Menu, MenuItem } from '@mui/material';
@@ -11,12 +11,16 @@ import { Link } from 'react-router-dom';
 import '../styles/EmpresasGestoras.css';
 
 const EmpresasGestoras = () => {
-  const [empresas, setEmpresas] = useState([
-    { id: 1, nombre: 'Gestora S.A.', ubicacion: 'Montevideo', contacto: '098123456' },
-    { id: 2, nombre: 'Reciclaje Uruguay', ubicacion: 'Canelones', contacto: '099654321' },
-  ]);
-
+  const [empresas, setEmpresas] = useState([]);
   const navigate = useNavigate();
+
+  // Se hace fetch a la API para obtener la lista de empresas gestoras
+  useEffect(() => {
+    fetch('http://127.0.0.1:8000/api/empresas/lista/')
+      .then(response => response.json())
+      .then(data => setEmpresas(data))
+      .catch(error => console.error('Error fetching empresas:', error));
+  }, []);
 
   const eliminarEmpresa = (id) => {
     const confirmacion = window.confirm("¿Seguro que deseas eliminar esta empresa?");
@@ -48,11 +52,9 @@ const EmpresasGestoras = () => {
       flex: 1,
       sortable: false,
       renderCell: (params) => (
-        <>
-          <IconButton onClick={(event) => handleMenuOpen(event, params.row)}>
-            <MoreVertIcon />
-          </IconButton>
-        </>
+        <IconButton onClick={(event) => handleMenuOpen(event, params.row)}>
+          <MoreVertIcon />
+        </IconButton>
       ),
     },
   ];
@@ -83,16 +85,22 @@ const EmpresasGestoras = () => {
         </MenuItem>
       </Menu>
 
-        <Button
-          variant="contained"
-          color="primary"
-          startIcon={<AddIcon />}
-          component={Link}
-          to="/altaempresas"
-          style={{ marginTop: '20px' }}
-        >
-          Añadir Empresa
-        </Button>
+      <Button
+        variant="contained"
+        sx={{
+          marginTop: '20px',
+          backgroundColor: '#abbf9d', // Verde personalizado
+          '&:hover': {
+            backgroundColor: '#d1e063', // Color al hacer hover
+          },
+        }}
+        startIcon={<AddIcon />}
+        component={Link}
+        to="/altaempresas"
+        style={{ marginTop: '20px' }}
+      >
+        Añadir Empresa
+      </Button>
     </div>
   );
 };

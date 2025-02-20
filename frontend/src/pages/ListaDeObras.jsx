@@ -15,7 +15,7 @@ const ListaDeObras = () => {
 
   useEffect(() => {
     // Realizar la petición a la API de obras aprobadas
-    fetch("http://localhost:8000/api/obras/aprobadas/")
+    fetch("http://127.0.0.1:8000/api/obras/aprobadas/")
       .then((res) => {
         if (!res.ok) {
           throw new Error(`Error HTTP: ${res.status}`);
@@ -31,9 +31,27 @@ const ListaDeObras = () => {
   const eliminarObra = (id) => {
     const confirmacion = window.confirm("¿Seguro que deseas eliminar esta obra?");
     if (confirmacion) {
-      setObras(obras.filter((obra) => obra.id !== id));
+      fetch(`http://127.0.0.1:8000/api/obras/${id}/eliminar/`, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      })
+        .then((res) => {
+          if (!res.ok) {
+            throw new Error(`Error HTTP: ${res.status}`);
+          }
+          // Si la API retorna 204 (No Content) o algún JSON, puedes adaptar esto:
+          return res.text(); // o res.json();
+        })
+        .then(() => {
+          // Actualizar el estado eliminando la obra
+          setObras(obras.filter((obra) => obra.id !== id));
+        })
+        .catch((err) => console.error("Error al eliminar obra:", err));
     }
   };
+  
 
   const [anchorEl, setAnchorEl] = useState(null);
   const [selectedObra, setSelectedObra] = useState(null);
@@ -50,7 +68,7 @@ const ListaDeObras = () => {
 
   const columnasObras = [
     { field: 'nombre_obra', headerName: 'Nombre', flex: 1 },
-    { field: 'direccion', headerName: 'Ubicación', flex: 1 },
+    { field: 'direccion', headerName: 'Dirección', flex: 1 },
     {
       field: 'acciones',
       headerName: 'Acciones',
@@ -70,7 +88,7 @@ const ListaDeObras = () => {
       <Tabla
         datos={obras}
         columnas={columnasObras}
-        filtroClave="nombre"
+        filtroClave="id"
         filtroPlaceholder="Nombre de la obra"
       />
 
@@ -87,15 +105,22 @@ const ListaDeObras = () => {
       </Menu>
 
       <Button
-        variant="contained"
-        color="primary"
-        startIcon={<AddIcon />}
-        component={Link}
-        to="/altaobra"
-        style={{ marginTop: '20px' }}
-      >
-        Añadir Obra
-      </Button>
+  variant="contained"
+  startIcon={<AddIcon />}
+  component={Link}
+  to="/altaobra"
+  sx={{
+    marginTop: '20px',
+    backgroundColor: '#abbf9d', // Verde personalizado
+    '&:hover': {
+      backgroundColor: '#d1e063', // Color al hacer hover
+    },
+  }}
+>
+  Añadir Obra
+</Button>
+
+
     </div>
   );
 };
