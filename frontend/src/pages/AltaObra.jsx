@@ -174,14 +174,16 @@ const AltaObra = () => {
 
   return (
     <Container maxWidth="sm">
-      <Typography variant="h4" gutterBottom>Registro de Obra</Typography>
+      <Typography variant="h4" gutterBottom sx={{ marginTop: 2 }}>
+        Registro de Obra
+      </Typography>
       <Stepper activeStep={activeStep} alternativeLabel>
         {steps.map((label, index) => (
           <Step key={index}><StepLabel>{label}</StepLabel></Step>
         ))}
       </Stepper>
       <form onSubmit={handleSubmit}>
-        <Grid container spacing={2}>
+        <Grid container spacing={2} justifyContent="flex-end" sx={{ mt: 2 }}>
           {activeStep === 0 && (
             <>
               <Grid item xs={12}>
@@ -292,7 +294,7 @@ const AltaObra = () => {
                         <Typography variant="body2">Materiales: {punto.materiales && punto.materiales.join(', ')}</Typography>
                         <Typography variant="body2">Observaciones: {punto.observaciones}</Typography>
                         <Button variant="outlined" color="error" size="small" sx={{ mt: 1 }} onClick={() => handleCancelarPunto(index)}>
-                          Cancelar Agregación
+                          Quitar punto limpio
                         </Button>
                       </CardContent>
                     </Card>
@@ -402,11 +404,32 @@ const AltaObra = () => {
             </>
           )}
         </Grid>
-        <Grid container spacing={2} justifyContent="space-between" sx={{ mt: 2 }}>
-          {activeStep !== 0 && (<Button onClick={handleBack}>Atrás</Button>)}
-          {activeStep < steps.length - 1 && (<Button onClick={handleNext}>Siguiente</Button>)}
-          {activeStep === steps.length - 1 && (<Button type="submit" variant="contained" color="primary">Finalizar</Button>)}
+        <Grid container spacing={2} sx={{ mt: 2 }}>
+          {activeStep !== 0 && (
+            <Grid item xs={6}>
+              <Button onClick={handleBack}>Atrás</Button>
+            </Grid>
+          )}
+
+          {activeStep === 0 && (
+            <Grid item xs={12} sx={{ textAlign: 'right' }}>
+              <Button onClick={handleNext}>Siguiente</Button>
+            </Grid>
+          )}
+
+          {activeStep !== 0 && activeStep < steps.length - 1 && (
+            <Grid item xs={6} sx={{ textAlign: 'right' }}>
+              <Button onClick={handleNext}>Siguiente</Button>
+            </Grid>
+          )}
+
+          {activeStep === steps.length - 1 && (
+            <Grid item xs={6} sx={{ textAlign: 'right' }}>
+              <Button type="submit" variant="contained" color="primary">Finalizar</Button>
+            </Grid>
+          )}
         </Grid>
+
       </form>
 
       <Dialog open={openDialog} onClose={handleCloseDialog} maxWidth="md" fullWidth PaperProps={{ sx: { width: '750px' } }}>

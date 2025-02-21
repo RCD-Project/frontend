@@ -51,7 +51,9 @@ const AltaCapacitaciones = () => {
 
   return (
     <Container maxWidth="sm">
-      <Typography variant="h4" gutterBottom>Alta Capacitación</Typography>
+      <Typography variant="h4" gutterBottom sx={{ marginTop: 2 }}>
+        Alta Capacitación
+      </Typography>
       <Stepper activeStep={activeStep} alternativeLabel>
         {steps.map((label, index) => (
           <Step key={index}>
@@ -124,11 +126,20 @@ const AltaCapacitaciones = () => {
             </>
           )}
         </Grid>
-        <Grid container spacing={2} justifyContent="space-between" style={{ marginTop: '20px' }}>
-          {activeStep !== 0 && (<Button onClick={handleBack}>Atrás</Button>)}
-          {activeStep < steps.length - 1 && (<Button onClick={handleNext}>Siguiente</Button>)}
-          {activeStep === steps.length - 1 && (<Button type="submit" variant="contained" color="primary">Finalizar</Button>)}
+        <Grid container spacing={2} justifyContent="flex-end" style={{ marginTop: '20px' }}>
+          {activeStep !== 0 && (
+            <Button onClick={handleBack}>Atrás</Button>
+          )}
+          {activeStep < steps.length - 1 && (
+            <Button onClick={handleNext}>Siguiente</Button>
+          )}
+          {activeStep === steps.length - 1 && (
+            <Button type="submit" variant="contained" color="primary">
+              Finalizar
+            </Button>
+          )}
         </Grid>
+
       </form>
     </Container>
   );

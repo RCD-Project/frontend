@@ -87,8 +87,8 @@ const AltaTransportistas = () => {
 
   return (
     <Container maxWidth="sm">
-      <Typography variant="h4" gutterBottom>
-        Alta Transportista
+      <Typography variant="h4" gutterBottom sx={{ marginTop: 2 }}>
+        Alta transportista
       </Typography>
       <Stepper activeStep={activeStep} alternativeLabel>
         {steps.map((label, index) => (
@@ -174,21 +174,29 @@ const AltaTransportistas = () => {
             {errorMessage}
           </Typography>
         )}
-        <Grid container spacing={2} justifyContent="space-between" style={{ marginTop: '20px' }}>
+        <Grid container spacing={2} sx={{ mt: 2 }}>
           {activeStep !== 0 && (
-            <Button onClick={handleBack}>
-              Atrás
-            </Button>
+            <Grid item xs={6}>
+              <Button onClick={handleBack}>Atrás</Button>
+            </Grid>
           )}
-          {activeStep < steps.length - 1 && (
-            <Button onClick={handleNext}>
-              Siguiente
-            </Button>
+
+          {activeStep === 0 && (
+            <Grid item xs={12} sx={{ textAlign: 'right' }}>
+              <Button onClick={handleNext}>Siguiente</Button>
+            </Grid>
           )}
+
+          {activeStep !== 0 && activeStep < steps.length - 1 && (
+            <Grid item xs={6} sx={{ textAlign: 'right' }}>
+              <Button onClick={handleNext}>Siguiente</Button>
+            </Grid>
+          )}
+
           {activeStep === steps.length - 1 && (
-            <Button type="submit" variant="contained" color="primary">
-              Finalizar
-            </Button>
+            <Grid item xs={6} sx={{ textAlign: 'right' }}>
+              <Button type="submit" variant="contained" color="primary">Finalizar</Button>
+            </Grid>
           )}
         </Grid>
       </form>

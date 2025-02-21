@@ -230,26 +230,29 @@ const AltaCliente = () => {
               </>
             )}
           </Grid>
-          <Grid
-            container
-            spacing={3}
-            justifyContent="space-between"
-            sx={{ marginTop: "30px" }}
-          >
+          <Grid container spacing={2} sx={{ mt: 2 }}>
             {activeStep !== 0 && (
-              <Button onClick={handleBack} size="large">
-                Atrás
-              </Button>
+              <Grid item xs={6}>
+                <Button onClick={handleBack}>Atrás</Button>
+              </Grid>
             )}
-            {activeStep < steps.length - 1 && (
-              <Button onClick={handleNext} size="large">
-                Siguiente
-              </Button>
+  
+            {activeStep === 0 && (
+              <Grid item xs={12} sx={{ textAlign: 'right' }}>
+                <Button onClick={handleNext}>Siguiente</Button>
+              </Grid>
             )}
+  
+            {activeStep !== 0 && activeStep < steps.length - 1 && (
+              <Grid item xs={6} sx={{ textAlign: 'right' }}>
+                <Button onClick={handleNext}>Siguiente</Button>
+              </Grid>
+            )}
+  
             {activeStep === steps.length - 1 && (
-              <Button type="submit" variant="contained" color="primary" size="large">
-                Finalizar
-              </Button>
+              <Grid item xs={6} sx={{ textAlign: 'right' }}>
+                <Button type="submit" variant="contained" color="primary">Finalizar</Button>
+              </Grid>
             )}
           </Grid>
         </form>

@@ -7,6 +7,14 @@
   --header-fade-opacity: 1;
   /* Valor inicial */
 }
+body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+
 
 /* Contenedor principal: organiza Header y Main Content */
 .app-container {
