@@ -52,29 +52,39 @@ body {
 }
 
 /* Body Content: contenedor donde se renderiza el contenido dinámico */
+/* Body Content: contenedor donde se renderiza el contenido dinámico */
 .body-content {
   flex-grow: 1;
-  padding: 10px; /* Reducir padding para más espacio */
   box-sizing: border-box;
   margin-top: 20px;
   width: 100%; /* Permitir que ocupe todo el ancho */
-
-/* Efecto de máscara para desvanecer el contenido debajo del header */
--webkit-mask-image: linear-gradient(to bottom,
-  rgba(0, 0, 0, var(--header-fade-opacity)) 0px,
-  rgba(0, 0, 0, 1) var(--header-height));
-  mask-image: linear-gradient(to bottom,
-  rgba(0, 0, 0, var(--header-fade-opacity)) 0px,
-  rgba(0, 0, 0, 1) var(--header-height));
+  display: flex;             /* Agregado para centrar verticalmente */
+  flex-direction: column;    /* Opcional: si deseas que los hijos se apilen */
+  align-items: center;       /* Centra horizontalmente los elementos hijos */
+  /* Efecto de máscara para desvanecer el contenido debajo del header */
+  -webkit-mask-image: linear-gradient(
+    to bottom,
+    rgba(0, 0, 0, var(--header-fade-opacity)) 0px,
+    rgba(0, 0, 0, 1) var(--header-height)
+  );
+  mask-image: linear-gradient(
+    to bottom,
+    rgba(0, 0, 0, var(--header-fade-opacity)) 0px,
+    rgba(0, 0, 0, 1) var(--header-height)
+  );
 }
 
 /* Contenedor interno: limita el ancho y centra el contenido */
 .inner-content {
   width: 100%;
+  padding-top: 40px;
+  padding-bottom: 40px;
   max-width: 1000px;
+  margin: 0 auto; /* Centra horizontalmente el contenido */
   box-sizing: border-box;
   font-family: 'Montserrat', sans-serif;
 }
+
 
 /* Media Query para dispositivos móviles */
 @media (max-width: 768px) {

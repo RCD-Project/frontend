@@ -81,7 +81,7 @@ const ObrasList = () => {
                     <Button
                       variant="contained"
                       sx={{
-                        backgroundColor: '#abbf9d', // Verde personalizado
+                        backgroundColor: '#abbf9d',
                         '&:hover': {
                           backgroundColor: '#d1e063', // Color al hacer hover
                         },
