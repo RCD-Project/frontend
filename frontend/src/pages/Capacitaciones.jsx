@@ -1,20 +1,25 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Tabla from '../components/Table';
 import { Button } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import { Link } from 'react-router-dom';
 
 const Capacitaciones = () => {
-  const [capacitaciones, setCapacitaciones] = useState([
-    { id: 1, cliente: 'Juan Pérez', obra: 'Obra1', contacto: '123456789', horario: '10:00 AM' },
-    { id: 2, cliente: 'Ana López', obra: 'Obra2', contacto: '987654321', horario: '02:30 PM' },
-  ]);
+  const [capacitaciones, setCapacitaciones] = useState([]);
+
+  useEffect(() => {
+    fetch('http://localhost:8000/api/capacitaciones/lista/')
+      .then(response => response.json())
+      .then(data => setCapacitaciones(data))
+      .catch(error => console.error('Error fetching capacitaciones:', error));
+  }, []);
 
   const columnasCapacitaciones = [
-    { field: 'cliente', headerName: 'Cliente', flex: 1 },
+    { field: 'fecha', headerName: 'Fecha', flex: 1 },
+    { field: 'motivo', headerName: 'Motivo', flex: 1 },
     { field: 'obra', headerName: 'Obra', flex: 1 },
-    { field: 'contacto', headerName: 'Contacto', flex: 1 },
-    { field: 'horario', headerName: 'Horario', flex: 1 },
+    { field: 'tecnico', headerName: 'Técnico', flex: 1 },
+    { field: 'comentario', headerName: 'Comentario', flex: 1 },
   ];
 
   return (
@@ -23,26 +28,25 @@ const Capacitaciones = () => {
       <Tabla
         datos={capacitaciones}
         columnas={columnasCapacitaciones}
-        filtroClave="cliente"
-        filtroPlaceholder="Nombre del cliente"
+        filtroClave="motivo"
+        filtroPlaceholder="Buscar capacitación"
       />
-      
-        <Button
-          variant="contained"
-          sx={{
-            marginTop: '20px',
-            backgroundColor: '#abbf9d', // Verde personalizado
-            '&:hover': {
-              backgroundColor: '#d1e063', // Color al hacer hover
-            },
-          }}
-          startIcon={<AddIcon />}
-          component={Link}
-          to="/altacapacitaciones"
-          style={{ marginTop: '20px' }}
-        >
-          Añadir Capacitación
-        </Button>
+      <Button
+        variant="contained"
+        sx={{
+          marginTop: '20px',
+          backgroundColor: '#abbf9d',
+          '&:hover': {
+            backgroundColor: '#d1e063',
+          },
+        }}
+        startIcon={<AddIcon />}
+        component={Link}
+        to="/altacapacitaciones"
+        style={{ marginTop: '20px' }}
+      >
+        Añadir Capacitación
+      </Button>
     </div>
   );
 };

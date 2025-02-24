@@ -9,9 +9,9 @@ import { AuthContext } from "../pages/context/AuthContext"; // Se asume que el A
 const menuItems = [
   { path: "/listadeobras", label: "Lista de Obras", icon: <Building size={24} />, roles: ["superadmin", "cliente"] },
   { path: "/informes", label: "Informes", icon: <FileText size={24} />, roles: ["superadmin", "coordinadorlogistico"] },
-  { path: "/coordinaciones", label: "Coordinaciones", icon: <Calendar size={24} />, roles: ["superadmin", "coordinator"] },
+  { path: "/coordinaciones", label: "Coordinaciones", icon: <Calendar size={24} />, roles: ["superadmin", "supervisor", "cliente"] },
   { path: "/clientes", label: "Clientes", icon: <Users size={24} />, roles: ["superadmin"] },
-  { path: "/solicitudes", label: "Solicitudes", icon: <ClipboardList size={24} />, roles: ["superadmin", "cliente"] },
+  { path: "/solicitudes", label: "Solicitudes", icon: <ClipboardList size={24} />, roles: ["superadmin", "coordinador", "coordinadorlogistico"] },
   { path: "/transportistas", label: "Transportistas", icon: <Truck size={24} />, roles: ["superadmin", "coordinadorlogistico"] },
   { path: "/empresasgestoras", label: "Empresa Gestora", icon: <Factory size={24} />, roles: ["superadmin", 'coordinadorlogistico'] },
   { path: "/capacitaciones", label: "Capacitaciones", icon: <Eye size={24} />, roles: ["superadmin", "tecnico"] },

@@ -1,38 +1,27 @@
-// src/contexts/AuthContext.jsx
-import React, { createContext, useState, useEffect } from 'react';
+import React, { createContext, useState } from "react";
 
-// Creamos el contexto
 export const AuthContext = createContext();
 
-// Proveedor del contexto, que envolverá a la aplicación
 export const AuthProvider = ({ children }) => {
-  // Estado para almacenar los datos del usuario (por ejemplo, token, roles, etc.)
+  // Inicia con un rol por defecto, por ejemplo "cliente"
+  const [role, setRole] = useState("cliente");
   const [user, setUser] = useState(null);
+  const [token, setToken] = useState(null);
 
-  // Al montar, verificamos si existe un usuario almacenado (por ejemplo, en localStorage)
-  useEffect(() => {
-    const storedUser = localStorage.getItem('user');
-    if (storedUser) {
-      setUser(JSON.parse(storedUser));
-    }
-  }, []);
-
-  // Función para iniciar sesión (aquí se integraría la llamada a la API de autenticación)
-  const login = (userData) => {
-    // userData podría incluir token, rol, etc.
+  const login = (userData, tokenData) => {
     setUser(userData);
-    localStorage.setItem('user', JSON.stringify(userData));
+    setToken(tokenData);
+    localStorage.setItem("token", tokenData);
   };
 
-  // Función para cerrar sesión
   const logout = () => {
     setUser(null);
-    localStorage.removeItem('user');
+    setToken(null);
+    localStorage.removeItem("token");
   };
 
-  // Se expone el estado y las funciones mediante el contexto
   return (
-    <AuthContext.Provider value={{ user, login, logout }}>
+    <AuthContext.Provider value={{ user, token, role, setRole, login, logout }}>
       {children}
     </AuthContext.Provider>
   );

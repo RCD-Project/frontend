@@ -20,7 +20,7 @@ const ObrasList = () => {
   const { data, updateData } = useFormStore();
 
   useEffect(() => {
-    // Realizar la petición a la API de obras aprobadas
+    // obras aprobadas
     fetch("http://localhost:8000/api/obras/aprobadas/")
       .then((res) => {
         if (!res.ok) {
@@ -37,19 +37,15 @@ const ObrasList = () => {
   const handleSelectObra = (obra) => {
     updateData("page1", {
       ...data.page1,
-      // Guarda el nombre de la obra para mostrarlo o usarlo en otro lugar
+
       obra: obra.nombre_obra,
-      // Guarda el ID de la obra (o la obra completa si lo prefieres)
       obraId: obra.id,
       direccion: obra.direccion,
-      // Si deseas que en el formulario se pueda seleccionar otra obra,
-      // guarda la lista de obras aprobadas
       obrasDisponibles: obras,
     });
   
-    updateData("pageIndex", 0); // Reinicia el índice de página en el formulario
+    updateData("pageIndex", 0);
   
-    // Navega a la ruta del formulario (puedes ajustar el retraso o eliminarlo si no es necesario)
     setTimeout(() => {
       navigate("../Formularios");
     }, 100);

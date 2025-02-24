@@ -3,8 +3,6 @@ import Tabla from '../components/Table';
 import { Button, IconButton } from '@mui/material';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import CancelIcon from '@mui/icons-material/Cancel';
-import DoneIcon from '@mui/icons-material/Done';
-import { Link } from 'react-router-dom';
 import '../styles/Solicitudes.css';
 
 const Solicitudes = () => {

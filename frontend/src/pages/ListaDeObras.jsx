@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import { useNavigate, useLocation, Link } from 'react-router-dom';
 import Tabla from '../components/Table';
 import { Button, IconButton, Menu, MenuItem, Alert } from '@mui/material';
@@ -7,13 +7,14 @@ import VisibilityIcon from '@mui/icons-material/Visibility';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import AddIcon from '@mui/icons-material/Add';
+import { AuthContext } from '../pages/context/AuthContext';
 
 const ListaDeObras = () => {
   const [obras, setObras] = useState([]);
   const navigate = useNavigate();
   const location = useLocation();
+  const { role, user } = useContext(AuthContext);
 
-  // Extraemos el mensaje de éxito (si lo hay) del estado de navegación
   const successMessage = location.state?.successMessage || "";
 
   useEffect(() => {
@@ -25,10 +26,14 @@ const ListaDeObras = () => {
         return res.json();
       })
       .then((data) => {
-        setObras(data);
+        if (role === "cliente" && user) {
+          setObras(data.filter((obra) => obra.cliente === 1)); //cambiar user.id para probar
+        } else {
+          setObras(data);
+        }
       })
       .catch((err) => console.error("Error al obtener obras aprobadas:", err));
-  }, []);
+  }, [role, user]);
 
   const eliminarObra = (id) => {
     const confirmacion = window.confirm("¿Seguro que deseas eliminar esta obra?");
@@ -83,7 +88,7 @@ const ListaDeObras = () => {
     <div>
       <h1>Lista de Obras</h1>
       
-      {/* Mostrar el mensaje de éxito si existe */}
+
       { successMessage && <Alert severity="success" sx={{ mb: 2 }}>{successMessage}</Alert> }
       
       <Tabla

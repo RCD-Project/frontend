@@ -23,9 +23,25 @@ const Clientes = () => {
   const eliminarCliente = (id) => {
     const confirmacion = window.confirm("¿Seguro que deseas eliminar este cliente?");
     if (confirmacion) {
-      setClientes(clientes.filter((cliente) => cliente.id !== id));
+      fetch(`http://127.0.0.1:8000/api/clientes/${id}/eliminar/`, {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+      })
+        .then((res) => {
+          if (!res.ok) {
+            throw new Error(`Error HTTP: ${res.status}`);
+          }
+          return res.text();
+        })
+        .then(() => {
+          // Actualizamos el estado eliminando el cliente borrado
+          setClientes(clientes.filter((cliente) => cliente.id !== id));
+        })
+        .catch((error) => console.error("Error al eliminar cliente:", error));
     }
   };
+  
+  
 
   const [anchorEl, setAnchorEl] = useState(null);
   const [selectedCliente, setSelectedCliente] = useState(null);

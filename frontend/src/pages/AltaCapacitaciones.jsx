@@ -16,6 +16,7 @@ const AltaCapacitaciones = () => {
     comentario: '',
   });
   const [obras, setObras] = useState([]);
+  const [tecnicos, setTecnicos] = useState([]);
 
   const navigate = useNavigate();
 
@@ -27,12 +28,20 @@ const AltaCapacitaciones = () => {
       .catch(error => console.error('Error fetching obras:', error));
   }, []);
 
+  // Obtener los técnicos desde la API
+  useEffect(() => {
+    fetch('http://localhost:8000/api/tecnicos/lista/')
+      .then(response => response.json())
+      .then(data => setTecnicos(data))
+      .catch(error => console.error('Error fetching técnicos:', error));
+  }, []);
+
   const handleNext = () => {
-    setActiveStep((prevStep) => prevStep + 1);
+    setActiveStep(prevStep => prevStep + 1);
   };
 
   const handleBack = () => {
-    setActiveStep((prevStep) => prevStep - 1);
+    setActiveStep(prevStep => prevStep - 1);
   };
 
   const handleChange = (e) => {
@@ -45,8 +54,36 @@ const AltaCapacitaciones = () => {
 
   const handleSubmit = (event) => {
     event.preventDefault();
-    console.log('Enviando formulario:', formData);
-    navigate('/');
+    
+    const payload = {
+      ...formData,
+      // Se formatea la fecha a "YYYY-MM-DD"
+      fecha: formData.fecha ? formData.fecha.format('YYYY-MM-DD') : null,
+    };
+
+    fetch('http://localhost:8000/api/capacitaciones/registro/', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(payload)
+    })
+      .then(response => {
+        if (!response.ok) {
+          return response.json().then(err => {
+            console.error('Error en la respuesta:', err);
+            throw new Error('Error en la respuesta de la red');
+          });
+        }
+        return response.json();
+      })
+      .then(data => {
+        console.log('Capacitación registrada exitosamente:', data);
+        navigate('/');
+      })
+      .catch(error => {
+        console.error('Error al registrar la capacitación:', error);
+      });
   };
 
   return (
@@ -96,7 +133,7 @@ const AltaCapacitaciones = () => {
                   required
                 >
                   {obras.map((obra) => (
-                    <MenuItem key={obra.id} value={obra.nombre_obra}>
+                    <MenuItem key={obra.id} value={obra.id}>
                       {obra.nombre_obra}
                     </MenuItem>
                   ))}
@@ -104,13 +141,20 @@ const AltaCapacitaciones = () => {
               </Grid>
               <Grid item xs={12}>
                 <TextField
+                  select
                   label="Técnico"
                   fullWidth
                   name="tecnico"
                   value={formData.tecnico}
                   onChange={handleChange}
                   required
-                />
+                >
+                  {tecnicos.map((tecnico) => (
+                    <MenuItem key={tecnico.id} value={tecnico.id}>
+                      {tecnico.nombre}
+                    </MenuItem>
+                  ))}
+                </TextField>
               </Grid>
               <Grid item xs={12}>
                 <TextField
@@ -126,20 +170,15 @@ const AltaCapacitaciones = () => {
             </>
           )}
         </Grid>
-        <Grid container spacing={2} justifyContent="flex-end" style={{ marginTop: '20px' }}>
-          {activeStep !== 0 && (
-            <Button onClick={handleBack}>Atrás</Button>
-          )}
-          {activeStep < steps.length - 1 && (
-            <Button onClick={handleNext}>Siguiente</Button>
-          )}
+        <Grid container spacing={2} justifyContent="flex-end" sx={{ marginTop: 2 }}>
+          {activeStep !== 0 && <Button onClick={handleBack}>Atrás</Button>}
+          {activeStep < steps.length - 1 && <Button onClick={handleNext}>Siguiente</Button>}
           {activeStep === steps.length - 1 && (
             <Button type="submit" variant="contained" color="primary">
               Finalizar
             </Button>
           )}
         </Grid>
-
       </form>
     </Container>
   );
