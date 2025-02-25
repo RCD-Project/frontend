@@ -1,5 +1,17 @@
 import React, { useState } from 'react';
-import { Container, TextField, Button, Grid, Typography, Stepper, Step, StepLabel } from '@mui/material';
+import { 
+  Container, 
+  TextField, 
+  Button, 
+  Grid, 
+  Typography, 
+  Stepper, 
+  Step, 
+  StepLabel, 
+  Paper, 
+  Box 
+} from '@mui/material';
+import { createTheme, ThemeProvider } from '@mui/material/styles';
 import { useNavigate } from 'react-router-dom';
 
 const steps = ['Información General'];
@@ -56,95 +68,119 @@ const AltaEmpresasGestoras = () => {
     }
   };
 
+  const theme = createTheme({
+    palette: {
+      primary: {
+        main: '#a8c948', // Color personalizado igual que en AltaCliente
+      },
+    },
+  });
+
   return (
-    <Container maxWidth="sm">
-      <Typography variant="h4" gutterBottom sx={{ marginTop: 2 }}>
-        Alta Empresa Gestora
-      </Typography>
-      <Stepper activeStep={activeStep} alternativeLabel>
-        {steps.map((label, index) => (
-          <Step key={index}>
-            <StepLabel>{label}</StepLabel>
-          </Step>
-        ))}
-      </Stepper>
-      <form onSubmit={handleSubmit}>
-        <Grid container spacing={2}>
-          {activeStep === 0 && (
-            <>
-              <Grid item xs={12}>
-                <TextField 
-                  label="Nombre" 
-                  fullWidth 
-                  name="nombre" 
-                  value={formData.nombre} 
-                  onChange={handleChange} 
-                  required 
-                />
-              </Grid>
-              <Grid item xs={12}>
-                <TextField 
-                  label="Ubicación" 
-                  fullWidth 
-                  name="ubicacion" 
-                  value={formData.ubicacion} 
-                  onChange={handleChange} 
-                  required 
-                />
-              </Grid>
-              <Grid item xs={12}>
-                <TextField 
-                  label="Contacto" 
-                  fullWidth 
-                  name="contacto" 
-                  value={formData.contacto} 
-                  onChange={handleChange} 
-                  required 
-                />
-              </Grid>
-              <Grid item xs={12}>
-                <TextField 
-                  label="Email" 
-                  type="email" 
-                  fullWidth 
-                  name="email" 
-                  value={formData.email} 
-                  onChange={handleChange} 
-                  required 
-                />
-              </Grid>
-            </>
-          )}
-        </Grid>
-        {error && (
-          <Typography color="error" style={{ marginTop: '10px' }}>
-            {error}
-          </Typography>
-        )}
-        <Grid container spacing={2} style={{ marginTop: '20px' }}>
-          {activeStep !== 0 && (
-            <Grid item xs={6}>
-              <Button onClick={handleBack}>Atrás</Button>
-            </Grid>
-          )}
-          
-          {activeStep < steps.length - 1 && (
-            <Grid item xs={6}>
-              <Button onClick={handleNext}>Siguiente</Button>
-            </Grid>
-          )}
+    <ThemeProvider theme={theme}>
+      <Container
+        maxWidth="md"
+        sx={{
+          minHeight: '100vh', // El contenedor ocupa toda la altura de la ventana
+          display: 'flex',
+          flexDirection: 'column',
+          justifyContent: 'center',
+          alignItems: 'center',
+        }}
+      >
+        <Box sx={{ width: '100%' }}>
+          <Paper elevation={3} sx={{ padding: 6, borderRadius: 3 }}>
+            <Typography variant="h3" gutterBottom sx={{ mb: 4 }}>
+              Alta Empresa Gestora
+            </Typography>
 
-          {activeStep === steps.length - 1 && (
-            <Grid item xs={12} sx={{ textAlign: 'right' }}>
-              <Button type="submit" variant="contained" color="primary" disabled={loading}>
-                {loading ? 'Registrando...' : 'Finalizar'}
-              </Button>
-            </Grid>
-          )}
-        </Grid>
+            <Stepper activeStep={activeStep} alternativeLabel>
+              {steps.map((label, index) => (
+                <Step key={index}>
+                  <StepLabel>{label}</StepLabel>
+                </Step>
+              ))}
+            </Stepper>
 
-      </form>
-    </Container>
+            <form onSubmit={handleSubmit}>
+              <Grid container spacing={3}>
+                {activeStep === 0 && (
+                  <>
+                    <Grid item xs={12}>
+                      <TextField
+                        label="Nombre"
+                        fullWidth
+                        name="nombre"
+                        value={formData.nombre}
+                        onChange={handleChange}
+                        required
+                      />
+                    </Grid>
+                    <Grid item xs={12}>
+                      <TextField
+                        label="Ubicación"
+                        fullWidth
+                        name="ubicacion"
+                        value={formData.ubicacion}
+                        onChange={handleChange}
+                        required
+                      />
+                    </Grid>
+                    <Grid item xs={12}>
+                      <TextField
+                        label="Contacto"
+                        fullWidth
+                        name="contacto"
+                        value={formData.contacto}
+                        onChange={handleChange}
+                        required
+                      />
+                    </Grid>
+                    <Grid item xs={12}>
+                      <TextField
+                        label="Email"
+                        type="email"
+                        fullWidth
+                        name="email"
+                        value={formData.email}
+                        onChange={handleChange}
+                        required
+                      />
+                    </Grid>
+                  </>
+                )}
+              </Grid>
+              {error && (
+                <Typography color="error" style={{ marginTop: '10px' }}>
+                  {error}
+                </Typography>
+              )}
+              <Grid container spacing={2} sx={{ mt: 4 }}>
+                {activeStep !== 0 && (
+                  <Grid item xs={6}>
+                    <Button onClick={handleBack}>Atrás</Button>
+                  </Grid>
+                )}
+
+                {activeStep < steps.length - 1 && (
+                  <Grid item xs={6}>
+                    <Button onClick={handleNext}>Siguiente</Button>
+                  </Grid>
+                )}
+
+                {activeStep === steps.length - 1 && (
+                  <Grid item xs={12} sx={{ textAlign: 'right' }}>
+                    <Button type="submit" variant="contained" color="primary" disabled={loading}>
+                      {loading ? 'Registrando...' : 'Finalizar'}
+                    </Button>
+                  </Grid>
+                )}
+              </Grid>
+            </form>
+          </Paper>
+        </Box>
+      </Container>
+    </ThemeProvider>
   );
 };
 

@@ -1,15 +1,18 @@
 import React, { useState } from 'react';
-import { 
-  Container, 
-  TextField, 
-  Button, 
-  Grid, 
-  Typography, 
-  Stepper, 
-  Step, 
-  StepLabel, 
-  MenuItem 
+import {
+  Container,
+  TextField,
+  Button,
+  Grid,
+  Typography,
+  Stepper,
+  Step,
+  StepLabel,
+  MenuItem,
+  Paper,
+  Box,
 } from '@mui/material';
+import { createTheme, ThemeProvider } from '@mui/material/styles';
 import { useNavigate } from 'react-router-dom';
 
 const steps = ['Información General', 'Detalles de Transporte'];
@@ -29,7 +32,6 @@ const AltaTransportistas = () => {
 
   const handleNext = () => {
     setActiveStep((prevStep) => prevStep + 1);
-    // Limpia mensaje de error si se pasa a otro step
     setErrorMessage('');
   };
 
@@ -40,7 +42,6 @@ const AltaTransportistas = () => {
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
-    // Si se cambia el email, limpiamos el error
     if (e.target.name === 'email') {
       setErrorMessage('');
     }
@@ -48,14 +49,13 @@ const AltaTransportistas = () => {
 
   const handleSubmit = async (event) => {
     event.preventDefault();
-    // Mapeamos los nombres de campo para que coincidan con el modelo de Django
     const payload = {
       nombre: formData.nombre,
       contacto: formData.contacto,
       email: formData.email,
       tipo_vehiculo: formData.tipoVehiculo,
       tipo_material: formData.tipoMaterial,
-      estado: 'activo', // Se asigna por defecto como activo
+      estado: 'activo', 
     };
 
     try {
@@ -66,18 +66,15 @@ const AltaTransportistas = () => {
         },
         body: JSON.stringify(payload),
       });
-      
+
       if (!response.ok) {
-        // Intentamos extraer un mensaje de error
         const errorData = await response.json();
-        // Supongamos que el error relacionado al email viene en errorData.email (como un arreglo)
         const mensaje = errorData.email ? errorData.email[0] : response.statusText;
         throw new Error(mensaje);
       }
-      
+
       const data = await response.json();
       console.log('Transportista creado:', data);
-      // Redirige a /transportistas al finalizar
       navigate('/transportistas');
     } catch (error) {
       console.error('Error al crear el transportista:', error);
@@ -85,122 +82,149 @@ const AltaTransportistas = () => {
     }
   };
 
+  const theme = createTheme({
+    palette: {
+      primary: {
+        main: '#a8c948', // Color personalizado igual que en AltaCliente
+      },
+    },
+  });
+
   return (
-    <Container maxWidth="sm">
-      <Typography variant="h4" gutterBottom sx={{ marginTop: 2 }}>
-        Alta transportista
-      </Typography>
-      <Stepper activeStep={activeStep} alternativeLabel>
-        {steps.map((label, index) => (
-          <Step key={index}>
-            <StepLabel>{label}</StepLabel>
-          </Step>
-        ))}
-      </Stepper>
-      <form onSubmit={handleSubmit}>
-        <Grid container spacing={2}>
-          {activeStep === 0 && (
-            <>
-              <Grid item xs={12}>
-                <TextField 
-                  label="Nombre" 
-                  fullWidth 
-                  name="nombre" 
-                  value={formData.nombre} 
-                  onChange={handleChange} 
-                  required
-                />
-              </Grid>
-              <Grid item xs={12}>
-                <TextField 
-                  label="Contacto" 
-                  fullWidth 
-                  name="contacto" 
-                  value={formData.contacto} 
-                  onChange={handleChange} 
-                  required
-                />
-              </Grid>
-              <Grid item xs={12}>
-                <TextField 
-                  label="Email" 
-                  type="email" 
-                  fullWidth 
-                  name="email" 
-                  value={formData.email} 
-                  onChange={handleChange} 
-                  required
-                />
-              </Grid>
-            </>
-          )}
+    <ThemeProvider theme={theme}>
+      <Container
+        maxWidth="md"
+        sx={{
+          minHeight: '100vh',
+          display: 'flex',
+          flexDirection: 'column',
+          justifyContent: 'center',
+          alignItems: 'center',
+        }}
+      >
+        <Box sx={{ width: '100%' }}>
+          <Paper elevation={3} sx={{ padding: 6, borderRadius: 3 }}>
+            <Typography variant="h3" gutterBottom sx={{ mb: 4 }}>
+              Alta Transportista
+            </Typography>
 
-          {activeStep === 1 && (
-            <>
-              <Grid item xs={12}>
-                <TextField 
-                  label="Tipo de Vehículo" 
-                  fullWidth 
-                  name="tipoVehiculo" 
-                  value={formData.tipoVehiculo} 
-                  onChange={handleChange} 
-                  required
-                />
+            <Stepper activeStep={activeStep} alternativeLabel>
+              {steps.map((label, index) => (
+                <Step key={index}>
+                  <StepLabel>{label}</StepLabel>
+                </Step>
+              ))}
+            </Stepper>
+
+            <form onSubmit={handleSubmit}>
+              <Grid container spacing={3}>
+                {activeStep === 0 && (
+                  <>
+                    <Grid item xs={12}>
+                      <TextField
+                        label="Nombre"
+                        fullWidth
+                        name="nombre"
+                        value={formData.nombre}
+                        onChange={handleChange}
+                        required
+                      />
+                    </Grid>
+                    <Grid item xs={12}>
+                      <TextField
+                        label="Contacto"
+                        fullWidth
+                        name="contacto"
+                        value={formData.contacto}
+                        onChange={handleChange}
+                        required
+                      />
+                    </Grid>
+                    <Grid item xs={12}>
+                      <TextField
+                        label="Email"
+                        type="email"
+                        fullWidth
+                        name="email"
+                        value={formData.email}
+                        onChange={handleChange}
+                        required
+                      />
+                    </Grid>
+                  </>
+                )}
+
+                {activeStep === 1 && (
+                  <>
+                    <Grid item xs={12}>
+                      <TextField
+                        label="Tipo de Vehículo"
+                        fullWidth
+                        name="tipoVehiculo"
+                        value={formData.tipoVehiculo}
+                        onChange={handleChange}
+                        required
+                      />
+                    </Grid>
+                    <Grid item xs={12}>
+                      <TextField
+                        select
+                        label="Tipo de Material"
+                        fullWidth
+                        name="tipoMaterial"
+                        value={formData.tipoMaterial}
+                        onChange={handleChange}
+                        required
+                      >
+                        <MenuItem value="escombro_limpio">Escombro Limpio</MenuItem>
+                        <MenuItem value="plastico">Plástico</MenuItem>
+                        <MenuItem value="papel_carton">Papel y Cartón</MenuItem>
+                        <MenuItem value="metales">Metales</MenuItem>
+                        <MenuItem value="madera">Madera</MenuItem>
+                        <MenuItem value="mezclados">Mezclados</MenuItem>
+                        <MenuItem value="peligrosos">Peligrosos</MenuItem>
+                      </TextField>
+                    </Grid>
+                  </>
+                )}
               </Grid>
-              <Grid item xs={12}>
-                <TextField
-                  select
-                  label="Tipo de Material"
-                  fullWidth
-                  name="tipoMaterial"
-                  value={formData.tipoMaterial}
-                  onChange={handleChange}
-                  required
-                >
-                  <MenuItem value="escombro_limpio">Escombro Limpio</MenuItem>
-                  <MenuItem value="plastico">Plástico</MenuItem>
-                  <MenuItem value="papel_carton">Papel y Cartón</MenuItem>
-                  <MenuItem value="metales">Metales</MenuItem>
-                  <MenuItem value="madera">Madera</MenuItem>
-                  <MenuItem value="mezclados">Mezclados</MenuItem>
-                  <MenuItem value="peligrosos">Peligrosos</MenuItem>
-                </TextField>
+              {errorMessage && (
+                <Typography variant="body2" color="error" sx={{ mt: 2 }}>
+                  {errorMessage}
+                </Typography>
+              )}
+              <Grid container spacing={2} sx={{ mt: 4 }}>
+                {activeStep !== 0 && (
+                  <Grid item xs={6}>
+                    <Button onClick={handleBack}>Atrás</Button>
+                  </Grid>
+                )}
+
+                {activeStep === 0 && (
+                  <Grid item xs={12} sx={{ textAlign: 'right' }}>
+                    <Button onClick={handleNext}>Siguiente</Button>
+                  </Grid>
+                )}
+
+                {activeStep !== 0 && activeStep < steps.length - 1 && (
+                  <Grid item xs={6} sx={{ textAlign: 'right' }}>
+                    <Button onClick={handleNext}>Siguiente</Button>
+                  </Grid>
+                )}
+
+                {activeStep === steps.length - 1 && (
+                  <Grid item xs={6} sx={{ textAlign: 'right' }}>
+                    <Button type="submit" variant="contained" color="primary">
+                      Finalizar
+                    </Button>
+                  </Grid>
+                )}
               </Grid>
-            </>
-          )}
-        </Grid>
-        {errorMessage && (
-          <Typography variant="body2" color="error" sx={{ mt: 2 }}>
-            {errorMessage}
-          </Typography>
-        )}
-        <Grid container spacing={2} sx={{ mt: 2 }}>
-          {activeStep !== 0 && (
-            <Grid item xs={6}>
-              <Button onClick={handleBack}>Atrás</Button>
-            </Grid>
-          )}
-
-          {activeStep === 0 && (
-            <Grid item xs={12} sx={{ textAlign: 'right' }}>
-              <Button onClick={handleNext}>Siguiente</Button>
-            </Grid>
-          )}
-
-          {activeStep !== 0 && activeStep < steps.length - 1 && (
-            <Grid item xs={6} sx={{ textAlign: 'right' }}>
-              <Button onClick={handleNext}>Siguiente</Button>
-            </Grid>
-          )}
-
-          {activeStep === steps.length - 1 && (
-            <Grid item xs={6} sx={{ textAlign: 'right' }}>
-              <Button type="submit" variant="contained" color="primary">Finalizar</Button>
-            </Grid>
-          )}
-        </Grid>
-      </form>
-    </Container>
+            </form>
+          </Paper>
+        </Box>
+      </Container>
+    </ThemeProvider>
   );
 };
 
