@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Tabla from '../components/Table';
-import { IconButton, Menu, MenuItem, Button } from '@mui/material';
+import { IconButton, Menu, MenuItem, Button, Tabs, Tab, Box } from '@mui/material';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import ToggleOnIcon from '@mui/icons-material/ToggleOn';
@@ -10,7 +10,9 @@ import AddIcon from '@mui/icons-material/Add';
 
 const Transportistas = () => {
   const [transportistas, setTransportistas] = useState([]);
+  const [value, setValue] = useState(0);
   const navigate = useNavigate();
+
 
   useEffect(() => {
     fetch('http://localhost:8000/api/transportistas/lista/')
@@ -82,31 +84,67 @@ const Transportistas = () => {
     },
   ];
 
+  const handleChangeTab = (event, newValue) => {
+    setValue(newValue);
+  };  
+  
+
   return (
     <div>
-      <h1>Transportistas Activos</h1>
-      <Tabla
-        datos={transportistas.filter((t) => t.estado === 'activo')}
-        columnas={columnasTransportistas}
-        filtroClave="nombre"
-        filtroPlaceholder="Nombre del transportista"
-      />
+      <Box sx={{ width: '100%' }}>
+      <Tabs
+        value={value}
+        onChange={handleChangeTab}
+        aria-label="Transportistas"
+        textColor="primary"
+        indicatorColor="primary" // Cambia el color del indicador
+        sx={{
+          '& .MuiTab-root': {
+            color: '#000',  // Color de texto de las pestañas inactivas (negro o el color que elijas)
+          },
+          '& .Mui-selected': {
+            backgroundColor: '#abbf9d',  // Color de fondo cuando la pestaña está seleccionada
+            color: '#fff',  // Color de texto cuando está seleccionada (blanco)
+          },
+          '& .MuiTabs-indicator': {
+            backgroundColor: '#abbf9d',  // Cambia el color de la línea debajo de la pestaña seleccionada
+          },
+        }}
+      >
+        <Tab label="Activos" />
+        <Tab label="Inactivos" />
+      </Tabs>
 
-      <h1>Transportistas Inactivos</h1>
-      <Tabla
-        datos={transportistas.filter((t) => t.estado === 'inactivo')}
-        columnas={columnasTransportistas}
-        filtroClave="nombre"
-        filtroPlaceholder="Nombre del transportista"
-      />
+        {value === 0 && (
+          <div>
+            <Tabla
+              datos={transportistas.filter((t) => t.estado === 'activo')}
+              columnas={columnasTransportistas}
+              filtroClave="nombre"
+              filtroPlaceholder="Nombre del transportista"
+            />
+          </div>
+        )}
+
+        {value === 1 && (
+          <div>
+            <Tabla
+              datos={transportistas.filter((t) => t.estado === 'inactivo')}
+              columnas={columnasTransportistas}
+              filtroClave="nombre"
+              filtroPlaceholder="Nombre del transportista"
+            />
+          </div>
+        )}
+      </Box>
 
       <Button
         variant="contained"
         sx={{
           marginTop: '20px',
-          backgroundColor: '#abbf9d', // Verde personalizado
+          backgroundColor: '#abbf9d',
           '&:hover': {
-            backgroundColor: '#d1e063', // Color al hacer hover
+            backgroundColor: '#d1e063',
           },
         }}
         startIcon={<AddIcon />}

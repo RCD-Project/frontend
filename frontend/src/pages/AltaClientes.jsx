@@ -31,7 +31,6 @@ const AltaCliente = () => {
     razon_social: "",
     direccion_fiscal: "",
     rut: "",
-    cronograma: "",
   });
   const [successMessage, setSuccessMessage] = useState("");
   const navigate = useNavigate();
@@ -208,15 +207,6 @@ const AltaCliente = () => {
                       value={formData.rut}
                       onChange={handleChange}
                       required
-                    />
-                  </Grid>
-                  <Grid item xs={12}>
-                    <TextField
-                      label="Cronograma"
-                      fullWidth
-                      name="cronograma"
-                      value={formData.cronograma}
-                      onChange={handleChange}
                     />
                   </Grid>
                 </>

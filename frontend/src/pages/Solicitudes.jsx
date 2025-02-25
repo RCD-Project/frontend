@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import Tabla from '../components/Table';
-import { Button, IconButton } from '@mui/material';
+import { IconButton,Tab, Tabs, Box } from '@mui/material';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import CancelIcon from '@mui/icons-material/Cancel';
 import '../styles/Solicitudes.css';
 
 const Solicitudes = () => {
   const [solicitudes, setSolicitudes] = useState([]);
+  const [value, setValue] = useState(0);
 
   // Función para formatear la fecha a dd/MM/yyyy
   const formatDate = (dateString) => {
@@ -188,43 +189,62 @@ const Solicitudes = () => {
     { field: 'solicitante', headerName: 'Solicitante', flex: 1 },
   ];
 
+  const handleChangeTab = (event, newValue) => {
+    setValue(newValue);
+  };
+
   return (
     <div className="solicitudes-container">
-      <div className="solicitudes-table">
-        <h1>Solicitudes Pendientes</h1>
-        <Tabla
-          datos={solicitudes.filter(
-            (sol) => sol.estado?.toLowerCase() === 'pendiente'
-          )}
-          columnas={columnasPendientes}
-          filtroClave="nombre"
-          filtroPlaceholder="Nombre del cliente"
-          getRowId={(row) => row.id}
-        />
+    <Box sx={{ width: '100%' }}>
+      <Tabs value={value} onChange={handleChangeTab} aria-label="Solicitudes">
+        <Tab label="Pendientes" />
+        <Tab label="Aceptadas" />
+        <Tab label="Terminadas" />
+      </Tabs>
 
-        <h1>Solicitudes Aceptadas</h1>
-        <Tabla
-          datos={solicitudes.filter(
-            (sol) => sol.estado?.toLowerCase() === 'aceptado'
-          )}
-          columnas={columnasAceptadas}
-          filtroClave="nombre"
-          filtroPlaceholder="Nombre del cliente"
-          getRowId={(row) => row.id}
-        />
+      {value === 0 && (
+        <div>
+          <Tabla
+            datos={solicitudes.filter(
+              (sol) => sol.estado?.toLowerCase() === 'pendiente'
+            )}
+            columnas={columnasPendientes}
+            filtroClave="nombre"
+            filtroPlaceholder="Nombre del cliente"
+            getRowId={(row) => row.id}
+          />
+        </div>
+      )}
 
-        <h1>Solicitudes Terminadas</h1>
-        <Tabla
-          datos={solicitudes.filter((sol) => sol.estado === 'Terminado')}
-          columnas={columnasTerminadas}
-          filtroClave="nombre"
-          filtroPlaceholder="Nombre del cliente"
-          className="tabla-terminadas"
-          getRowId={(row) => row.id}
-        />
-      </div>
-    </div>
-  );
+      {value === 1 && (
+        <div>
+          <Tabla
+            datos={solicitudes.filter(
+              (sol) => sol.estado?.toLowerCase() === 'aceptado'
+            )}
+            columnas={columnasAceptadas}
+            filtroClave="nombre"
+            filtroPlaceholder="Nombre del cliente"
+            getRowId={(row) => row.id}
+          />
+        </div>
+      )}
+
+      {value === 2 && (
+        <div>
+          <Tabla
+            datos={solicitudes.filter((sol) => sol.estado === 'terminado')}
+            columnas={columnasTerminadas}
+            filtroClave="nombre"
+            filtroPlaceholder="Nombre del cliente"
+            className="tabla-terminadas"
+            getRowId={(row) => row.id}
+          />
+        </div>
+      )}
+    </Box>
+  </div>
+);
 };
 
 export default Solicitudes;

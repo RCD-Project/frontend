@@ -1,20 +1,15 @@
 import React, { useState, useEffect } from "react";
 import { Container, TextField, Button, Grid, Typography, Stepper, Step, StepLabel, Paper } from "@mui/material";
-import { LocalizationProvider, DatePicker } from "@mui/x-date-pickers";
-import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
-import dayjs from "dayjs";
 import { useNavigate, useLocation } from "react-router-dom";
 
-const steps = ["Información General", "Detalles del Vehículo", "Contacto"];
+const steps = ["Información General", "Detalles del Contacto", "Ubicación"];
 
-const EditarTransportista = () => {
+const EditarEmpresaGestora = () => {
   const [activeStep, setActiveStep] = useState(0);
   const [formData, setFormData] = useState({
     nombre: "",
+    ubicacion: "",
     contacto: "",
-    email: "",
-    tipoVehiculo: "",
-    tipoMaterial: "",
   });
 
   const navigate = useNavigate();
@@ -24,11 +19,11 @@ const EditarTransportista = () => {
 
   useEffect(() => {
     if (id) {
-      // Realiza la petición para obtener los datos del transportista
-      fetch(`http://localhost:8000/api/transportistas/${id}/`)
+      // Realiza la petición para obtener los datos de la empresa gestora
+      fetch(`http://localhost:8000/api/empresas-gestoras/${id}/`)
         .then((response) => {
           if (!response.ok) {
-            throw new Error("Error al obtener los datos del transportista");
+            throw new Error("Error al obtener los datos de la empresa gestora");
           }
           return response.json();
         })
@@ -36,10 +31,8 @@ const EditarTransportista = () => {
           // Actualiza el estado formData con los datos obtenidos
           setFormData({
             nombre: data.nombre,
+            ubicacion: data.ubicacion,
             contacto: data.contacto,
-            email: data.email,
-            tipoVehiculo: data.tipoVehiculo,
-            tipoMaterial: data.tipoMaterial,
           });
         })
         .catch((error) => console.error("Error:", error));
@@ -65,7 +58,7 @@ const EditarTransportista = () => {
         ...formData,
       };
   
-      const response = await fetch(`http://localhost:8000/api/transportistas/${id}/actualizar/`, {
+      const response = await fetch(`http://localhost:8000/api/empresas-gestoras/${id}/actualizar/`, {
         method: 'PATCH',
         headers: {
           "Content-Type": "application/json",
@@ -75,10 +68,10 @@ const EditarTransportista = () => {
     
       if (response.ok) {
         const data = await response.json();
-        console.log("Transportista actualizado:", data);
-        navigate("/transportistas");
+        console.log("Empresa Gestora actualizada:", data);
+        navigate("/empresas-gestoras");
       } else {
-        console.error("Error al actualizar el transportista. Código de error:", response.status);
+        console.error("Error al actualizar la empresa gestora. Código de error:", response.status);
       }
     } catch (error) {
       console.error("Error en la petición:", error);
@@ -88,7 +81,7 @@ const EditarTransportista = () => {
   return (
     <Container maxWidth="md">
       <Paper elevation={3} sx={{ padding: 6, marginTop: 6, borderRadius: 3 }}>
-        <Typography variant="h3" gutterBottom>Editar Transportista</Typography>
+        <Typography variant="h3" gutterBottom>Editar Empresa Gestora</Typography>
         <Stepper activeStep={activeStep} alternativeLabel>
           {steps.map((label, index) => (
             <Step key={index}>
@@ -110,6 +103,10 @@ const EditarTransportista = () => {
                     required
                   />
                 </Grid>
+              </>
+            )}
+            {activeStep === 1 && (
+              <>
                 <Grid item xs={12}>
                   <TextField
                     label="Contacto"
@@ -120,53 +117,19 @@ const EditarTransportista = () => {
                     required
                   />
                 </Grid>
-                <Grid item xs={12}>
-                  <TextField
-                    label="Email"
-                    fullWidth
-                    name="email"
-                    value={formData.email}
-                    onChange={handleChange}
-                    required
-                  />
-                </Grid>
-              </>
-            )}
-            {activeStep === 1 && (
-              <>
-                <Grid item xs={12}>
-                  <TextField
-                    label="Tipo de Vehículo"
-                    fullWidth
-                    name="tipoVehiculo"
-                    value={formData.tipoVehiculo}
-                    onChange={handleChange}
-                    required
-                  />
-                </Grid>
-                <Grid item xs={12}>
-                  <TextField
-                    label="Tipo de Material"
-                    fullWidth
-                    name="tipoMaterial"
-                    value={formData.tipoMaterial}
-                    onChange={handleChange}
-                    required
-                  />
-                </Grid>
               </>
             )}
             {activeStep === 2 && (
               <>
                 <Grid item xs={12}>
-                  <LocalizationProvider dateAdapter={AdapterDayjs}>
-                    <DatePicker
-                      label="Fecha de Ingreso"
-                      value={formData.fecha_ingreso || null}
-                      onChange={handleDateChange}
-                      renderInput={(params) => <TextField {...params} fullWidth required />}
-                    />
-                  </LocalizationProvider>
+                  <TextField
+                    label="Ubicación"
+                    fullWidth
+                    name="ubicacion"
+                    value={formData.ubicacion}
+                    onChange={handleChange}
+                    required
+                  />
                 </Grid>
               </>
             )}
@@ -182,4 +145,4 @@ const EditarTransportista = () => {
   );
 };
 
-export default EditarTransportista;
+export default EditarEmpresaGestora;

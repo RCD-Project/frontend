@@ -4,7 +4,7 @@ import { AuthProvider, AuthContext } from "./pages/context/AuthContext";
 
 import Header from "./components/Header";
 import Drawer from "./components/Drawer";
-import Body from "./components/Body";
+import Body from "./components/body";
 import RoleSelector from "./components/RolSelector";
 
 // Importa tus páginas
@@ -27,6 +27,7 @@ import DetallesTransportista from "./pages/DetallesTransportista";
 import EditarTransportista from "./pages/EditarTransportista";
 import AltaTransportistas from "./pages/AltaTransportistas";
 import AltaEmpresas from "./pages/AltaEmpresas";
+import EditarEmpresasGestoras from "./pages/EditarEmpresasGestoras";
 import AltaCapacitaciones from "./pages/AltaCapacitaciones";
 import LoginForm from "./pages/login";
 import RoleBasedRoute from "./pages/RutasProtegidas";
@@ -190,6 +191,7 @@ const AppContent = () => {
             <Route path="/editartransportista" element={<EditarTransportista />} />
             <Route path="/altatransportistas" element={<AltaTransportistas />} />
             <Route path="/altaempresas" element={<AltaEmpresas />} />
+            <Route path="/editarempresasgestoras" element={<EditarEmpresasGestoras />} />
             <Route path="/altacapacitaciones" element={<AltaCapacitaciones />} />
             <Route path="/Formularios" element={<Formularios />} />
           </Routes>
