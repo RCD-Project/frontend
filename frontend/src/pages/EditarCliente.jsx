@@ -4,6 +4,7 @@ import { LocalizationProvider, DatePicker } from "@mui/x-date-pickers";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import dayjs from "dayjs";
 import { useNavigate, useLocation } from "react-router-dom";
+import { createTheme, ThemeProvider } from '@mui/material/styles';
 
 const steps = ["Información General", "Detalles Fiscales", "Contacto"];
 
@@ -28,7 +29,6 @@ const EditarCliente = () => {
 
   useEffect(() => {
     if (id) {
-      // Realiza la petición para obtener los datos del cliente
       fetch(`http://localhost:8000/api/clientes/${id}/`)
         .then((response) => {
           if (!response.ok) {
@@ -37,7 +37,6 @@ const EditarCliente = () => {
           return response.json();
         })
         .then((data) => {
-          // Actualiza el estado formData con los datos obtenidos usando snake_case
           setFormData({
             nombre: data.nombre,
             direccion: data.direccion,
@@ -73,7 +72,6 @@ const EditarCliente = () => {
   const handleSubmit = async (event) => {
     event.preventDefault();
     try {
-      // Convierte el objeto dayjs a una cadena en formato "YYYY-MM-DD"
       const payload = {
         ...formData,
         fecha_ingreso: formData.fecha_ingreso 
@@ -100,123 +98,132 @@ const EditarCliente = () => {
       console.error("Error en la petición:", error);
     }
   };
-  
+
+  const theme = createTheme({
+    palette: {
+      primary: {
+        main: '#a8c948',
+      },
+    },
+  });
 
   return (
-    <Container maxWidth="md">
-      <Paper elevation={3} sx={{ padding: 6, marginTop: 6, borderRadius: 3 }}>
-        <Typography variant="h3" gutterBottom>Editar Cliente</Typography>
-        <Stepper activeStep={activeStep} alternativeLabel>
-          {steps.map((label, index) => (
-            <Step key={index}>
-              <StepLabel>{label}</StepLabel>
-            </Step>
-          ))}
-        </Stepper>
-        <form onSubmit={handleSubmit}>
-          <Grid container spacing={3}>
-            {activeStep === 0 && (
-              <>
-                <Grid item xs={12}>
-                  <TextField
-                    label="Nombre"
-                    fullWidth
-                    name="nombre"
-                    value={formData.nombre}
-                    onChange={handleChange}
-                    required
-                  />
-                </Grid>
-                <Grid item xs={12}>
-                  <TextField
-                    label="Dirección"
-                    fullWidth
-                    name="direccion"
-                    value={formData.direccion}
-                    onChange={handleChange}
-                    required
-                  />
-                </Grid>
-                <Grid item xs={12}>
-                  <TextField
-                    label="Contacto"
-                    fullWidth
-                    name="contacto"
-                    value={formData.contacto}
-                    onChange={handleChange}
-                    required
-                  />
-                </Grid>
-              </>
-            )}
-            {activeStep === 1 && (
-              <>
-                <Grid item xs={12}>
-                  <TextField
-                    label="Razón Social"
-                    fullWidth
-                    name="razon_social"
-                    value={formData.razon_social}
-                    onChange={handleChange}
-                    required
-                  />
-                </Grid>
-                <Grid item xs={12}>
-                  <TextField
-                    label="Dirección Fiscal"
-                    fullWidth
-                    name="direccion_fiscal"
-                    value={formData.direccion_fiscal}
-                    onChange={handleChange}
-                    required
-                  />
-                </Grid>
-                <Grid item xs={12}>
-                  <TextField
-                    label="RUT"
-                    fullWidth
-                    name="rut"
-                    value={formData.rut}
-                    onChange={handleChange}
-                    required
-                  />
-                </Grid>
-              </>
-            )}
-            {activeStep === 2 && (
-              <>
-                <Grid item xs={12}>
-                  <LocalizationProvider dateAdapter={AdapterDayjs}>
-                    <DatePicker
-                      label="Fecha de Ingreso"
-                      value={formData.fecha_ingreso || null}
-                      onChange={handleDateChange}
-                      renderInput={(params) => <TextField {...params} fullWidth required />}
+    <ThemeProvider theme={theme}>
+      <Container maxWidth="md">
+        <Paper elevation={3} sx={{ padding: 6, marginTop: 6, borderRadius: 3 }}>
+          <Typography variant="h3" gutterBottom>Editar Cliente</Typography>
+          <Stepper activeStep={activeStep} alternativeLabel>
+            {steps.map((label, index) => (
+              <Step key={index}>
+                <StepLabel>{label}</StepLabel>
+              </Step>
+            ))}
+          </Stepper>
+          <form onSubmit={handleSubmit}>
+            <Grid container spacing={3}>
+              {activeStep === 0 && (
+                <>
+                  <Grid item xs={12}>
+                    <TextField
+                      label="Nombre"
+                      fullWidth
+                      name="nombre"
+                      value={formData.nombre}
+                      onChange={handleChange}
+                      required
                     />
-                  </LocalizationProvider>
-                </Grid>
-                <Grid item xs={12}>
-                  <TextField
-                    label="Email"
-                    type="email"
-                    fullWidth
-                    name="mail"
-                    value={formData.mail}
-                    onChange={handleChange}
-                    required
-                  />
-                </Grid>
-              </>
-            )}
-          </Grid>
-          <Grid container spacing={3} justifyContent="space-between" sx={{ marginTop: 3 }}>
-            {activeStep !== 0 && (<Button onClick={handleBack} size="large">Atrás</Button>)}
-            {activeStep < steps.length - 1 && (<Button onClick={handleNext} size="large">Siguiente</Button>)}
-            {activeStep === steps.length - 1 && (<Button type="submit" variant="contained" color="primary" size="large">Guardar Cambios</Button>)}
-          </Grid>
-        </form>
-      </Paper>
-    </Container>
+                  </Grid>
+                  <Grid item xs={12}>
+                    <TextField
+                      label="Dirección"
+                      fullWidth
+                      name="direccion"
+                      value={formData.direccion}
+                      onChange={handleChange}
+                      required
+                    />
+                  </Grid>
+                  <Grid item xs={12}>
+                    <TextField
+                      label="Contacto"
+                      fullWidth
+                      name="contacto"
+                      value={formData.contacto}
+                      onChange={handleChange}
+                      required
+                    />
+                  </Grid>
+                </>
+              )}
+              {activeStep === 1 && (
+                <>
+                  <Grid item xs={12}>
+                    <TextField
+                      label="Razón Social"
+                      fullWidth
+                      name="razon_social"
+                      value={formData.razon_social}
+                      onChange={handleChange}
+                      required
+                    />
+                  </Grid>
+                  <Grid item xs={12}>
+                    <TextField
+                      label="Dirección Fiscal"
+                      fullWidth
+                      name="direccion_fiscal"
+                      value={formData.direccion_fiscal}
+                      onChange={handleChange}
+                      required
+                    />
+                  </Grid>
+                  <Grid item xs={12}>
+                    <TextField
+                      label="RUT"
+                      fullWidth
+                      name="rut"
+                      value={formData.rut}
+                      onChange={handleChange}
+                      required
+                    />
+                  </Grid>
+                </>
+              )}
+              {activeStep === 2 && (
+                <>
+                  <Grid item xs={12}>
+                    <LocalizationProvider dateAdapter={AdapterDayjs}>
+                      <DatePicker
+                        label="Fecha de Ingreso"
+                        value={formData.fecha_ingreso || null}
+                        onChange={handleDateChange}
+                        renderInput={(params) => <TextField {...params} fullWidth required />}
+                      />
+                    </LocalizationProvider>
+                  </Grid>
+                  <Grid item xs={12}>
+                    <TextField
+                      label="Email"
+                      type="email"
+                      fullWidth
+                      name="mail"
+                      value={formData.mail}
+                      onChange={handleChange}
+                      required
+                    />
+                  </Grid>
+                </>
+              )}
+            </Grid>
+            <Grid container spacing={3} justifyContent="space-between" sx={{ marginTop: 3 }}>
+              {activeStep !== 0 && (<Button onClick={handleBack} size="large">Atrás</Button>)}
+              {activeStep < steps.length - 1 && (<Button onClick={handleNext} size="large">Siguiente</Button>)}
+              {activeStep === steps.length - 1 && (<Button type="submit" variant="contained" color="primary" size="large">Guardar Cambios</Button>)}
+            </Grid>
+          </form>
+        </Paper>
+      </Container>
+    </ThemeProvider>
   );
 };
 

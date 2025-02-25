@@ -1,6 +1,15 @@
+import React from "react";
 import { useLocation } from "react-router-dom";
-import { Card, CardContent, Typography, Grid, Paper, Divider } from "@mui/material";
-import '../styles/DetallesObra.css';
+import {
+  Card,
+  CardContent,
+  Typography,
+  Grid,
+  Paper,
+  Divider,
+  Box
+} from "@mui/material";
+import { createTheme, ThemeProvider } from '@mui/material/styles';
 
 const obras = [
   {
@@ -38,49 +47,60 @@ const DetallesObra = () => {
     return <Typography variant="h6" color="error" align="center">Obra no encontrada</Typography>;
   }
 
-  return (
-    <Card className="obra-card">
-      <CardContent>
-        <Typography variant="h4" align="center" className="obra-nombre">
-          {obra.nombreObra}
-        </Typography>
-        <Divider className="obra-divider" />
-        <Grid container spacing={2}>
-          {[
-            { label: "Localidad", value: obra.localidad },
-            { label: "Barrio", value: obra.barrio },
-            { label: "Dirección", value: obra.direccion },
-            { label: "Visitas por Mes", value: obra.visitasMes },
-            { label: "Inicio de la Obra", value: obra.inicioObra },
-            { label: "Duración de la Obra", value: obra.duracionObra },
-            { label: "Etapa de la Obra", value: obra.etapaObra },
-            { label: "Jefe de Obra", value: obra.jefeObra },
-            { label: "Email del Jefe", value: obra.emailJefe },
-            { label: "Teléfono del Jefe", value: obra.telefonoJefe },
-            { label: "Capataz", value: obra.capataz },
-            { label: "Email del Capataz", value: obra.emailCapataz },
-            { label: "Teléfono del Capataz", value: obra.telefonoCapataz },
-            { label: "Encargado", value: obra.encargado },
-            { label: "Email del Encargado", value: obra.emailEncargado },
-            { label: "Teléfono del Encargado", value: obra.telefonoEncargado },
-            { label: "Pedido", value: obra.pedido },
-          ].map((item, index) => (
-            <Grid item xs={12} sm={6} key={index}>
-              <Paper className="obra-info">
-                <Typography className="obra-label">{item.label}</Typography>
-                <Typography className="obra-valor">{item.value}</Typography>
-              </Paper>
-            </Grid>
-          ))}
-        </Grid>
+  const theme = createTheme({
+    palette: {
+      primary: {
+        main: '#a8c948',
+      },
+    },
+  });
 
-        {obra.imagen && (
-          <div className="obra-imagen">
-            <img src={obra.imagen} alt={obra.nombreObra} className="obra-img" />
-          </div>
-        )}
-      </CardContent>
-    </Card>
+  return (
+    <ThemeProvider theme={theme}>
+      <Card sx={{ maxWidth: 800, margin: '0 auto', padding: 4 }}>
+        <CardContent>
+          <Typography variant="h3" align="center" sx={{ mb: 4 }}>
+            {obra.nombreObra}
+          </Typography>
+          <Divider sx={{ mb: 4 }} />
+          
+          <Grid container spacing={3}>
+            {[
+              { label: "Localidad", value: obra.localidad },
+              { label: "Barrio", value: obra.barrio },
+              { label: "Dirección", value: obra.direccion },
+              { label: "Visitas por Mes", value: obra.visitasMes },
+              { label: "Inicio de la Obra", value: obra.inicioObra },
+              { label: "Duración de la Obra", value: obra.duracionObra },
+              { label: "Etapa de la Obra", value: obra.etapaObra },
+              { label: "Jefe de Obra", value: obra.jefeObra },
+              { label: "Email del Jefe", value: obra.emailJefe },
+              { label: "Teléfono del Jefe", value: obra.telefonoJefe },
+              { label: "Capataz", value: obra.capataz },
+              { label: "Email del Capataz", value: obra.emailCapataz },
+              { label: "Teléfono del Capataz", value: obra.telefonoCapataz },
+              { label: "Encargado", value: obra.encargado },
+              { label: "Email del Encargado", value: obra.emailEncargado },
+              { label: "Teléfono del Encargado", value: obra.telefonoEncargado },
+              { label: "Pedido", value: obra.pedido },
+            ].map((item, index) => (
+              <Grid item xs={12} sm={6} key={index}>
+                <Paper sx={{ padding: 2, backgroundColor: '#f4f4f4' }}>
+                  <Typography variant="body1" sx={{ fontWeight: 'bold' }}>{item.label}</Typography>
+                  <Typography variant="body2">{item.value}</Typography>
+                </Paper>
+              </Grid>
+            ))}
+          </Grid>
+
+          {obra.imagen && (
+            <Box sx={{ textAlign: 'center', mt: 4 }}>
+              <img src={obra.imagen} alt={obra.nombreObra} style={{ maxWidth: '100%', height: 'auto', borderRadius: '8px' }} />
+            </Box>
+          )}
+        </CardContent>
+      </Card>
+    </ThemeProvider>
   );
 };
 

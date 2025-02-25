@@ -1,6 +1,7 @@
+import React from 'react';
 import { useLocation } from 'react-router-dom';
 import { Card, CardContent, Typography, Grid, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Divider } from '@mui/material';
-import '../styles/DetallesCliente.css';
+import { createTheme, ThemeProvider } from '@mui/material/styles';
 
 const perfiles = [
   {
@@ -43,56 +44,67 @@ const DetallesCliente = () => {
     return <Typography variant="h6" color="error" align="center">Cliente no encontrado</Typography>;
   }
 
+  const theme = createTheme({
+    palette: {
+      primary: {
+        main: '#a8c948',
+      },
+    },
+  });
+
   return (
-    <Card className="cliente-card">
-      <CardContent>
-        <Typography variant="h4" align="center" className="cliente-nombre">
-          {cliente.nombre}
-        </Typography>
-        <Divider className="cliente-divider" />
-        <Grid container spacing={2}>
-          {[ 
-            { label: "Fecha de Ingreso", value: cliente.fechaIngreso },
-            { label: "Cantidad de Obras", value: cliente.cantidadObras },
-            { label: "Dirección", value: cliente.direccion },
-            { label: "Contacto", value: cliente.contacto },
-            { label: "Nombre de Contacto", value: cliente.nombreContacto },
-            { label: "Razón Social", value: cliente.razonSocial },
-            { label: "Dirección Fiscal", value: cliente.direccionFiscal },
-            { label: "RUT", value: cliente.RUT },
-            { label: "Correo Electrónico", value: cliente.email }
-          ].map((item, index) => (
-            <Grid item xs={12} sm={6} key={index}>
-              <Paper className="cliente-info">
-                <Typography className="cliente-label">{item.label}</Typography>
-                <Typography className="cliente-valor">{item.value}</Typography>
-              </Paper>
-            </Grid>
-          ))}
-        </Grid>
-        
-        {/* Tabla de Obras */}
-        <Typography variant="h5" align="center" className="cliente-obras-titulo">
-          Obras Asociadas
-        </Typography>
-        <TableContainer component={Paper} className="cliente-tabla-container">
-          <Table>
-            <TableHead>
-              <TableRow>
-                <TableCell align="center" className="cliente-tabla-header">Nombre de la Obra</TableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {cliente.obras.map((obra, index) => (
-                <TableRow key={index}>
-                  <TableCell align="center" className="cliente-tabla-dato">{obra}</TableCell>
+    <ThemeProvider theme={theme}>
+      <Card sx={{ maxWidth: 800, margin: '0 auto', padding: 4 }}>
+        <CardContent>
+          <Typography variant="h3" align="center" sx={{ mb: 4 }}>
+            {cliente.nombre}
+          </Typography>
+          <Divider sx={{ mb: 2 }} />
+
+          <Grid container spacing={2}>
+            {[
+              { label: "Fecha de Ingreso", value: cliente.fechaIngreso },
+              { label: "Cantidad de Obras", value: cliente.cantidadObras },
+              { label: "Dirección", value: cliente.direccion },
+              { label: "Contacto", value: cliente.contacto },
+              { label: "Nombre de Contacto", value: cliente.nombreContacto },
+              { label: "Razón Social", value: cliente.razonSocial },
+              { label: "Dirección Fiscal", value: cliente.direccionFiscal },
+              { label: "RUT", value: cliente.RUT },
+              { label: "Correo Electrónico", value: cliente.email }
+            ].map((item, index) => (
+              <Grid item xs={12} sm={6} key={index}>
+                <Paper sx={{ padding: 2, backgroundColor: '#f4f4f4' }}>
+                  <Typography variant="body1" sx={{ fontWeight: 'bold' }}>{item.label}</Typography>
+                  <Typography variant="body2">{item.value}</Typography>
+                </Paper>
+              </Grid>
+            ))}
+          </Grid>
+
+          {/* Tabla de Obras */}
+          <Typography variant="h5" align="center" sx={{ mt: 4, mb: 2 }}>
+            Obras Asociadas
+          </Typography>
+          <TableContainer component={Paper}>
+            <Table>
+              <TableHead>
+                <TableRow>
+                  <TableCell align="center" sx={{ fontWeight: 'bold' }}>Nombre de la Obra</TableCell>
                 </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </TableContainer>
-      </CardContent>
-    </Card>
+              </TableHead>
+              <TableBody>
+                {cliente.obras.map((obra, index) => (
+                  <TableRow key={index}>
+                    <TableCell align="center">{obra}</TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </TableContainer>
+        </CardContent>
+      </Card>
+    </ThemeProvider>
   );
 };
 

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Container, TextField, Button, Grid, Typography, Stepper, Step, StepLabel, Paper } from "@mui/material";
 import { useNavigate, useLocation } from "react-router-dom";
+import { createTheme, ThemeProvider } from '@mui/material/styles';
 
 const steps = ["Información General", "Detalles del Contacto", "Ubicación"];
 
@@ -57,7 +58,7 @@ const EditarEmpresaGestora = () => {
       const payload = {
         ...formData,
       };
-  
+
       const response = await fetch(`http://localhost:8000/api/empresas-gestoras/${id}/actualizar/`, {
         method: 'PATCH',
         headers: {
@@ -78,70 +79,80 @@ const EditarEmpresaGestora = () => {
     }
   };
 
+  const theme = createTheme({
+    palette: {
+      primary: {
+        main: '#a8c948',
+      },
+    },
+  });
+
   return (
-    <Container maxWidth="md">
-      <Paper elevation={3} sx={{ padding: 6, marginTop: 6, borderRadius: 3 }}>
-        <Typography variant="h3" gutterBottom>Editar Empresa Gestora</Typography>
-        <Stepper activeStep={activeStep} alternativeLabel>
-          {steps.map((label, index) => (
-            <Step key={index}>
-              <StepLabel>{label}</StepLabel>
-            </Step>
-          ))}
-        </Stepper>
-        <form onSubmit={handleSubmit}>
-          <Grid container spacing={3}>
-            {activeStep === 0 && (
-              <>
-                <Grid item xs={12}>
-                  <TextField
-                    label="Nombre"
-                    fullWidth
-                    name="nombre"
-                    value={formData.nombre}
-                    onChange={handleChange}
-                    required
-                  />
-                </Grid>
-              </>
-            )}
-            {activeStep === 1 && (
-              <>
-                <Grid item xs={12}>
-                  <TextField
-                    label="Contacto"
-                    fullWidth
-                    name="contacto"
-                    value={formData.contacto}
-                    onChange={handleChange}
-                    required
-                  />
-                </Grid>
-              </>
-            )}
-            {activeStep === 2 && (
-              <>
-                <Grid item xs={12}>
-                  <TextField
-                    label="Ubicación"
-                    fullWidth
-                    name="ubicacion"
-                    value={formData.ubicacion}
-                    onChange={handleChange}
-                    required
-                  />
-                </Grid>
-              </>
-            )}
-          </Grid>
-          <Grid container spacing={3} justifyContent="space-between" sx={{ marginTop: 3 }}>
-            {activeStep !== 0 && (<Button onClick={handleBack} size="large">Atrás</Button>)}
-            {activeStep < steps.length - 1 && (<Button onClick={handleNext} size="large">Siguiente</Button>)}
-            {activeStep === steps.length - 1 && (<Button type="submit" variant="contained" color="primary" size="large">Guardar Cambios</Button>)}
-          </Grid>
-        </form>
-      </Paper>
-    </Container>
+    <ThemeProvider theme={theme}>
+      <Container maxWidth="md">
+        <Paper elevation={3} sx={{ padding: 6, marginTop: 6, borderRadius: 3 }}>
+          <Typography variant="h3" gutterBottom>Editar Empresa Gestora</Typography>
+          <Stepper activeStep={activeStep} alternativeLabel>
+            {steps.map((label, index) => (
+              <Step key={index}>
+                <StepLabel>{label}</StepLabel>
+              </Step>
+            ))}
+          </Stepper>
+          <form onSubmit={handleSubmit}>
+            <Grid container spacing={3}>
+              {activeStep === 0 && (
+                <>
+                  <Grid item xs={12}>
+                    <TextField
+                      label="Nombre"
+                      fullWidth
+                      name="nombre"
+                      value={formData.nombre}
+                      onChange={handleChange}
+                      required
+                    />
+                  </Grid>
+                </>
+              )}
+              {activeStep === 1 && (
+                <>
+                  <Grid item xs={12}>
+                    <TextField
+                      label="Contacto"
+                      fullWidth
+                      name="contacto"
+                      value={formData.contacto}
+                      onChange={handleChange}
+                      required
+                    />
+                  </Grid>
+                </>
+              )}
+              {activeStep === 2 && (
+                <>
+                  <Grid item xs={12}>
+                    <TextField
+                      label="Ubicación"
+                      fullWidth
+                      name="ubicacion"
+                      value={formData.ubicacion}
+                      onChange={handleChange}
+                      required
+                    />
+                  </Grid>
+                </>
+              )}
+            </Grid>
+            <Grid container spacing={3} justifyContent="space-between" sx={{ marginTop: 3 }}>
+              {activeStep !== 0 && (<Button onClick={handleBack} size="large">Atrás</Button>)}
+              {activeStep < steps.length - 1 && (<Button onClick={handleNext} size="large">Siguiente</Button>)}
+              {activeStep === steps.length - 1 && (<Button type="submit" variant="contained" color="primary" size="large">Guardar Cambios</Button>)}
+            </Grid>
+          </form>
+        </Paper>
+      </Container>
+    </ThemeProvider>
   );
 };
 
