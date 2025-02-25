@@ -101,7 +101,7 @@ const AppContent = () => {
             <Route
               path="/clientes"
               element={
-                <RoleBasedRoute allowedRoles={["superadmin"]}>
+                <RoleBasedRoute allowedRoles={["superadmin", "coordinadorlogistico", "coordinador"]}>
                   <Clientes />
                 </RoleBasedRoute>
               }
@@ -132,7 +132,14 @@ const AppContent = () => {
             />
             <Route path="/altacliente" element={<AltaCliente />} />
             <Route path="/detallescliente" element={isLoggedIn ? <DetallesCliente /> : <Landing />} />
-            <Route path="/editarcliente" element={isLoggedIn ? <EditarCliente /> : <Landing />} />
+            <Route
+              path="/editarcliente"
+              element={
+                <RoleBasedRoute allowedRoles={["cliente", "superadmin"]}>
+                  <EditarCliente />
+                </RoleBasedRoute>
+              }
+            />
             <Route
               path="/listadeobras"
               element={
@@ -142,6 +149,14 @@ const AppContent = () => {
               }
             />
             <Route path="/informes" element={<Informes />} />
+            <Route
+              path="/informes"
+              element={
+                <RoleBasedRoute allowedRoles={["coordinadorlogistico", "superadmin", "coordinador"]}>
+                  <Informes />
+                </RoleBasedRoute>
+              }
+            />
             <Route path="/unauthorized" element={<Error403 />} />
             <Route
               path="/solicitudes"
@@ -151,8 +166,22 @@ const AppContent = () => {
                 </RoleBasedRoute>
               }
             />
-            <Route path="/capacitaciones" element={<Capacitaciones />} />
-            <Route path="/obraslist" element={<ObrasList />} />
+            <Route
+              path="/capacitaciones"
+              element={
+                <RoleBasedRoute allowedRoles={["cliente", "superadmin", "tecnico", "coordinador"]}>
+                  <Capacitaciones />
+                </RoleBasedRoute>
+              }
+            />
+            <Route
+              path="/obraslist"
+              element={
+                <RoleBasedRoute allowedRoles={["tecnico", "superadmin"]}>
+                  <ObrasList />
+                </RoleBasedRoute>
+              }
+            />
             <Route path="/altaobra" element={<AltaObra />} />
             <Route path="/detallesobra" element={<DetallesObra />} />
             <Route path="/editarobra" element={<EditarObra />} />

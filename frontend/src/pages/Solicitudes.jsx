@@ -37,7 +37,7 @@ const Solicitudes = () => {
             item.cliente_nombre ||
             (item.cliente && item.cliente.cliente_nombre) ||
             'Sin nombre',
-          solicitante: item.cliente?.cliente_nombre || 'Sin solicitante',
+          solicitante: item.cliente_nombre || 'Sin solicitante',
           fecha: formatDate(item.cliente?.fecha_solicitud || item.fecha_solicitud),
         }));
 

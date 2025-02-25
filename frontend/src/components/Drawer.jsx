@@ -1,21 +1,23 @@
 import React, { useState, useContext } from "react";
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
-import { Building, FileText, Calendar, Users, ClipboardList, Truck, Factory, Eye, FileCog } from "lucide-react";
+import { GraduationCap, FileText, Calendar, Users, ClipboardList, Truck, Factory, ClipboardPenLine, UserPlus, Hammer, MapPinCheck } from "lucide-react";
 import "../styles/drawer.css";
 import { AuthContext } from "../pages/context/AuthContext"; // Se asume que el AuthContext tiene el rol
 
 // Agregamos la propiedad roles a cada item de menú
 const menuItems = [
-  { path: "/listadeobras", label: "Lista de Obras", icon: <Building size={24} />, roles: ["superadmin", "cliente"] },
-  { path: "/informes", label: "Informes", icon: <FileText size={24} />, roles: ["superadmin", "coordinadorlogistico"] },
-  { path: "/coordinaciones", label: "Coordinaciones", icon: <Calendar size={24} />, roles: ["superadmin", "supervisor", "cliente"] },
-  { path: "/clientes", label: "Clientes", icon: <Users size={24} />, roles: ["superadmin"] },
+  { path: "/altausuario", label: "Usuarios", icon: <UserPlus size={24} />, roles: ["superadmin"] },
+  { path: "/clientes", label: "Clientes", icon: <Users size={24} />, roles: ["superadmin", "coordinador", "coordinadorlogistico"] },
+  { path: "/listadeobras", label: "Obras", icon: <Hammer size={24} />, roles: ["superadmin", "cliente"] },
   { path: "/solicitudes", label: "Solicitudes", icon: <ClipboardList size={24} />, roles: ["superadmin", "coordinador", "coordinadorlogistico"] },
+  { path: "/coordinaciones", label: "Coordinaciones", icon: <Calendar size={24} />, roles: ["superadmin", "supervisor", "cliente"] },
   { path: "/transportistas", label: "Transportistas", icon: <Truck size={24} />, roles: ["superadmin", "coordinadorlogistico"] },
   { path: "/empresasgestoras", label: "Empresa Gestora", icon: <Factory size={24} />, roles: ["superadmin", 'coordinadorlogistico'] },
-  { path: "/capacitaciones", label: "Capacitaciones", icon: <Eye size={24} />, roles: ["superadmin", "tecnico"] },
-  { path: "/obraslist", label: "Formularios", icon: <Users size={24} />, roles: ["superadmin", "tecnico"] },
+  { path: "/capacitaciones", label: "Capacitaciones", icon: <GraduationCap size={24} />, roles: ["superadmin", "tecnico"] },
+  { path: "/informes", label: "Informes", icon: <FileText size={24} />, roles: ["superadmin", "coordinadorlogistico"] },
+  { path: "/obraslist", label: "Formularios", icon: <ClipboardPenLine size={24} />, roles: ["superadmin", "tecnico"] },
+  { path: "/altapuntolimpio", label: "Puntos Limpios", icon: <MapPinCheck size={24} />, roles: ["superadmin", "cliente"] },
 ];
 
 const Drawer = () => {

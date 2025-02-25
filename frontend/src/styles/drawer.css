@@ -11,6 +11,8 @@
   align-items: flex-start;
   padding: 10px 0;
   transition: width 0.2s ease-in-out;
+  overflow-y: auto;
+  scrollbar-width: none;
 }
 
 .drawer-menu {
@@ -23,6 +25,7 @@
 .drawer-item {
   width: 100%;
   display: flex;
+  height: 70px;
   justify-content: flex-start;
 }
 
@@ -64,4 +67,8 @@
 .drawer-link:hover {
   background-color: #000000;
   color: #ffffff;
+}
+
+.drawer::-webkit-scrollbar {
+  display: none; /* Chrome, Safari, Opera */
 }
