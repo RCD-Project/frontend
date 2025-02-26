@@ -9,12 +9,16 @@ import RoleSelector from "./components/RolSelector";
 
 // Importa tus páginas
 import Clientes from "./pages/Clientes";
-import Coordinaciones from "./pages/Coordinaciones";
-import Transportistas from "./pages/Transportistas";
-import EmpresasGestoras from "./pages/EmpresasGestoras";
 import AltaCliente from "./pages/AltaClientes";
 import DetallesCliente from "./pages/DetallesCliente";
 import EditarCliente from "./pages/EditarCliente";
+import PuntoLimpio from "./pages/PuntoLimpio";
+import AltaPuntoLimpio from "./pages/AltaPuntoLimpio";
+import DetallesPuntoLimpio from "./pages/DetallesPuntoLimpio";
+import EditarPuntoLimpio from "./pages/EditarPuntoLimpio";
+import Coordinaciones from "./pages/Coordinaciones";
+import Transportistas from "./pages/Transportistas";
+import EmpresasGestoras from "./pages/EmpresasGestoras";
 import ListaDeObras from "./pages/ListaDeObras";
 import Informes from "./pages/Informes";
 import Solicitudes from "./pages/Solicitudes";
@@ -183,9 +187,20 @@ const AppContent = () => {
                 </RoleBasedRoute>
               }
             />
+            <Route
+              path="/puntolimpio"
+              element={
+                <RoleBasedRoute allowedRoles={["cliente", "superadmin"]}>
+                  <PuntoLimpio />
+                </RoleBasedRoute>
+              }
+            />
             <Route path="/altaobra" element={<AltaObra />} />
             <Route path="/detallesobra" element={<DetallesObra />} />
             <Route path="/editarobra" element={<EditarObra />} />
+            <Route path="/altapuntolimpio" element={<AltaPuntoLimpio />} />
+            <Route path="/detallespuntolimpio" element={<DetallesPuntoLimpio />} />
+            <Route path="/editarpuntolimpio" element={<EditarPuntoLimpio />} />
             <Route path="/login" element={<LoginForm />} />
             <Route path="/detalletransportista" element={<DetallesTransportista />} />
             <Route path="/editartransportista" element={<EditarTransportista />} />

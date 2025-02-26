@@ -82,7 +82,6 @@ const DetallesCliente = () => {
             ))}
           </Grid>
 
-          {/* Tabla de Obras */}
           <Typography variant="h5" align="center" sx={{ mt: 4, mb: 2 }}>
             Obras Asociadas
           </Typography>
