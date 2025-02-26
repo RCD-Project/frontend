@@ -104,7 +104,7 @@ const Transportistas = () => {
           },
           '& .Mui-selected': {
             backgroundColor: '#abbf9d',  // Color de fondo cuando la pestaña está seleccionada
-            color: '#fff',  // Color de texto cuando está seleccionada (blanco)
+            color: 'white',  // Color de texto cuando está seleccionada (blanco)
           },
           '& .MuiTabs-indicator': {
             backgroundColor: '#abbf9d',  // Cambia el color de la línea debajo de la pestaña seleccionada

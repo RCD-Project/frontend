@@ -11,16 +11,14 @@ import {
   Paper,
   Alert,
   Box,
-  MenuItem,
   IconButton,
+  MenuItem,
 } from "@mui/material";
 import { LocalizationProvider, DatePicker } from "@mui/x-date-pickers";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { useNavigate } from "react-router-dom";
 import { createTheme, ThemeProvider } from '@mui/material/styles';
-import { GoAlert } from "react-icons/go";
-import { GiMetalBar, GiFruitTree, GiGlassBottle } from "react-icons/gi";
-import { HiArrowPath } from "react-icons/hi2";
+import { Anvil, TreeDeciduous, CupSoda, TriangleAlert, TrendingUpDown, Recycle } from 'lucide-react';
 
 const steps = ["Información General", "Detalles de Material", "Clasificación y Observaciones"];
 
@@ -38,10 +36,11 @@ const AltaPuntoLimpio = () => {
     senaletica: true,
     observaciones: "",
     clasificacion: "correcta",
-    tipo_material: "",
+    fecha_ingreso: null,
+    // Usamos un objeto para almacenar la cantidad de cada tipo de material
+    materiales: {},
   });
 
-  const [successMessage, setSuccessMessage] = useState("");
   const navigate = useNavigate();
 
   const handleNext = () => {
@@ -60,14 +59,20 @@ const AltaPuntoLimpio = () => {
     setFormData({ ...formData, fecha_ingreso: newValue });
   };
 
-  const handleMaterialChange = (material) => {
-    setFormData({ ...formData, tipo_material: material });
+  // Actualiza la cantidad para cada tipo de material
+  const handleMaterialQuantityChange = (materialType, quantity) => {
+    setFormData(prevState => ({
+      ...prevState,
+      materiales: {
+        ...prevState.materiales,
+        [materialType]: quantity,
+      },
+    }));
   };
 
   const handleSubmit = (event) => {
     event.preventDefault();
 
-  
     fetch("http://127.0.0.1:8000/api/puntos-limpios/registro/", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -83,7 +88,6 @@ const AltaPuntoLimpio = () => {
         return res.json();
       })
       .then((data) => {
-        setSuccessMessage("Punto Limpio registrado con éxito.");
         navigate("/listapuntolimpio", {
           state: { successMessage: "Punto Limpio registrado con éxito." },
         });
@@ -102,6 +106,16 @@ const AltaPuntoLimpio = () => {
     },
   });
 
+  // Definición de los tipos de material disponibles
+  const materialTypes = [
+    { value: "escombro_limpio", label: "Escombro Limpio", icon: <Recycle /> },
+    { value: "plastico", label: "Plástico", icon: <CupSoda /> },
+    { value: "metales", label: "Metales", icon: <Anvil /> },
+    { value: "madera", label: "Madera", icon: <TreeDeciduous /> },
+    { value: "mezclados", label: "Mezclados", icon: <TrendingUpDown /> },
+    { value: "peligrosos", label: "Peligrosos", icon: <TriangleAlert /> },
+  ];
+
   return (
     <ThemeProvider theme={theme}>
       <Container
@@ -118,8 +132,6 @@ const AltaPuntoLimpio = () => {
             <Typography variant="h3" gutterBottom sx={{ mb: 4 }}>
               Alta Punto Limpio
             </Typography>
-
-            {successMessage && <Alert severity="success" sx={{ mb: 2 }}>{successMessage}</Alert>}
 
             <Stepper activeStep={activeStep} alternativeLabel>
               {steps.map((label, index) => (
@@ -221,36 +233,30 @@ const AltaPuntoLimpio = () => {
                         onChange={handleChange}
                       />
                     </Grid>
+                    {/* Sección para seleccionar varios materiales y asignar la cantidad a cada uno */}
                     <Grid item xs={12}>
-                      <TextField
-                        select
-                        label="Tipo de Material"
-                        fullWidth
-                        name="tipo_material"
-                        value={formData.tipo_material}
-                        onChange={handleChange}
-                      >
-                        <Box sx={{ display: "flex", justifyContent: "space-evenly", flexWrap: "wrap", gap: 2 }}>
-                          <MenuItem value="escombro_limpio" onClick={() => handleMaterialChange("escombro_limpio")}>
-                            <IconButton><GoAlert /></IconButton> Escombro Limpio
-                          </MenuItem>
-                          <MenuItem value="plastico" onClick={() => handleMaterialChange("plastico")}>
-                            <IconButton><GiGlassBottle /></IconButton> Plástico
-                          </MenuItem>
-                          <MenuItem value="metales" onClick={() => handleMaterialChange("metales")}>
-                            <IconButton><GiMetalBar /></IconButton> Metales
-                          </MenuItem>
-                          <MenuItem value="madera" onClick={() => handleMaterialChange("madera")}>
-                            <IconButton><GiFruitTree /></IconButton> Madera
-                          </MenuItem>
-                          <MenuItem value="mezclados" onClick={() => handleMaterialChange("mezclados")}>
-                            <IconButton><HiArrowPath /></IconButton> Mezclados
-                          </MenuItem>
-                          <MenuItem value="peligrosos" onClick={() => handleMaterialChange("peligrosos")}>
-                            <IconButton><GoAlert /></IconButton> Peligrosos
-                          </MenuItem>
-                        </Box>
-                      </TextField>
+                      <Typography variant="h6" gutterBottom>
+                        Materiales y Cantidades
+                      </Typography>
+                      <Grid container spacing={2}>
+                        {materialTypes.map((material) => (
+                          <Grid item xs={12} sm={6} key={material.value}>
+                            <Box display="flex" alignItems="center">
+                              <IconButton>{material.icon}</IconButton>
+                              <Typography sx={{ marginLeft: 1 }}>{material.label}</Typography>
+                            </Box>
+                            <TextField
+                              label="Cantidad"
+                              type="number"
+                              value={formData.materiales[material.value] || ""}
+                              onChange={(e) =>
+                                handleMaterialQuantityChange(material.value, e.target.value)
+                              }
+                              fullWidth
+                            />
+                          </Grid>
+                        ))}
+                      </Grid>
                     </Grid>
                   </>
                 )}
@@ -302,7 +308,9 @@ const AltaPuntoLimpio = () => {
                 )}
                 {activeStep === steps.length - 1 && (
                   <Grid item xs={6} sx={{ textAlign: "right" }}>
-                    <Button type="submit" variant="contained" color="primary">Finalizar</Button>
+                    <Button type="submit" variant="contained" color="primary">
+                      Finalizar
+                    </Button>
                   </Grid>
                 )}
               </Grid>

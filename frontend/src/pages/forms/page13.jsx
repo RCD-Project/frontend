@@ -14,8 +14,14 @@ import {
 } from "@mui/material";
 import { useFormStore } from "../context/FormContext";
 
-const gridColumnTitles = ["Óptimo", "Regular", "Deficiente"];
-const gridRowLabels = Array.from({ length: 5 }, (_, i) => `Fila ${i + 1}`);
+const gridColumnTitles = ["Correcto", "Aceptable (con observaciones)", "Incorrecto"];
+const gridRowLabels = [
+  "Ubicacion",
+  "Tipo contenedor",
+  "Estado de contenedor",
+  "Señalética",
+  "Ventilación"
+]
 
 const checkboxOptions = [
   "Tanques vacíos",
