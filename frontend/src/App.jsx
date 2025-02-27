@@ -33,6 +33,7 @@ import AltaTransportistas from "./pages/AltaTransportistas";
 import AltaEmpresas from "./pages/AltaEmpresas";
 import EditarEmpresasGestoras from "./pages/EditarEmpresasGestoras";
 import AltaCapacitaciones from "./pages/AltaCapacitaciones";
+import DetallesCapacitaciones from "./pages/DetallesCapacitaciones";
 import LoginForm from "./pages/login";
 import RoleBasedRoute from "./pages/RutasProtegidas";
 import Landing from "./pages/Landing";
@@ -303,7 +304,15 @@ const AppContent = () => {
               path="/altacapacitaciones"
               element={
                 <RoleBasedRoute allowedRoles={["tecnico", "superadmin"]}>
-                  <EditarEmpresasGestoras />
+                  <AltaCapacitaciones />
+                </RoleBasedRoute>
+              }
+            />
+            <Route
+              path="/detallescapacitaciones"
+              element={
+                <RoleBasedRoute allowedRoles={["tecnico", "superadmin"]}>
+                  <DetallesCapacitaciones />
                 </RoleBasedRoute>
               }
             />

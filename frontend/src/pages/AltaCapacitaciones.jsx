@@ -101,7 +101,7 @@ const AltaCapacitaciones = () => {
   const theme = createTheme({
     palette: {
       primary: {
-        main: '#a8c948', // Color personalizado igual que en AltaCliente
+        main: '#a8c948',
       },
     },
   });
@@ -111,7 +111,7 @@ const AltaCapacitaciones = () => {
       <Container
         maxWidth="md"
         sx={{
-          minHeight: '100vh', // El contenedor ocupa toda la altura de la ventana
+          minHeight: '100vh',
           display: 'flex',
           flexDirection: 'column',
           justifyContent: 'center',
