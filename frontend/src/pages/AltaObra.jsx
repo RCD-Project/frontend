@@ -82,6 +82,7 @@ const AltaObra = () => {
     fetch('http://127.0.0.1:8000/api/obras/registro/', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
+      'Authorization': `Token ${token}`,
       body: JSON.stringify(obraData),
     })
       .then((res) => {
@@ -116,12 +117,12 @@ const AltaObra = () => {
       <Container
         maxWidth="md"
         sx={{
-          minHeight: '100vh', // El contenedor ocupa toda la altura de la ventana
+          minHeight: '100vh',
           display: 'flex',
           flexDirection: 'column',
           justifyContent: 'center',
           alignItems: 'center',
-          overflow: 'hidden', // Evita scroll innecesario
+          overflow: 'hidden',
         }}
       >
         <Box sx={{ width: '100%' }}>
@@ -130,7 +131,8 @@ const AltaObra = () => {
               Registro de Obra
             </Typography>
 
-            <Stepper activeStep={activeStep} alternativeLabel>
+            {/* Agregamos margen inferior al Stepper para separarlo de los textboxes */}
+            <Stepper activeStep={activeStep} alternativeLabel sx={{ mb: 4 }}>
               {steps.map((label, index) => (
                 <Step key={index}>
                   <StepLabel>{label}</StepLabel>

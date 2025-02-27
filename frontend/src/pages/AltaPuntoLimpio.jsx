@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import {
   Container,
   TextField,
@@ -19,29 +19,51 @@ import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { useNavigate } from "react-router-dom";
 import { createTheme, ThemeProvider } from '@mui/material/styles';
 import { Anvil, TreeDeciduous, CupSoda, TriangleAlert, TrendingUpDown, Recycle } from 'lucide-react';
+import { AuthContext } from "../pages/context/AuthContext";
 
-const steps = ["Información General", "Detalles de Material", "Clasificación y Observaciones"];
+const steps = ["Información General", "Detalles de Material", "Fecha"];
 
 const AltaPuntoLimpio = () => {
   const [activeStep, setActiveStep] = useState(0);
+  const [obras, setObras] = useState([]); // Estado para guardar las obras de la API
   const [formData, setFormData] = useState({
     obra: "",
     ubicacion: "",
     accesibilidad: "en_planta_baja",
     cantidad: "",
     metros_cuadrados: "",
-    estructura: "",
     tipo_contenedor: "",
-    puntaje: "",
     senaletica: true,
     observaciones: "",
     clasificacion: "correcta",
     fecha_ingreso: null,
-    // Usamos un objeto para almacenar la cantidad de cada tipo de material
     materiales: {},
   });
 
+  const { token } = useContext(AuthContext);
   const navigate = useNavigate();
+
+  // Obtener las obras aprobadas de la API al cargar el componente
+  useEffect(() => {
+    if (!token) return; // No realizar la petición si no hay token
+
+    fetch("http://127.0.0.1:8000/api/obras/aprobadas/", {
+      method: "GET",
+      headers: {
+        Accept: "application/json",
+        "Content-Type": "application/json",
+        "Authorization": `Token ${token}`,
+      },
+    })
+      .then((res) => {
+        if (!res.ok) {
+          throw new Error(`Error HTTP: ${res.status}`);
+        }
+        return res.json();
+      })
+      .then((data) => setObras(data))
+      .catch((err) => console.error("Error al cargar las obras:", err));
+  }, [token]);
 
   const handleNext = () => {
     setActiveStep((prevStep) => prevStep + 1);
@@ -73,7 +95,7 @@ const AltaPuntoLimpio = () => {
   const handleSubmit = (event) => {
     event.preventDefault();
 
-    fetch("http://127.0.0.1:8000/api/puntos-limpios/registro/", {
+    fetch("http://127.0.0.1:8000/api/puntolimpio/registro/", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(formData),
@@ -133,7 +155,8 @@ const AltaPuntoLimpio = () => {
               Alta Punto Limpio
             </Typography>
 
-            <Stepper activeStep={activeStep} alternativeLabel>
+            {/* Stepper para indicar el progreso */}
+            <Stepper activeStep={activeStep} alternativeLabel sx={{ mb: 4 }}>
               {steps.map((label, index) => (
                 <Step key={index}>
                   <StepLabel>{label}</StepLabel>
@@ -147,13 +170,20 @@ const AltaPuntoLimpio = () => {
                   <>
                     <Grid item xs={12}>
                       <TextField
+                        select
                         label="Nombre de la Obra"
                         fullWidth
                         name="obra"
                         value={formData.obra}
                         onChange={handleChange}
                         required
-                      />
+                      >
+                        {obras.map((obra) => (
+                          <MenuItem key={obra.id} value={obra.id}>
+                            {obra.nombre_obra}
+                          </MenuItem>
+                        ))}
+                      </TextField>
                     </Grid>
                     <Grid item xs={12}>
                       <TextField
@@ -193,16 +223,6 @@ const AltaPuntoLimpio = () => {
                   <>
                     <Grid item xs={12}>
                       <TextField
-                        label="Estructura"
-                        fullWidth
-                        name="estructura"
-                        value={formData.estructura}
-                        onChange={handleChange}
-                        required
-                      />
-                    </Grid>
-                    <Grid item xs={12}>
-                      <TextField
                         label="Tipo de Contenedor"
                         fullWidth
                         name="tipo_contenedor"
@@ -211,29 +231,7 @@ const AltaPuntoLimpio = () => {
                         required
                       />
                     </Grid>
-                    <Grid item xs={12}>
-                      <TextField
-                        label="Puntaje"
-                        fullWidth
-                        name="puntaje"
-                        type="number"
-                        value={formData.puntaje}
-                        onChange={handleChange}
-                        required
-                      />
-                    </Grid>
-                    <Grid item xs={12}>
-                      <TextField
-                        label="Observaciones"
-                        fullWidth
-                        multiline
-                        rows={4}
-                        name="observaciones"
-                        value={formData.observaciones}
-                        onChange={handleChange}
-                      />
-                    </Grid>
-                    {/* Sección para seleccionar varios materiales y asignar la cantidad a cada uno */}
+
                     <Grid item xs={12}>
                       <Typography variant="h6" gutterBottom>
                         Materiales y Cantidades
@@ -262,21 +260,6 @@ const AltaPuntoLimpio = () => {
                 )}
                 {activeStep === 2 && (
                   <>
-                    <Grid item xs={12}>
-                      <TextField
-                        select
-                        label="Clasificación"
-                        fullWidth
-                        name="clasificacion"
-                        value={formData.clasificacion}
-                        onChange={handleChange}
-                      >
-                        <MenuItem value="correcta">Correcta</MenuItem>
-                        <MenuItem value="a_mejorar">A Mejorar</MenuItem>
-                        <MenuItem value="incorrecta">Incorrecta</MenuItem>
-                        <MenuItem value="no_aplica">No Aplica</MenuItem>
-                      </TextField>
-                    </Grid>
                     <Grid item xs={12}>
                       <LocalizationProvider dateAdapter={AdapterDayjs}>
                         <DatePicker

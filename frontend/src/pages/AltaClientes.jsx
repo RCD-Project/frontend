@@ -16,8 +16,7 @@ import { LocalizationProvider, DatePicker } from "@mui/x-date-pickers";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import dayjs from "dayjs";
 import { useNavigate } from "react-router-dom";
-import { createTheme, ThemeProvider } from '@mui/material/styles';
-
+import { createTheme, ThemeProvider } from "@mui/material/styles";
 
 const steps = ["Información General", "Detalles Fiscales", "Contacto"];
 
@@ -29,6 +28,7 @@ const AltaCliente = () => {
     contacto: "",
     nombre_contacto: "",
     mail: "",
+    password: "",
     fecha_ingreso: null,
     razon_social: "",
     direccion_fiscal: "",
@@ -68,7 +68,9 @@ const AltaCliente = () => {
 
     fetch("http://127.0.0.1:8000/api/clientes/registro/", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/json",
+      },
       body: JSON.stringify(clientData),
     })
       .then((res) => {
@@ -84,7 +86,7 @@ const AltaCliente = () => {
         console.log("Cliente registrado:", data);
         setSuccessMessage("Cliente registrado con éxito.");
         // Redirigir a la lista de clientes y pasar un mensaje de éxito
-        navigate("/listadeclientes", {
+        navigate("/", {
           state: { successMessage: "Cliente registrado con éxito." },
         });
       })
@@ -93,10 +95,11 @@ const AltaCliente = () => {
         alert("Error al dar de alta el cliente:\n" + err.message);
       });
   };
+
   const theme = createTheme({
     palette: {
       primary: {
-        main: '#a8c948',
+        main: "#a8c948",
       },
     },
   });
@@ -106,13 +109,12 @@ const AltaCliente = () => {
       <Container
         maxWidth="md"
         sx={{
-          minHeight: "calc(100vh - var(--header-height))", // Ocupa el alto disponible
+          minHeight: "calc(100vh - var(--header-height))",
           display: "flex",
           justifyContent: "center",
           alignItems: "center",
         }}
       >
-        {/* Usamos un Box con la clase inner-content para centrar el contenido */}
         <Box
           className="inner-content"
           sx={{
@@ -123,21 +125,17 @@ const AltaCliente = () => {
           }}
         >
           <Paper elevation={3} sx={{ padding: 6, borderRadius: 3 }}>
-          <Typography
-              variant="h3"
-              gutterBottom
-              sx={{ mb: 4 }}
-            >
+            <Typography variant="h3" gutterBottom sx={{ mb: 8 }}>
               Alta Cliente
             </Typography>
 
             {successMessage && (
-              <Alert severity="success" sx={{ mb: 2 }}>
+              <Alert severity="success" sx={{ mb: 4 }}>
                 {successMessage}
               </Alert>
             )}
 
-            <Stepper activeStep={activeStep} alternativeLabel>
+            <Stepper activeStep={activeStep} alternativeLabel sx={{ mb: 8 }}>
               {steps.map((label, index) => (
                 <Step key={index}>
                   <StepLabel>{label}</StepLabel>
@@ -146,7 +144,7 @@ const AltaCliente = () => {
             </Stepper>
 
             <form onSubmit={handleSubmit}>
-              <Grid container spacing={3}>
+              <Grid container spacing={4}>
                 {activeStep === 0 && (
                   <>
                     <Grid item xs={12}>
@@ -250,10 +248,21 @@ const AltaCliente = () => {
                         required
                       />
                     </Grid>
+                    <Grid item xs={12}>
+                      <TextField
+                        label="Contraseña"
+                        type="password"
+                        fullWidth
+                        name="password"
+                        value={formData.password}
+                        onChange={handleChange}
+                        required
+                      />
+                    </Grid>
                   </>
                 )}
               </Grid>
-              <Grid container spacing={2} sx={{ mt: 2 }}>
+              <Grid container spacing={2} sx={{ mt: 4 }}>
                 {activeStep !== 0 && (
                   <Grid item xs={6}>
                     <Button onClick={handleBack}>Atrás</Button>

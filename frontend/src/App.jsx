@@ -5,7 +5,7 @@ import { AuthProvider, AuthContext } from "./pages/context/AuthContext";
 import Header from "./components/Header";
 import Drawer from "./components/Drawer";
 import Body from "./components/body";
-import RoleSelector from "./components/RolSelector";
+// import RoleSelector from "./components/RolSelector";
 
 // Importa tus páginas
 import Clientes from "./pages/Clientes";
@@ -90,7 +90,7 @@ const AppContent = () => {
       </button>
 
       {/* Componente para seleccionar rol en pruebas */}
-      {isLoggedIn && <RoleSelector />}
+      {/* {isLoggedIn && <RoleSelector />} */}
 
       <Header opacity={headerOpacity} isLoggedIn={isLoggedIn} />
       {isLoggedIn && <Drawer onWidthChange={setDrawerWidth} />}

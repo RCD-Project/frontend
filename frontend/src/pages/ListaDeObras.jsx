@@ -13,12 +13,17 @@ const ListaDeObras = () => {
   const [obras, setObras] = useState([]);
   const navigate = useNavigate();
   const location = useLocation();
-  const { role, user } = useContext(AuthContext);
+  const { role, user, token } = useContext(AuthContext);
 
   const successMessage = location.state?.successMessage || "";
 
   useEffect(() => {
-    fetch("http://127.0.0.1:8000/api/obras/aprobadas/")
+    fetch("http://127.0.0.1:8000/api/obras/aprobadas/", {
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Token ${token}`, // Se envía el token de autenticación
+      },
+    })
       .then((res) => {
         if (!res.ok) {
           throw new Error(`Error HTTP: ${res.status}`);
@@ -27,20 +32,22 @@ const ListaDeObras = () => {
       })
       .then((data) => {
         if (role === "cliente" && user) {
-          setObras(data.filter((obra) => obra.cliente === 1)); //cambiar user.id para probar
+          setObras(data.filter((obra) => obra.cliente === 1)); // cambiar user.id para probar
         } else {
           setObras(data);
         }
       })
       .catch((err) => console.error("Error al obtener obras aprobadas:", err));
-  }, [role, user]);
+  }, [role, user, token]);
+  
 
   const eliminarObra = (id) => {
     const confirmacion = window.confirm("¿Seguro que deseas eliminar esta obra?");
     if (confirmacion) {
       fetch(`http://127.0.0.1:8000/api/obras/${id}/eliminar/`, {
         method: 'DELETE',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json',
+        "Authorization": `Token ${token}` },
       })
         .then((res) => {
           if (!res.ok) {

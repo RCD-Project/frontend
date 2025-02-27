@@ -94,7 +94,7 @@ const AltaEmpresasGestoras = () => {
               Alta Empresa Gestora
             </Typography>
 
-            <Stepper activeStep={activeStep} alternativeLabel>
+            <Stepper activeStep={activeStep} alternativeLabel sx={{ mb: 4 }}>
               {steps.map((label, index) => (
                 <Step key={index}>
                   <StepLabel>{label}</StepLabel>

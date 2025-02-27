@@ -7,7 +7,7 @@ import { AuthContext } from "../pages/context/AuthContext"; // Se asume que el A
 
 // Agregamos la propiedad roles a cada item de menú
 const menuItems = [
-  { path: "/altausuario", label: "Usuarios", icon: <UserPlus size={24} />, roles: ["superadmin"] },
+
   { path: "/clientes", label: "Clientes", icon: <Users size={24} />, roles: ["superadmin", "coordinador", "coordinadorlogistico"] },
   { path: "/listadeobras", label: "Obras", icon: <Hammer size={24} />, roles: ["superadmin", "cliente"] },
   { path: "/solicitudes", label: "Solicitudes", icon: <ClipboardList size={24} />, roles: ["superadmin", "coordinador", "coordinadorlogistico"] },

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import { Button, IconButton, Menu, MenuItem, Box, Tabs, Tab } from "@mui/material";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
 import VisibilityIcon from "@mui/icons-material/Visibility";
@@ -9,26 +9,46 @@ import ToggleOnIcon from "@mui/icons-material/ToggleOn";
 import ToggleOffIcon from "@mui/icons-material/ToggleOff";
 import { useNavigate, Link } from "react-router-dom";
 import Tabla from "../components/Table";
+import { AuthContext } from "../pages/context/AuthContext";
+
 const PuntoLimpio = () => {
   const [puntosLimpios, setPuntosLimpios] = useState([]);
   const [value, setValue] = useState(0);
   const navigate = useNavigate();
+  const { token } = useContext(AuthContext);
 
   useEffect(() => {
-    fetch("http://localhost:8000/api/puntos-limpios/")
-      .then((response) => response.json())
-      .then((data) => setPuntosLimpios(data))
+    if (!token) return; // Evita la petición si no hay token
+
+    fetch("http://localhost:8000/api/puntolimpio/lista/", {
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Token ${token}`,
+      },
+    })
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error(`Error HTTP: ${response.status}`);
+        }
+        return response.json();
+      })
+      .then((data) => {
+        // Verificamos que data sea un arreglo, de lo contrario forzamos a un arreglo vacío
+        setPuntosLimpios(Array.isArray(data) ? data : []);
+      })
       .catch((error) => console.error("Error al obtener puntos limpios:", error));
-  }, []);
+  }, [token]);
 
   const toggleEstado = (id) => {
     const puntoLimpio = puntosLimpios.find((p) => p.id === id);
+    if (!puntoLimpio) return;
     const newEstado = puntoLimpio.estado === "activo" ? "inactivo" : "activo";
 
     fetch(`http://127.0.0.1:8000/api/puntos-limpios/modificar/${id}/`, {
-      method: "PATCH", 
+      method: "PATCH",
       headers: {
         "Content-Type": "application/json",
+        "Authorization": `Token ${token}`,
       },
       body: JSON.stringify({ estado: newEstado }),
     })
@@ -64,8 +84,8 @@ const PuntoLimpio = () => {
   };
 
   const columnasPuntosLimpios = [
-    { field: "obra_nombre", headerName: "Nombre de la Obra", flex: 1 },
-    { field: "tipo_material", headerName: "Tipo de Material", flex: 1 },
+    { field: "obra", headerName: "Nombre de la Obra", flex: 1 },
+    // { field: "tipo_material", headerName: "Tipo de Material", flex: 1 },
     { field: "tipo_contenedor", headerName: "Tipo de Contenedor", flex: 1 },
     { field: "estado", headerName: "Estado", flex: 1 },
     {
@@ -74,11 +94,9 @@ const PuntoLimpio = () => {
       flex: 1,
       sortable: false,
       renderCell: (params) => (
-        <>
-          <IconButton onClick={(event) => handleMenuOpen(event, params.row)}>
-            <MoreVertIcon />
-          </IconButton>
-        </>
+        <IconButton onClick={(event) => handleMenuOpen(event, params.row)}>
+          <MoreVertIcon />
+        </IconButton>
       ),
     },
   ];
@@ -102,7 +120,7 @@ const PuntoLimpio = () => {
             },
             "& .Mui-selected": {
               backgroundColor: "#abbf9d",
-              color: "#ffffff",
+              color: "#ffff",
             },
             "& .MuiTabs-indicator": {
               backgroundColor: "#abbf9d",
@@ -118,7 +136,7 @@ const PuntoLimpio = () => {
             <Tabla
               datos={puntosLimpios.filter((p) => p.estado === "activo")}
               columnas={columnasPuntosLimpios}
-              filtroClave="obra_nombre"
+              filtroClave="id"
               filtroPlaceholder="Buscar por nombre de obra"
             />
           </div>
@@ -129,7 +147,7 @@ const PuntoLimpio = () => {
             <Tabla
               datos={puntosLimpios.filter((p) => p.estado === "inactivo")}
               columnas={columnasPuntosLimpios}
-              filtroClave="obra_nombre"
+              filtroClave="obra"
               filtroPlaceholder="Buscar por nombre de obra"
             />
           </div>

@@ -23,14 +23,18 @@ const LoginForm = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await fetch("http://127.0.0.1:8000/api/auth/login/", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password }),
-      });
+      const response = await fetch(
+        "http://127.0.0.1:8000/api/usuarios/login/",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email, password }),
+        }
+      );
       if (response.ok) {
         const data = await response.json();
-        login(data.user, data.token);
+        // Se envía un objeto con email y rol, de acuerdo a lo que devuelve el backend
+        login({ email: data.email, rol: data.rol }, data.token);
         navigate("/");
       } else {
         console.error("Error al iniciar sesión");

@@ -1,13 +1,15 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import Tabla from '../components/Table';
-import { IconButton,Tab, Tabs, Box } from '@mui/material';
+import { IconButton, Tab, Tabs, Box } from '@mui/material';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import CancelIcon from '@mui/icons-material/Cancel';
 import '../styles/Solicitudes.css';
+import { AuthContext } from '../pages/context/AuthContext';
 
 const Solicitudes = () => {
   const [solicitudes, setSolicitudes] = useState([]);
   const [value, setValue] = useState(0);
+  const { token } = useContext(AuthContext);
 
   // Función para formatear la fecha a dd/MM/yyyy
   const formatDate = (dateString) => {
@@ -21,11 +23,22 @@ const Solicitudes = () => {
   };
 
   useEffect(() => {
+    // Si no hay token, no realizamos las solicitudes
+    if (!token) return;
+
     Promise.all([
-      fetch('http://127.0.0.1:8000/api/clientes/solicitudes/')
-        .then((res) => res.json()),
-      fetch('http://127.0.0.1:8000/api/obras/solicitudes/')
-        .then((res) => res.json()),
+      fetch('http://127.0.0.1:8000/api/clientes/solicitudes/', {
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Token ${token}`,
+        },
+      }).then((res) => res.json()),
+      fetch('http://127.0.0.1:8000/api/obras/solicitudes/', {
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Token ${token}`,
+        },
+      }).then((res) => res.json()),
     ])
       .then(([clientesSolicitudes, obrasSolicitudes]) => {
         const clientesData = clientesSolicitudes.map((item) => ({
@@ -57,7 +70,7 @@ const Solicitudes = () => {
       .catch((error) =>
         console.error('Error al obtener solicitudes:', error)
       );
-  }, []);
+  }, [token]);
 
   const aceptarSolicitud = (id) => {
     // Buscamos la solicitud en nuestro estado
@@ -79,6 +92,7 @@ const Solicitudes = () => {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",
+        "Authorization": `Token ${token}`,
       },
     })
       .then((response) => {
@@ -125,6 +139,7 @@ const Solicitudes = () => {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",
+        "Authorization": `Token ${token}`,
       },
     })
       .then((response) => {
@@ -195,56 +210,56 @@ const Solicitudes = () => {
 
   return (
     <div className="solicitudes-container">
-    <Box sx={{ width: '100%' }}>
-      <Tabs value={value} onChange={handleChangeTab} aria-label="Solicitudes">
-        <Tab label="Pendientes" />
-        <Tab label="Aceptadas" />
-        <Tab label="Terminadas" />
-      </Tabs>
+      <Box sx={{ width: '100%' }}>
+        <Tabs value={value} onChange={handleChangeTab} aria-label="Solicitudes">
+          <Tab label="Pendientes" />
+          <Tab label="Aceptadas" />
+          <Tab label="Terminadas" />
+        </Tabs>
 
-      {value === 0 && (
-        <div>
-          <Tabla
-            datos={solicitudes.filter(
-              (sol) => sol.estado?.toLowerCase() === 'pendiente'
-            )}
-            columnas={columnasPendientes}
-            filtroClave="nombre"
-            filtroPlaceholder="Nombre del cliente"
-            getRowId={(row) => row.id}
-          />
-        </div>
-      )}
+        {value === 0 && (
+          <div>
+            <Tabla
+              datos={solicitudes.filter(
+                (sol) => sol.estado?.toLowerCase() === 'pendiente'
+              )}
+              columnas={columnasPendientes}
+              filtroClave="nombre"
+              filtroPlaceholder="Nombre del cliente"
+              getRowId={(row) => row.id}
+            />
+          </div>
+        )}
 
-      {value === 1 && (
-        <div>
-          <Tabla
-            datos={solicitudes.filter(
-              (sol) => sol.estado?.toLowerCase() === 'aceptado'
-            )}
-            columnas={columnasAceptadas}
-            filtroClave="nombre"
-            filtroPlaceholder="Nombre del cliente"
-            getRowId={(row) => row.id}
-          />
-        </div>
-      )}
+        {value === 1 && (
+          <div>
+            <Tabla
+              datos={solicitudes.filter(
+                (sol) => sol.estado?.toLowerCase() === 'aceptado'
+              )}
+              columnas={columnasAceptadas}
+              filtroClave="nombre"
+              filtroPlaceholder="Nombre del cliente"
+              getRowId={(row) => row.id}
+            />
+          </div>
+        )}
 
-      {value === 2 && (
-        <div>
-          <Tabla
-            datos={solicitudes.filter((sol) => sol.estado === 'terminado')}
-            columnas={columnasTerminadas}
-            filtroClave="nombre"
-            filtroPlaceholder="Nombre del cliente"
-            className="tabla-terminadas"
-            getRowId={(row) => row.id}
-          />
-        </div>
-      )}
-    </Box>
-  </div>
-);
+        {value === 2 && (
+          <div>
+            <Tabla
+              datos={solicitudes.filter((sol) => sol.estado === 'terminado')}
+              columnas={columnasTerminadas}
+              filtroClave="nombre"
+              filtroPlaceholder="Nombre del cliente"
+              className="tabla-terminadas"
+              getRowId={(row) => row.id}
+            />
+          </div>
+        )}
+      </Box>
+    </div>
+  );
 };
 
 export default Solicitudes;
