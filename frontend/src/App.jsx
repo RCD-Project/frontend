@@ -195,20 +195,127 @@ const AppContent = () => {
                 </RoleBasedRoute>
               }
             />
-            <Route path="/altaobra" element={<AltaObra />} />
-            <Route path="/detallesobra" element={<DetallesObra />} />
-            <Route path="/editarobra" element={<EditarObra />} />
-            <Route path="/altapuntolimpio" element={<AltaPuntoLimpio />} />
-            <Route path="/detallespuntolimpio" element={<DetallesPuntoLimpio />} />
-            <Route path="/editarpuntolimpio" element={<EditarPuntoLimpio />} />
+
+            <Route
+              path="/altaobra"
+              element={
+                <RoleBasedRoute allowedRoles={["cliente", "superadmin"]}>
+                  <AltaObra />
+                </RoleBasedRoute>
+              }
+            />
+
+            <Route
+              path="/detallesobra"
+              element={
+                <RoleBasedRoute allowedRoles={["cliente", "superadmin"]}>
+                  <DetallesObra />
+                </RoleBasedRoute>
+              }
+            />
+
+            <Route
+              path="/editarobra"
+              element={
+                <RoleBasedRoute allowedRoles={["cliente", "superadmin", "supervisor"]}>
+                  <EditarObra />
+                </RoleBasedRoute>
+              }
+            />
+
+            <Route
+              path="/altapuntolimpio"
+              element={
+                <RoleBasedRoute allowedRoles={["cliente", "superadmin"]}>
+                  <AltaPuntoLimpio />
+                </RoleBasedRoute>
+              }
+            />
+
+            <Route
+              path="/detallespuntolimpio"
+              element={
+                <RoleBasedRoute allowedRoles={["cliente", "superadmin"]}>
+                  <DetallesPuntoLimpio />
+                </RoleBasedRoute>
+              }
+            />
+
+            <Route
+              path="/editarpuntolimpio"
+              element={
+                <RoleBasedRoute allowedRoles={["cliente", "superadmin"]}>
+                  <EditarPuntoLimpio />
+                </RoleBasedRoute>
+              }
+            />
+
             <Route path="/login" element={<LoginForm />} />
+            
             <Route path="/detalletransportista" element={<DetallesTransportista />} />
-            <Route path="/editartransportista" element={<EditarTransportista />} />
-            <Route path="/altatransportistas" element={<AltaTransportistas />} />
+            <Route
+              path="/detallestransportista"
+              element={
+                <RoleBasedRoute allowedRoles={["coordinadorlogistico", "superadmin"]}>
+                  <DetallesTransportista />
+                </RoleBasedRoute>
+              }
+            />
+
+            <Route
+              path="/editartransportista"
+              element={
+                <RoleBasedRoute allowedRoles={["coordinadorlogistico", "superadmin"]}>
+                  <EditarTransportista />
+                </RoleBasedRoute>
+              }
+            />
+
+            <Route
+              path="/altatransportistas"
+              element={
+                <RoleBasedRoute allowedRoles={["coordinadorlogistico", "superadmin"]}>
+                  <AltaTransportistas />
+                </RoleBasedRoute>
+              }
+            />
+
             <Route path="/altaempresas" element={<AltaEmpresas />} />
-            <Route path="/editarempresasgestoras" element={<EditarEmpresasGestoras />} />
-            <Route path="/altacapacitaciones" element={<AltaCapacitaciones />} />
-            <Route path="/Formularios" element={<Formularios />} />
+            <Route
+              path="/altaempresas"
+              element={
+                <RoleBasedRoute allowedRoles={["cliente", "superadmin"]}>
+                  <AltaEmpresas />
+                </RoleBasedRoute>
+              }
+            />
+
+            <Route
+              path="/editarempresasgestoras"
+              element={
+                <RoleBasedRoute allowedRoles={["coordinadorlogistico", "superadmin"]}>
+                  <EditarEmpresasGestoras />
+                </RoleBasedRoute>
+              }
+            />
+
+            <Route
+              path="/altacapacitaciones"
+              element={
+                <RoleBasedRoute allowedRoles={["tecnico", "superadmin"]}>
+                  <EditarEmpresasGestoras />
+                </RoleBasedRoute>
+              }
+            />
+
+            <Route
+              path="/Formularios"
+              element={
+                <RoleBasedRoute allowedRoles={["tecnico", "superadmin"]}>
+                  <Formularios />
+                </RoleBasedRoute>
+              }
+            />
           </Routes>
         </Body>
       </main>
