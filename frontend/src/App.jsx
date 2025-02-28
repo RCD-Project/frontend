@@ -17,6 +17,7 @@ import AltaPuntoLimpio from "./pages/AltaPuntoLimpio";
 import DetallesPuntoLimpio from "./pages/DetallesPuntoLimpio";
 import EditarPuntoLimpio from "./pages/EditarPuntoLimpio";
 import Coordinaciones from "./pages/Coordinaciones";
+import ListaDeCoordinaciones from './pages/ListaCoordinaciones'; 
 import Transportistas from "./pages/Transportistas";
 import EmpresasGestoras from "./pages/EmpresasGestoras";
 import ListaDeObras from "./pages/ListaDeObras";
@@ -138,10 +139,19 @@ const AppContent = () => {
               }
             />
             <Route
-              path="/coordinaciones"
+              path="/altacoordinaciones"
               element={
                 <RoleBasedRoute allowedRoles={["superadmin", "supervisor", "cliente" ]}>
                   <Coordinaciones />
+                </RoleBasedRoute>
+              }
+            />
+
+<Route
+              path="/coordinaciones"
+              element={
+                <RoleBasedRoute allowedRoles={["superadmin", "supervisor", "cliente" ]}>
+                  <ListaDeCoordinaciones />
                 </RoleBasedRoute>
               }
             />

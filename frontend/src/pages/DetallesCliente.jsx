@@ -1,41 +1,51 @@
-import React from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import { useLocation } from 'react-router-dom';
 import { Card, CardContent, Typography, Divider, Paper, Grid } from '@mui/material';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
+import { AuthContext } from '../pages/context/AuthContext';
 
 const DetallesCliente = () => {
   const location = useLocation();
   const queryParams = new URLSearchParams(location.search);
   const id = queryParams.get('id');
+  const [cliente, setCliente] = useState(null);
+  const [cargando, setCargando] = useState(true);
+  const [error, setError] = useState(null);
+  
+  // Obtenemos el token desde el AuthContext
+  const { token } = useContext(AuthContext);
 
-  const clientes = [
-    {
-      id: 1,
-      nombre: 'Juan Pérez',
-      direccion: 'Calle Falsa 123',
-      contacto: '987654321',
-      nombre_contacto: 'Ana García',
-      email: 'juan.perez@example.com',
-      fecha_ingreso: '2022-01-15',
-      razon_social: 'Juan Pérez S.A.',
-      direccion_fiscal: 'Calle Real 456',
-      rut: '123456789',
-    },
-    {
-      id: 2,
-      nombre: 'María López',
-      direccion: 'Avenida Siempre Viva 742',
-      contacto: '912345678',
-      nombre_contacto: 'Carlos Ruiz',
-      email: 'maria.lopez@example.com',
-      fecha_ingreso: '2022-02-10',
-      razon_social: 'María López S.A.',
-      direccion_fiscal: 'Avenida Central 321',
-      rut: '987654321',
-    }
-  ];
+  useEffect(() => {
+    // Realiza una petición a la API para obtener los detalles del cliente
+    fetch(`http://localhost:8000/api/clientes/${id}`, {
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Token ${token}`,
+      },
+    })
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error(`Error HTTP: ${response.status}`);
+        }
+        return response.json();
+      })
+      .then((data) => {
+        setCliente(data);
+        setCargando(false);
+      })
+      .catch((error) => {
+        setError(error.message);
+        setCargando(false);
+      });
+  }, [id, token]);
 
-  const cliente = clientes.find((item) => item.id === parseInt(id));
+  if (cargando) {
+    return <Typography variant="h6" align="center">Cargando...</Typography>;
+  }
+
+  if (error) {
+    return <Typography variant="h6" color="error" align="center">{error}</Typography>;
+  }
 
   if (!cliente) {
     return <Typography variant="h6" color="error" align="center">Cliente no encontrado</Typography>;
@@ -57,19 +67,16 @@ const DetallesCliente = () => {
             Detalles del Cliente
           </Typography>
           <Divider sx={{ mb: 2 }} />
-
           <Grid container spacing={2}>
-            {/* Nombre */}
             <Grid item xs={12}>
-              <Paper sx={{ padding: 2, backgroundColor: '#f4f4f4' }}>
+              <Paper sx={{ padding: 2, backgroundColor: '#f8f9f9' }}>
                 <Typography variant="body1" sx={{ fontWeight: 'bold' }}>Nombre</Typography>
                 <Typography variant="body2">{cliente.nombre}</Typography>
               </Paper>
             </Grid>
-
-            {/* Dirección */}
-            <Grid item xs={12} sm={6}>
-              <Paper sx={{ padding: 2, backgroundColor: '#f4f4f4' }}>
+  {/* Dirección */}
+  <Grid item xs={12} sm={6}>
+              <Paper sx={{ padding: 2, backgroundColor: '#f8f9f9' }}>
                 <Typography variant="body1" sx={{ fontWeight: 'bold' }}>Dirección</Typography>
                 <Typography variant="body2">{cliente.direccion}</Typography>
               </Paper>
@@ -77,7 +84,7 @@ const DetallesCliente = () => {
 
             {/* Contacto */}
             <Grid item xs={12} sm={6}>
-              <Paper sx={{ padding: 2, backgroundColor: '#f4f4f4' }}>
+              <Paper sx={{ padding: 2, backgroundColor: '#f8f9f9' }}>
                 <Typography variant="body1" sx={{ fontWeight: 'bold' }}>Contacto</Typography>
                 <Typography variant="body2">{cliente.contacto}</Typography>
               </Paper>
@@ -85,7 +92,7 @@ const DetallesCliente = () => {
 
             {/* Nombre de Contacto */}
             <Grid item xs={12} sm={6}>
-              <Paper sx={{ padding: 2, backgroundColor: '#f4f4f4' }}>
+              <Paper sx={{ padding: 2, backgroundColor: '#f8f9f9' }}>
                 <Typography variant="body1" sx={{ fontWeight: 'bold' }}>Nombre de Contacto</Typography>
                 <Typography variant="body2">{cliente.nombre_contacto}</Typography>
               </Paper>
@@ -93,15 +100,15 @@ const DetallesCliente = () => {
 
             {/* Email */}
             <Grid item xs={12} sm={6}>
-              <Paper sx={{ padding: 2, backgroundColor: '#f4f4f4' }}>
+              <Paper sx={{ padding: 2, backgroundColor: '#f8f9f9' }}>
                 <Typography variant="body1" sx={{ fontWeight: 'bold' }}>Email</Typography>
-                <Typography variant="body2">{cliente.email}</Typography>
+                <Typography variant="body2">{cliente.mail}</Typography>
               </Paper>
             </Grid>
 
             {/* Fecha de Ingreso */}
             <Grid item xs={12} sm={6}>
-              <Paper sx={{ padding: 2, backgroundColor: '#f4f4f4' }}>
+              <Paper sx={{ padding: 2, backgroundColor: '#f8f9f9' }}>
                 <Typography variant="body1" sx={{ fontWeight: 'bold' }}>Fecha de Ingreso</Typography>
                 <Typography variant="body2">{cliente.fecha_ingreso}</Typography>
               </Paper>
@@ -109,7 +116,7 @@ const DetallesCliente = () => {
 
             {/* Razón Social */}
             <Grid item xs={12} sm={6}>
-              <Paper sx={{ padding: 2, backgroundColor: '#f4f4f4' }}>
+              <Paper sx={{ padding: 2, backgroundColor: '#f8f9f9' }}>
                 <Typography variant="body1" sx={{ fontWeight: 'bold' }}>Razón Social</Typography>
                 <Typography variant="body2">{cliente.razon_social}</Typography>
               </Paper>
@@ -117,7 +124,7 @@ const DetallesCliente = () => {
 
             {/* Dirección Fiscal */}
             <Grid item xs={12} sm={6}>
-              <Paper sx={{ padding: 2, backgroundColor: '#f4f4f4' }}>
+              <Paper sx={{ padding: 2, backgroundColor: '#f8f9f9' }}>
                 <Typography variant="body1" sx={{ fontWeight: 'bold' }}>Dirección Fiscal</Typography>
                 <Typography variant="body2">{cliente.direccion_fiscal}</Typography>
               </Paper>
@@ -125,12 +132,11 @@ const DetallesCliente = () => {
 
             {/* RUT */}
             <Grid item xs={12} sm={6}>
-              <Paper sx={{ padding: 2, backgroundColor: '#f4f4f4' }}>
+              <Paper sx={{ padding: 2, backgroundColor: '#f8f9f9' }}>
                 <Typography variant="body1" sx={{ fontWeight: 'bold' }}>RUT</Typography>
                 <Typography variant="body2">{cliente.rut}</Typography>
               </Paper>
-            </Grid>
-          </Grid>
+            </Grid>          </Grid>
         </CardContent>
       </Card>
     </ThemeProvider>

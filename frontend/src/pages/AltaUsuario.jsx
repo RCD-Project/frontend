@@ -13,13 +13,15 @@ import {
 import { createTheme, ThemeProvider } from "@mui/material/styles";
 import { useNavigate } from "react-router-dom";
 import { AuthContext } from "../pages/context/AuthContext";
+
 const theme = createTheme({
   palette: {
     primary: {
-      main: "#A8C948",
+      main: "#a8c948",
     },
   },
 });
+
 const AltaUsuario = () => {
   const { token } = useContext(AuthContext);
   const [formData, setFormData] = useState({
@@ -30,12 +32,16 @@ const AltaUsuario = () => {
   });
   const [successMessage, setSuccessMessage] = useState("");
   const navigate = useNavigate();
+
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
+
   const handleSubmit = (event) => {
     event.preventDefault();
+
     console.log("Enviando formulario:", formData);
+
     fetch("http://127.0.0.1:8000/api/usuarios/super-admin-crear-usuario/", {
       method: "POST",
       headers: {
@@ -65,6 +71,7 @@ const AltaUsuario = () => {
         alert("Error al registrar el usuario:\n" + err.message);
       });
   };
+
   return (
     <ThemeProvider theme={theme}>
       <Container
@@ -81,11 +88,13 @@ const AltaUsuario = () => {
             <Typography variant="h3" gutterBottom sx={{ mb: 4 }}>
               Alta Usuario
             </Typography>
+
             {successMessage && (
               <Alert severity="success" sx={{ mb: 4 }}>
                 {successMessage}
               </Alert>
             )}
+
             <form onSubmit={handleSubmit}>
               <Grid container spacing={4}>
                 <Grid item xs={12}>
@@ -152,8 +161,5 @@ const AltaUsuario = () => {
     </ThemeProvider>
   );
 };
+
 export default AltaUsuario;
-
-
-
-

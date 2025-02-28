@@ -10,6 +10,8 @@ import {
   StepLabel,
   Paper,
   Box,
+  Alert,
+  CircularProgress,
 } from '@mui/material';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
 import { useNavigate } from 'react-router-dom';
@@ -41,6 +43,8 @@ const AltaObra = () => {
     imagen: null,
     pedido: '',
   });
+  const [isLoading, setIsLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
 
   const navigate = useNavigate();
 
@@ -51,6 +55,9 @@ const AltaObra = () => {
 
   const handleSubmit = (event) => {
     event.preventDefault();
+    setIsLoading(true);
+    setErrorMessage("");
+
     const obraData = {
       cliente: 1,
       nombre_obra: formData.nombreObra,
@@ -82,15 +89,18 @@ const AltaObra = () => {
     const token = localStorage.getItem('token');
     if (!token) {
       console.error('Token no encontrado. El usuario debe iniciar sesión.');
-      alert('Por favor, inicie sesión');
+      setErrorMessage('Por favor, inicie sesión para registrar la obra.');
+      setIsLoading(false);
       navigate('/login');
       return;
-}
+    }
 
     fetch('http://127.0.0.1:8000/api/obras/registro/', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' ,
-      'Authorization': `Token ${token}` },
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Token ${token}`,
+      },
       body: JSON.stringify(obraData),
     })
       .then((res) => {
@@ -108,7 +118,15 @@ const AltaObra = () => {
       })
       .catch((err) => {
         console.error('Error al dar de alta la obra:', err);
-        alert('Error al dar de alta la obra:\n' + err.message);
+        // Personalizar mensaje de error según lo sucedido
+        if (err.message.toLowerCase().includes("email")) {
+          setErrorMessage("El email proporcionado ya está registrado. Por favor, utiliza otro email.");
+        } else {
+          setErrorMessage("Error al dar de alta la obra. Intenta nuevamente.");
+        }
+      })
+      .finally(() => {
+        setIsLoading(false);
       });
   };
 
@@ -135,11 +153,11 @@ const AltaObra = () => {
       >
         <Box sx={{ width: '100%' }}>
           <Paper elevation={3} sx={{ padding: 6, borderRadius: 3 }}>
-          <Typography variant="h3" gutterBottom sx={{ textAlign: 'center' }}>
-            Registro de Obra
-          </Typography>
+            <Typography variant="h3" gutterBottom sx={{ textAlign: 'center' }}>
+              Registro de Obra
+            </Typography>
 
-            {/* Agregamos margen inferior al Stepper para separarlo de los textboxes */}
+            {/* Stepper para los pasos */}
             <Stepper activeStep={activeStep} alternativeLabel sx={{ mb: 4 }}>
               {steps.map((label, index) => (
                 <Step key={index}>
@@ -147,6 +165,13 @@ const AltaObra = () => {
                 </Step>
               ))}
             </Stepper>
+
+            {/* Mostrar error con Alert */}
+            {errorMessage && (
+              <Alert severity="error" sx={{ mb: 2 }}>
+                {errorMessage}
+              </Alert>
+            )}
 
             <form onSubmit={handleSubmit}>
               <Grid container spacing={3}>
@@ -360,8 +385,14 @@ const AltaObra = () => {
                 )}
                 {activeStep === steps.length - 1 && (
                   <Grid item xs={6} sx={{ textAlign: 'right' }}>
-                    <Button type="submit" variant="contained" color="primary">
-                      Finalizar
+                    <Button
+                      type="submit"
+                      variant="contained"
+                      color="primary"
+                      disabled={isLoading}
+                      startIcon={isLoading && <CircularProgress size={20} color="inherit" />}
+                    >
+                      {isLoading ? "Procesando..." : "Finalizar"}
                     </Button>
                   </Grid>
                 )}

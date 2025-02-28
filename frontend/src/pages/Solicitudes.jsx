@@ -1,8 +1,6 @@
 import React, { useState, useEffect, useContext } from 'react';
 import Tabla from '../components/Table';
-import { IconButton, Tab, Tabs, Box } from '@mui/material';
-import CheckCircleIcon from '@mui/icons-material/CheckCircle';
-import CancelIcon from '@mui/icons-material/Cancel';
+import { Button, Tab, Tabs, Box, Alert, CircularProgress } from '@mui/material';
 import { Typography } from '@mui/material';
 import '../styles/Solicitudes.css';
 import { AuthContext } from '../pages/context/AuthContext';
@@ -10,6 +8,8 @@ import { AuthContext } from '../pages/context/AuthContext';
 const Solicitudes = () => {
   const [solicitudes, setSolicitudes] = useState([]);
   const [value, setValue] = useState(0);
+  const [errorMessage, setErrorMessage] = useState('');
+  const [loadingSolicitudId, setLoadingSolicitudId] = useState(null);
   const { token } = useContext(AuthContext);
 
   // Función para formatear la fecha a dd/MM/yyyy
@@ -24,7 +24,6 @@ const Solicitudes = () => {
   };
 
   useEffect(() => {
-    // Si no hay token, no realizamos las solicitudes
     if (!token) return;
 
     Promise.all([
@@ -40,8 +39,14 @@ const Solicitudes = () => {
           "Authorization": `Token ${token}`,
         },
       }).then((res) => res.json()),
+      fetch('http://127.0.0.1:8000/api/coordinacionretiro/lista/', {
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Token ${token}`,
+        },
+      }).then((res) => res.json()),
     ])
-      .then(([clientesSolicitudes, obrasSolicitudes]) => {
+      .then(([clientesSolicitudes, obrasSolicitudes, coordinacionesSolicitudes]) => {
         const clientesData = clientesSolicitudes.map((item) => ({
           ...item,
           tipo: 'cliente',
@@ -63,23 +68,36 @@ const Solicitudes = () => {
             ? `obra-${item.obra}`
             : `obra-${item.obra?.obra || Math.random()}`,
           nombre: item.obra?.obra || item.obra || 'Sin nombre',
-          solicitante: item.cliente  || 'Sin solicitante',
+          solicitante: item.cliente || 'Sin solicitante',
+          fecha: formatDate(item.fecha_solicitud),
         }));
 
-        setSolicitudes([...clientesData, ...obrasData]);
+        const coordinacionesData = coordinacionesSolicitudes.map((item) => ({
+          ...item,
+          tipo: 'coordinacion',
+          id: `coordinacion-${item.id}`,
+          // Puedes personalizar estos campos según la información que quieras mostrar
+          nombre: item.obra ? item.obra.nombre : 'Sin obra',
+          solicitante: item.transportista ? item.transportista.nombre : 'Sin transportista',
+          fecha: formatDate(item.fecha_solicitud),
+        }));
+
+        setSolicitudes([...clientesData, ...obrasData, ...coordinacionesData]);
       })
-      .catch((error) =>
-        console.error('Error al obtener solicitudes:', error)
-      );
+      .catch((error) => {
+        console.error('Error al obtener solicitudes:', error);
+        setErrorMessage('Ocurrió un error al cargar las solicitudes. Por favor, intenta nuevamente.');
+      });
   }, [token]);
 
   const aceptarSolicitud = (id) => {
-    // Buscamos la solicitud en nuestro estado
     const solicitud = solicitudes.find((sol) => sol.id === id);
     if (!solicitud) {
-      console.error("Solicitud no encontrada", id);
+      setErrorMessage("Solicitud no encontrada.");
       return;
     }
+
+    setLoadingSolicitudId(id);
     let url = "";
     if (solicitud.tipo === "cliente") {
       const clientId = id.split('-')[1];
@@ -87,6 +105,9 @@ const Solicitudes = () => {
     } else if (solicitud.tipo === "obra") {
       const obraId = id.split('-')[1];
       url = `http://127.0.0.1:8000/api/obras/solicitudes/${obraId}/aprobar/`;
+    } else if (solicitud.tipo === "coordinacion") {
+      const coordId = id.split('-')[1];
+      url = `http://127.0.0.1:8000/api/coordinaciones/solicitudes/${coordId}/aprobar/`;
     }
 
     fetch(url, {
@@ -104,29 +125,33 @@ const Solicitudes = () => {
                 ? {
                     ...sol,
                     estado: "aceptado",
-                    // Actualizamos la fecha de aceptación con el formato deseado
                     fecha: formatDate(new Date().toISOString()),
                     horaAceptacion: new Date().toLocaleTimeString(),
                   }
                 : sol
             )
           );
+          setErrorMessage('');
         } else {
-          console.error("Error al aprobar la solicitud");
+          setErrorMessage("Ocurrió un error al aprobar la solicitud. Por favor, inténtalo de nuevo.");
         }
       })
       .catch((error) => {
         console.error("Error en red:", error);
+        setErrorMessage("Error de red. Por favor, inténtalo de nuevo.");
+      })
+      .finally(() => {
+        setLoadingSolicitudId(null);
       });
   };
 
   const rechazarSolicitud = (id) => {
-    // Buscamos la solicitud en nuestro estado
     const solicitud = solicitudes.find((sol) => sol.id === id);
     if (!solicitud) {
-      console.error("Solicitud no encontrada", id);
+      setErrorMessage("Solicitud no encontrada.");
       return;
     }
+    setLoadingSolicitudId(id);
     let url = "";
     if (solicitud.tipo === "cliente") {
       const clientId = id.split('-')[1];
@@ -134,6 +159,9 @@ const Solicitudes = () => {
     } else if (solicitud.tipo === "obra") {
       const obraId = id.split('-')[1];
       url = `http://127.0.0.1:8000/api/obras/solicitudes/${obraId}/rechazar/`;
+    } else if (solicitud.tipo === "coordinacion") {
+      const coordId = id.split('-')[1];
+      url = `http://127.0.0.1:8000/api/coordinaciones/solicitudes/${coordId}/rechazar/`;
     }
 
     fetch(url, {
@@ -147,24 +175,31 @@ const Solicitudes = () => {
         if (response.ok) {
           setSolicitudes(
             solicitudes.map((sol) =>
-              sol.id === id ? { ...sol, estado: "Rechazado" } : sol
+              sol.id === id ? { ...sol, estado: "rechazado" } : sol
             )
           );
+          setErrorMessage('');
         } else {
-          console.error("Error al rechazar la solicitud");
+          setErrorMessage("Ocurrió un error al rechazar la solicitud. Por favor, inténtalo de nuevo.");
         }
       })
       .catch((error) => {
         console.error("Error en red:", error);
+        setErrorMessage("Error de red. Por favor, inténtalo de nuevo.");
+      })
+      .finally(() => {
+        setLoadingSolicitudId(null);
       });
   };
 
   const marcarComoTerminada = (id) => {
+    setLoadingSolicitudId(id);
     setSolicitudes(
       solicitudes.map((sol) =>
-        sol.id === id ? { ...sol, estado: "Terminado" } : sol
+        sol.id === id ? { ...sol, estado: "terminado" } : sol
       )
     );
+    setLoadingSolicitudId(null);
   };
 
   const columnasPendientes = [
@@ -174,21 +209,36 @@ const Solicitudes = () => {
       field: 'acciones',
       headerName: 'Acciones',
       flex: 1,
+      align: 'center',
       sortable: false,
       renderCell: (params) => (
-        <div className="acciones-container">
-          <IconButton
-            className="icono-aceptar"
-            onClick={() => aceptarSolicitud(params.row.id)}
-          >
-            <CheckCircleIcon sx={{ color: '#a8c948' }} />
-          </IconButton>
-          <IconButton
-            className="icono-rechazar"
-            onClick={() => rechazarSolicitud(params.row.id)}
-          >
-            <CancelIcon color="error" />
-          </IconButton>
+        <div
+          className="acciones-container"
+          style={{
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            gap: '8px',
+          }}
+        >
+          {loadingSolicitudId === params.row.id ? (
+            <CircularProgress size={24} />
+          ) : (
+            <>
+              <Button
+                onClick={() => aceptarSolicitud(params.row.id)}
+                style={{ color: '#a8c948' }}
+              >
+                Aceptar
+              </Button>
+              <Button
+                onClick={() => rechazarSolicitud(params.row.id)}
+                style={{ color: '#f44336' }}
+              >
+                Rechazar
+              </Button>
+            </>
+          )}
         </div>
       ),
     },
@@ -198,6 +248,34 @@ const Solicitudes = () => {
     { field: 'nombre', headerName: 'Nombre', flex: 1 },
     { field: 'solicitante', headerName: 'Solicitante', flex: 1 },
     { field: 'fecha', headerName: 'Hora de Aceptación', flex: 1 },
+    {
+      field: 'acciones',
+      headerName: 'Acciones',
+      flex: 1,
+      align: 'center',
+      sortable: false,
+      renderCell: (params) => (
+        <div
+          className="acciones-container"
+          style={{
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+          }}
+        >
+          {loadingSolicitudId === params.row.id ? (
+            <CircularProgress size={24} />
+          ) : (
+            <Button
+              onClick={() => marcarComoTerminada(params.row.id)}
+              style={{ color: '#1976d2' }}
+            >
+              Marcar como Terminado
+            </Button>
+          )}
+        </div>
+      ),
+    },
   ];
 
   const columnasTerminadas = [
@@ -207,6 +285,7 @@ const Solicitudes = () => {
 
   const handleChangeTab = (event, newValue) => {
     setValue(newValue);
+    setErrorMessage('');
   };
 
   return (
@@ -214,18 +293,18 @@ const Solicitudes = () => {
       <Typography variant="h4" sx={{ textAlign: 'center', mb: 4 }}>
         Solicitudes de Aprobación
       </Typography>
+
+      {errorMessage && (
+        <Alert severity="error" sx={{ mb: 4 }}>
+          {errorMessage}
+        </Alert>
+      )}
+
       <Box sx={{
-            "& .MuiTab-root": {
-              color: "#000000",
-            },
-            "& .Mui-selected": {
-              backgroundColor: "#abbf9d",
-              color: "#ffff",
-            },
-            "& .MuiTabs-indicator": {
-              backgroundColor: "#abbf9d",
-            },
-          }}>
+        "& .MuiTab-root": { color: "#000000" },
+        "& .Mui-selected": { backgroundColor: "#abbf9d", color: "#ffffff" },
+        "& .MuiTabs-indicator": { backgroundColor: "#abbf9d" },
+      }}>
         <Tabs value={value} onChange={handleChangeTab} aria-label="Solicitudes">
           <Tab label="Pendientes" />
           <Tab label="Aceptadas" />

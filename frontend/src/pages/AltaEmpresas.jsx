@@ -9,7 +9,9 @@ import {
   Step, 
   StepLabel, 
   Paper, 
-  Box 
+  Box,
+  Alert,
+  CircularProgress,
 } from '@mui/material';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
 import { useNavigate } from 'react-router-dom';
@@ -30,6 +32,7 @@ const AltaEmpresasGestoras = () => {
 
   const navigate = useNavigate();
   const { token } = useContext(AuthContext); 
+
   const handleNext = () => {
     setActiveStep(prevStep => prevStep + 1);
   };
@@ -64,6 +67,7 @@ const AltaEmpresasGestoras = () => {
       });
       if (!response.ok) {
         const errorData = await response.json();
+        // Personalizamos el mensaje de error según lo que retorne la API.
         throw new Error(errorData.message || 'Error al registrar la empresa gestora');
       }
       const data = await response.json();
@@ -160,9 +164,9 @@ const AltaEmpresasGestoras = () => {
                 )}
               </Grid>
               {error && (
-                <Typography color="error" style={{ marginTop: '10px' }}>
+                <Alert severity="error" sx={{ mt: 2, mb: 2 }}>
                   {error}
-                </Typography>
+                </Alert>
               )}
               <Grid container spacing={2} sx={{ mt: 4 }}>
                 {activeStep !== 0 && (
@@ -179,7 +183,13 @@ const AltaEmpresasGestoras = () => {
 
                 {activeStep === steps.length - 1 && (
                   <Grid item xs={12} sx={{ textAlign: 'right' }}>
-                    <Button type="submit" variant="contained" color="primary" disabled={loading}>
+                    <Button 
+                      type="submit" 
+                      variant="contained" 
+                      color="primary" 
+                      disabled={loading}
+                      startIcon={loading && <CircularProgress size={20} color="inherit" />}
+                    >
                       {loading ? 'Registrando...' : 'Finalizar'}
                     </Button>
                   </Grid>

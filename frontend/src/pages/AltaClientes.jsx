@@ -11,10 +11,10 @@ import {
   Paper,
   Alert,
   Box,
+  CircularProgress,
 } from "@mui/material";
 import { LocalizationProvider, DatePicker } from "@mui/x-date-pickers";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
-import dayjs from "dayjs";
 import { useNavigate } from "react-router-dom";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
 
@@ -35,6 +35,8 @@ const AltaCliente = () => {
     rut: "",
   });
   const [successMessage, setSuccessMessage] = useState("");
+  const [errorMessage, setErrorMessage] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
 
   const handleNext = () => {
@@ -55,6 +57,7 @@ const AltaCliente = () => {
 
   const handleSubmit = (event) => {
     event.preventDefault();
+    setIsLoading(true);
 
     // Convertir la fecha a formato "YYYY-MM-DD" si existe
     const clientData = {
@@ -85,6 +88,8 @@ const AltaCliente = () => {
       .then((data) => {
         console.log("Cliente registrado:", data);
         setSuccessMessage("Cliente registrado con éxito.");
+        setErrorMessage(""); // Limpiar error en caso de éxito
+        setIsLoading(false);
         // Redirigir a la lista de clientes y pasar un mensaje de éxito
         navigate("/", {
           state: { successMessage: "Cliente registrado con éxito." },
@@ -92,7 +97,13 @@ const AltaCliente = () => {
       })
       .catch((err) => {
         console.error("Error al dar de alta el cliente:", err);
-        alert("Error al dar de alta el cliente:\n" + err.message);
+        // Personalizar el mensaje de error de acuerdo a lo sucedido
+        if (err.message.toLowerCase().includes("email")) {
+          setErrorMessage("El email ya está registrado. Por favor, utiliza otro email.");
+        } else {
+          setErrorMessage("Ocurrió un error al registrar el cliente. Intenta nuevamente.");
+        }
+        setIsLoading(false);
       });
   };
 
@@ -135,6 +146,12 @@ const AltaCliente = () => {
               </Alert>
             )}
 
+            {errorMessage && (
+              <Alert severity="error" sx={{ mb: 4 }}>
+                {errorMessage}
+              </Alert>
+            )}
+
             <Stepper activeStep={activeStep} alternativeLabel sx={{ mb: 8 }}>
               {steps.map((label, index) => (
                 <Step key={index}>
@@ -169,7 +186,7 @@ const AltaCliente = () => {
                     </Grid>
                     <Grid item xs={12}>
                       <TextField
-                        label="Contacto"
+                        label="Contacto telefónico"
                         fullWidth
                         name="contacto"
                         value={formData.contacto}
@@ -283,8 +300,14 @@ const AltaCliente = () => {
 
                 {activeStep === steps.length - 1 && (
                   <Grid item xs={6} sx={{ textAlign: "right" }}>
-                    <Button type="submit" variant="contained" color="primary">
-                      Finalizar
+                    <Button
+                      type="submit"
+                      variant="contained"
+                      color="primary"
+                      disabled={isLoading}
+                      startIcon={isLoading && <CircularProgress size={20} color="inherit" />}
+                    >
+                      {isLoading ? "Procesando..." : "Finalizar"}
                     </Button>
                   </Grid>
                 )}
