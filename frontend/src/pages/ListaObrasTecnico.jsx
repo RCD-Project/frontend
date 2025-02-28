@@ -55,7 +55,7 @@ const ObrasList = () => {
 
   return (
     <Container>
-      <Typography variant="h4" sx={{ my: 3 }}>
+      <Typography variant="h4" align="center" sx={{ my: 3 }}>
         Obras Aprobadas
       </Typography>
       <TableContainer component={Paper}>

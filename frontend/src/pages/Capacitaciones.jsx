@@ -1,7 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { AuthContext } from './context/AuthContext';
 import Tabla from '../components/Table';
-import { Button, IconButton, Menu, MenuItem } from '@mui/material';
+import { Button, IconButton, Menu, MenuItem, Typography } from '@mui/material';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import DeleteIcon from '@mui/icons-material/Delete';
@@ -10,21 +11,38 @@ import { Link } from 'react-router-dom';
 
 const Capacitaciones = () => {
   const [capacitaciones, setCapacitaciones] = useState([]);
+  const { token } = useContext(AuthContext); 
   const navigate = useNavigate();
 
   useEffect(() => {
-    fetch('http://localhost:8000/api/capacitaciones/lista/')
-      .then((response) => response.json())
+    if (!token) return; 
+    
+    fetch('http://localhost:8000/api/capacitaciones/lista/', {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Token ${token}`, 
+      },
+    })
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error(`Error HTTP: ${response.status}`);
+        }
+        return response.json();
+      })
       .then((data) => setCapacitaciones(data))
       .catch((error) => console.error('Error al obtener capacitaciones:', error));
-  }, []);
+  }, [token]);
 
   const eliminarCapacitacion = (id) => {
     const confirmacion = window.confirm("¿Seguro que deseas eliminar esta capacitación?");
     if (confirmacion) {
       fetch(`http://localhost:8000/api/capacitaciones/${id}/eliminar/`, {
         method: 'DELETE',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': `Token ${token}`
+        },
       })
         .then((res) => {
           if (!res.ok) {
@@ -74,7 +92,10 @@ const Capacitaciones = () => {
 
   return (
     <div>
-      <h1>Listado de Capacitaciones</h1>
+      <Typography variant="h4" align="center" sx={{ mb: 4 }}>
+        Listado de Capacitaciones
+      </Typography>
+
       <Tabla
         datos={capacitaciones}
         columnas={columnasCapacitaciones}

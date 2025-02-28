@@ -56,9 +56,10 @@ const DetallesPuntoLimpio = () => {
     <ThemeProvider theme={theme}>
       <Card sx={{ maxWidth: 800, margin: '0 auto', padding: 4 }}>
         <CardContent>
-          <Typography variant="h3" align="center" sx={{ mb: 4 }}>
-            {puntoLimpio.obra}
-          </Typography>
+        <Typography variant="h3" align="center" sx={{ mb: 4 }}>
+          {puntoLimpio.obra}
+        </Typography>
+
           <Divider sx={{ mb: 2 }} />
 
           <Grid container spacing={2}>

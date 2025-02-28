@@ -19,7 +19,7 @@ import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { useNavigate } from "react-router-dom";
 import { createTheme, ThemeProvider } from '@mui/material/styles';
 import { Anvil, TreeDeciduous, CupSoda, TriangleAlert, TrendingUpDown, Recycle } from 'lucide-react';
-import { AuthContext } from "../pages/context/AuthContext";
+import { AuthContext } from "../pages/context/AuthContext";  // Asegúrate de que el contexto se importa correctamente
 
 const steps = ["Información General", "Detalles de Material", "Fecha"];
 
@@ -40,7 +40,7 @@ const AltaPuntoLimpio = () => {
     materiales: {},
   });
 
-  const { token } = useContext(AuthContext);
+  const { token } = useContext(AuthContext);  // Obtener el token desde el AuthContext
   const navigate = useNavigate();
 
   // Obtener las obras aprobadas de la API al cargar el componente
@@ -52,7 +52,7 @@ const AltaPuntoLimpio = () => {
       headers: {
         Accept: "application/json",
         "Content-Type": "application/json",
-        "Authorization": `Token ${token}`,
+        "Authorization": `Token ${token}`,  // Incluir el token en los headers
       },
     })
       .then((res) => {
@@ -95,9 +95,18 @@ const AltaPuntoLimpio = () => {
   const handleSubmit = (event) => {
     event.preventDefault();
 
+    // Verificar que el token está presente antes de enviar la solicitud
+    if (!token) {
+      alert("No estás autenticado. Por favor, inicia sesión.");
+      return;
+    }
+
     fetch("http://127.0.0.1:8000/api/puntolimpio/registro/", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Token ${token}`,  // Incluir el token en los headers
+      },
       body: JSON.stringify(formData),
     })
       .then((res) => {
@@ -151,11 +160,11 @@ const AltaPuntoLimpio = () => {
       >
         <Box className="inner-content" sx={{ width: "100%", display: "flex", flexDirection: "column", alignItems: "center" }}>
           <Paper elevation={3} sx={{ padding: 6, borderRadius: 3 }}>
-            <Typography variant="h3" gutterBottom sx={{ mb: 4 }}>
-              Alta Punto Limpio
-            </Typography>
+          <Typography variant="h3" align="center" gutterBottom sx={{ mb: 4 }}>
+            Alta Punto Limpio
+          </Typography>
 
-            {/* Stepper para indicar el progreso */}
+
             <Stepper activeStep={activeStep} alternativeLabel sx={{ mb: 4 }}>
               {steps.map((label, index) => (
                 <Step key={index}>

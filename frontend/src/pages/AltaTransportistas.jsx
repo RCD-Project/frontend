@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
 import {
   Container,
   TextField,
@@ -12,6 +12,7 @@ import {
   Paper,
   Box,
 } from '@mui/material';
+import { AuthContext } from './context/AuthContext'; // Importar el contexto
 import { createTheme, ThemeProvider } from '@mui/material/styles';
 import { useNavigate } from 'react-router-dom';
 
@@ -28,6 +29,7 @@ const AltaTransportistas = () => {
   });
   const [errorMessage, setErrorMessage] = useState('');
 
+  const { token } = useContext(AuthContext); // Accede al token desde el contexto
   const navigate = useNavigate();
 
   const handleNext = () => {
@@ -57,30 +59,37 @@ const AltaTransportistas = () => {
       tipo_material: formData.tipoMaterial,
       estado: 'activo', 
     };
-
+  
+  
     try {
+      if (!token) {
+        throw new Error('Token no disponible, redirigiendo a login');
+      }
+  
       const response = await fetch('http://127.0.0.1:8000/api/transportistas/registro/', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': `Token ${token}`,
         },
         body: JSON.stringify(payload),
       });
-
+  
       if (!response.ok) {
         const errorData = await response.json();
         const mensaje = errorData.email ? errorData.email[0] : response.statusText;
         throw new Error(mensaje);
       }
-
+  
       const data = await response.json();
       console.log('Transportista creado:', data);
-      navigate('/transportistas');
+      navigate('/transportistas'); 
     } catch (error) {
       console.error('Error al crear el transportista:', error);
       setErrorMessage(error.message);
     }
   };
+  
 
   const theme = createTheme({
     palette: {
@@ -104,9 +113,9 @@ const AltaTransportistas = () => {
       >
         <Box sx={{ width: '100%' }}>
           <Paper elevation={3} sx={{ padding: 6, borderRadius: 3 }}>
-            <Typography variant="h3" gutterBottom sx={{ mb: 4 }}>
-              Alta Transportista
-            </Typography>
+          <Typography variant="h3" gutterBottom sx={{ mb: 4, textAlign: 'center' }}>
+            Alta Transportista
+          </Typography>
 
             <Stepper activeStep={activeStep} alternativeLabel sx={{ mb: 4 }}>
               {steps.map((label, index) => (

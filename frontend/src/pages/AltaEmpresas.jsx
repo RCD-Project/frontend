@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
 import { 
   Container, 
   TextField, 
@@ -13,6 +13,7 @@ import {
 } from '@mui/material';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
 import { useNavigate } from 'react-router-dom';
+import { AuthContext } from './context/AuthContext';
 
 const steps = ['Información General'];
 
@@ -28,7 +29,7 @@ const AltaEmpresasGestoras = () => {
   const [error, setError] = useState(null);
 
   const navigate = useNavigate();
-
+  const { token } = useContext(AuthContext); 
   const handleNext = () => {
     setActiveStep(prevStep => prevStep + 1);
   };
@@ -45,13 +46,21 @@ const AltaEmpresasGestoras = () => {
     event.preventDefault();
     setLoading(true);
     setError(null);
+
+    if (!token) {
+      setError('No estás autenticado. Por favor, inicia sesión.');
+      setLoading(false);
+      return;
+    }
+
     try {
       const response = await fetch('http://127.0.0.1:8000/api/empresas/registro/', {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
+          'Authorization': `Token ${token}`,
         },
-        body: JSON.stringify(formData)
+        body: JSON.stringify(formData),
       });
       if (!response.ok) {
         const errorData = await response.json();
@@ -71,7 +80,7 @@ const AltaEmpresasGestoras = () => {
   const theme = createTheme({
     palette: {
       primary: {
-        main: '#a8c948', // Color personalizado igual que en AltaCliente
+        main: '#a8c948',
       },
     },
   });
@@ -81,7 +90,7 @@ const AltaEmpresasGestoras = () => {
       <Container
         maxWidth="md"
         sx={{
-          minHeight: '100vh', // El contenedor ocupa toda la altura de la ventana
+          minHeight: '100vh',
           display: 'flex',
           flexDirection: 'column',
           justifyContent: 'center',
@@ -90,7 +99,7 @@ const AltaEmpresasGestoras = () => {
       >
         <Box sx={{ width: '100%' }}>
           <Paper elevation={3} sx={{ padding: 6, borderRadius: 3 }}>
-            <Typography variant="h3" gutterBottom sx={{ mb: 4 }}>
+            <Typography variant="h3" gutterBottom sx={{ mb: 4, textAlign: 'center' }}>
               Alta Empresa Gestora
             </Typography>
 

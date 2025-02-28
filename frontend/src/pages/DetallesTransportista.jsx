@@ -52,9 +52,9 @@ const DetallesTransportista = () => {
     <ThemeProvider theme={theme}>
       <Card sx={{ maxWidth: 800, margin: '0 auto', padding: 4 }}>
         <CardContent>
-          <Typography variant="h3" align="center" sx={{ mb: 4 }}>
-            {transportista.nombre}
-          </Typography>
+        <Typography variant="h3" align="center" sx={{ mb: 4 }}>
+          {transportista.nombre}
+        </Typography>
           <Divider sx={{ mb: 4 }} />
 
           <Grid container spacing={3}>

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Tabla from '../components/Table';
-import { IconButton, Menu, MenuItem } from '@mui/material';
+import { IconButton, Menu, MenuItem, Typography } from '@mui/material';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import DeleteIcon from '@mui/icons-material/Delete';
@@ -62,7 +62,9 @@ const Informes = () => {
 
   return (
     <div>
-      <h1>Listado de Informes</h1>
+      <Typography variant="h4" align="center" sx={{ mb: 4 }}>
+        Listado de Informes
+      </Typography>
       <Tabla
         datos={informes}
         columnas={columnasInformes}

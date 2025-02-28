@@ -91,7 +91,9 @@ const EditarEmpresaGestora = () => {
     <ThemeProvider theme={theme}>
       <Container maxWidth="md">
         <Paper elevation={3} sx={{ padding: 6, marginTop: 6, borderRadius: 3 }}>
-          <Typography variant="h3" gutterBottom>Editar Empresa Gestora</Typography>
+        <Typography variant="h3" gutterBottom sx={{ mb: 4, textAlign: 'center' }}>
+          Editar Empresa Gestora
+        </Typography>
           <Stepper activeStep={activeStep} alternativeLabel>
             {steps.map((label, index) => (
               <Step key={index}>

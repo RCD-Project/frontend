@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext } from "react";
-import { Button, IconButton, Menu, MenuItem, Box, Tabs, Tab } from "@mui/material";
+import { Button, IconButton, Menu, MenuItem, Box, Tabs, Tab, Typography } from "@mui/material";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import EditIcon from "@mui/icons-material/Edit";
@@ -107,6 +107,10 @@ const PuntoLimpio = () => {
 
   return (
     <div>
+      <Typography variant="h4" align="center" sx={{ my: 3 }}>
+        Puntos Limpios
+      </Typography>
+
       <Box sx={{ width: "100%" }}>
         <Tabs
           value={value}

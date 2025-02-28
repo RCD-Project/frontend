@@ -1,7 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { AuthContext } from './context/AuthContext'
 import Tabla from '../components/Table';
-import { IconButton, Menu, MenuItem, Button, Tabs, Tab, Box } from '@mui/material';
+import { IconButton, Menu, MenuItem, Button, Tabs, Tab, Box, Typography} from '@mui/material';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import ToggleOnIcon from '@mui/icons-material/ToggleOn';
@@ -13,22 +14,43 @@ const Transportistas = () => {
   const [value, setValue] = useState(0);
   const navigate = useNavigate();
 
+  // Acceder al token desde el contexto
+  const { token } = useContext(AuthContext);
 
   useEffect(() => {
-    fetch('http://localhost:8000/api/transportistas/lista/')
-      .then((response) => response.json())
+    if (!token) {
+      console.log('No hay token, redirigiendo al login');
+      navigate('/login'); // Redirigir al login si no hay token
+      return;
+    }
+  
+    fetch('http://localhost:8000/api/transportistas/lista/', {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Token ${token}`, // Añadimos el token a la cabecera
+      },
+    })
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error(`Error HTTP: ${response.status}`);
+        }
+        return response.json();
+      })
       .then((data) => setTransportistas(data))
-      .catch((error) => console.error('Error al obtener transportistas:', error));
-  }, []);
-
+      .catch((error) => {
+        console.error('Error al obtener transportistas:', error);
+        alert('Ocurrió un error al obtener los transportistas.');
+      });
+  }, [token, navigate]); // Dependencias actualizadas para incluir `navigate` también
+  
+  // El resto de tu código sigue igual...
   const toggleEstado = (id) => {
-    // Encontrar el transportista seleccionado
     const transportista = transportistas.find((t) => t.id === id);
     const newEstado = transportista.estado === 'activo' ? 'inactivo' : 'activo';
 
-    // Llamada a la API para actualizar el estado
     fetch(`http://127.0.0.1:8000/api/transportistas/modificar/${id}/`, {
-      method: 'PATCH', // O 'PATCH' según lo que requiera tu API
+      method: 'PATCH',
       headers: {
         'Content-Type': 'application/json',
       },
@@ -41,7 +63,6 @@ const Transportistas = () => {
         return response.json();
       })
       .then((data) => {
-        // Actualizar el estado local para reflejar el cambio
         setTransportistas((prevTransportistas) =>
           prevTransportistas.map((t) =>
             t.id === id ? { ...t, estado: newEstado } : t
@@ -53,6 +74,7 @@ const Transportistas = () => {
       });
   };
 
+  // Manejo de menú, renderizado de tablas y demás...
   const [anchorEl, setAnchorEl] = useState(null);
   const [selectedTransportista, setSelectedTransportista] = useState(null);
 
@@ -86,34 +108,36 @@ const Transportistas = () => {
 
   const handleChangeTab = (event, newValue) => {
     setValue(newValue);
-  };  
-  
+  };
 
   return (
     <div>
+      <Typography variant="h4" sx={{ textAlign: 'center', marginBottom: '20px' }}>
+        Transportistas
+      </Typography>
       <Box sx={{ width: '100%' }}>
-      <Tabs
-        value={value}
-        onChange={handleChangeTab}
-        aria-label="Transportistas"
-        textColor="primary"
-        indicatorColor="primary" // Cambia el color del indicador
-        sx={{
-          '& .MuiTab-root': {
-            color: '#000',  // Color de texto de las pestañas inactivas (negro o el color que elijas)
-          },
-          '& .Mui-selected': {
-            backgroundColor: '#abbf9d',  // Color de fondo cuando la pestaña está seleccionada
-            color: 'white',  // Color de texto cuando está seleccionada (blanco)
-          },
-          '& .MuiTabs-indicator': {
-            backgroundColor: '#abbf9d',  // Cambia el color de la línea debajo de la pestaña seleccionada
-          },
-        }}
-      >
-        <Tab label="Activos" />
-        <Tab label="Inactivos" />
-      </Tabs>
+        <Tabs
+          value={value}
+          onChange={handleChangeTab}
+          aria-label="Transportistas"
+          textColor="primary"
+          indicatorColor="primary"
+          sx={{
+            '& .MuiTab-root': {
+              color: '#000',
+            },
+            '& .Mui-selected': {
+              backgroundColor: '#abbf9d',
+              color: 'white',
+            },
+            '& .MuiTabs-indicator': {
+              backgroundColor: '#abbf9d',
+            },
+          }}
+        >
+          <Tab label="Activos" />
+          <Tab label="Inactivos" />
+        </Tabs>
 
         {value === 0 && (
           <div>
@@ -152,7 +176,7 @@ const Transportistas = () => {
       >
         Añadir Transportista
       </Button>
-        
+
       <Menu anchorEl={anchorEl} open={Boolean(anchorEl)} onClose={handleMenuClose}>
         <MenuItem
           onClick={() => {

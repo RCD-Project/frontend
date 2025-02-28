@@ -79,10 +79,18 @@ const AltaObra = () => {
 
     console.log('Datos enviados:', obraData);
 
+    const token = localStorage.getItem('token');
+    if (!token) {
+      console.error('Token no encontrado. El usuario debe iniciar sesión.');
+      alert('Por favor, inicie sesión');
+      navigate('/login');
+      return;
+}
+
     fetch('http://127.0.0.1:8000/api/obras/registro/', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      'Authorization': `Token ${token}`,
+      headers: { 'Content-Type': 'application/json' ,
+      'Authorization': `Token ${token}` },
       body: JSON.stringify(obraData),
     })
       .then((res) => {
@@ -107,7 +115,7 @@ const AltaObra = () => {
   const theme = createTheme({
     palette: {
       primary: {
-        main: '#a8c948', // Color personalizado
+        main: '#a8c948',
       },
     },
   });
@@ -127,9 +135,9 @@ const AltaObra = () => {
       >
         <Box sx={{ width: '100%' }}>
           <Paper elevation={3} sx={{ padding: 6, borderRadius: 3 }}>
-            <Typography variant="h3" gutterBottom sx={{ mb: 4 }}>
-              Registro de Obra
-            </Typography>
+          <Typography variant="h3" gutterBottom sx={{ textAlign: 'center' }}>
+            Registro de Obra
+          </Typography>
 
             {/* Agregamos margen inferior al Stepper para separarlo de los textboxes */}
             <Stepper activeStep={activeStep} alternativeLabel sx={{ mb: 4 }}>

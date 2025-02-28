@@ -111,7 +111,9 @@ const EditarCliente = () => {
     <ThemeProvider theme={theme}>
       <Container maxWidth="md">
         <Paper elevation={3} sx={{ padding: 6, marginTop: 6, borderRadius: 3 }}>
-          <Typography variant="h3" gutterBottom>Editar Cliente</Typography>
+        <Typography variant="h3" gutterBottom sx={{ textAlign: "center" }}>
+          Editar Cliente
+        </Typography>
           <Stepper activeStep={activeStep} alternativeLabel>
             {steps.map((label, index) => (
               <Step key={index}>

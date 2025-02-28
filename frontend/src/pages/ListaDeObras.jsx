@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { useNavigate, useLocation, Link } from 'react-router-dom';
 import Tabla from '../components/Table';
+import { Typography } from '@mui/material';
 import { Button, IconButton, Menu, MenuItem, Alert } from '@mui/material';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
 import VisibilityIcon from '@mui/icons-material/Visibility';
@@ -93,7 +94,9 @@ const ListaDeObras = () => {
 
   return (
     <div>
-      <h1>Lista de Obras</h1>
+      <Typography variant="h4" sx={{ textAlign: 'center', mb: 4 }}>
+        Lista de Obras
+      </Typography>
       
 
       { successMessage && <Alert severity="success" sx={{ mb: 2 }}>{successMessage}</Alert> }

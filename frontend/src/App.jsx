@@ -44,11 +44,10 @@ import "./styles/App.css";
 
 const AppContent = () => {
   const [headerOpacity, setHeaderOpacity] = useState(1);
-  const [drawerWidth, setDrawerWidth] = useState("var(--drawer-width)");
-  
-  // Obtenemos datos de autenticación desde el AuthContext
-  const { token, login, logout } = useContext(AuthContext);
-  const isLoggedIn = Boolean(token);
+  const [drawerWidth, setDrawerWidth] = useState("60px");
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false); // Definir estado para el drawer visible  
+  const { token: authToken, login, logout } = useContext(AuthContext);
+  const isLoggedIn = Boolean(authToken); // Usa authToken aquí
 
   useEffect(() => {
     const handleScroll = () => {
@@ -63,6 +62,16 @@ const AppContent = () => {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
+  const handleDrawerHover = (hoverState) => {
+    if (hoverState) {
+      setDrawerWidth("220px"); // Se expandirá cuando se pase el ratón
+      setIsDrawerOpen(true); // Se abrirá el Drawer
+    } else {
+      setDrawerWidth("60px"); // Se reducirá cuando se retire el ratón
+      setIsDrawerOpen(false); // Se cerrará el Drawer
+    }
+  };
+
   // Función para simular login/logout usando AuthContext
   const toggleAuth = () => {
     if (isLoggedIn) {
@@ -72,6 +81,14 @@ const AppContent = () => {
       login({ name: "Test User" }, "test");
     }
   };
+  useEffect(() => {
+    if (isLoggedIn) {
+      setIsDrawerOpen(true); // Cambia 'setDrawerVisible' por 'setIsDrawerOpen'
+    } else {
+      setIsDrawerOpen(false); // Cambia 'setDrawerVisible' por 'setIsDrawerOpen'
+    }
+  }, [isLoggedIn]);
+  
 
   return (
     <div className="app-container">
@@ -93,12 +110,20 @@ const AppContent = () => {
       {/* {isLoggedIn && <RoleSelector />} */}
 
       <Header opacity={headerOpacity} isLoggedIn={isLoggedIn} />
-      {isLoggedIn && <Drawer onWidthChange={setDrawerWidth} />}
+      {isLoggedIn && (
+        <Drawer
+          isOpen={isDrawerOpen}
+          onMouseEnter={() => handleDrawerHover(true)} // Cuando el ratón entra
+          onMouseLeave={() => handleDrawerHover(false)} // Cuando el ratón sale
+        />
+      )}
       <main
         className="body-content"
         style={{
-          marginLeft: isLoggedIn ? drawerWidth : 0,
-          width: isLoggedIn ? `calc(100vw - ${drawerWidth})` : "100vw",
+          marginLeft: isLoggedIn ? "60px" : 0, // Solo mover el contenido si el drawer está visible
+          transition: "margin-left 0.3s ease", // Suavizar la transición
+          marginTop: "70px",  // Ajuste para que no se superponga al header
+          
         }}
       >
         <Body>

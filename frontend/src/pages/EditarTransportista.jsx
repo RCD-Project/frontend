@@ -88,7 +88,7 @@ const EditarTransportista = () => {
   const theme = createTheme({
     palette: {
       primary: {
-        main: '#a8c948', // Color personalizado igual que en otras páginas
+        main: '#a8c948',
       },
     },
   });
@@ -97,7 +97,10 @@ const EditarTransportista = () => {
     <ThemeProvider theme={theme}>
       <Container maxWidth="md">
         <Paper elevation={3} sx={{ padding: 6, marginTop: 6, borderRadius: 3 }}>
-          <Typography variant="h3" gutterBottom>Editar Transportista</Typography>
+        <Typography variant="h3" gutterBottom sx={{ textAlign: 'center' }}>
+          Editar Transportista
+        </Typography>
+
           <Stepper activeStep={activeStep} alternativeLabel>
             {steps.map((label, index) => (
               <Step key={index}>

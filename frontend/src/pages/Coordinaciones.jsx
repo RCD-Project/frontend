@@ -34,7 +34,10 @@ const FormularioCoordinaciones = () => {
 
   return (
     <Container maxWidth="sm">
-      <Typography variant="h4" gutterBottom>Solicitud de Coordinación</Typography>
+      <Typography variant="h4" gutterBottom sx={{ textAlign: 'center' }}>
+        Solicitud de Coordinación
+      </Typography>
+
       <form onSubmit={handleSubmit}>
         <Grid container spacing={2}>
           <Grid item xs={12}><TextField label="Descripción" fullWidth name="descripcion" value={formData.descripcion} onChange={handleChange} required/></Grid>

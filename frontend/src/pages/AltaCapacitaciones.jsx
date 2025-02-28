@@ -28,8 +28,8 @@ const AltaCapacitaciones = () => {
     tecnico: '',
     comentario: '',
   });
-  const [obras, setObras] = useState([]);
-  const [tecnicos, setTecnicos] = useState([]);
+  const [obras, setObras] = useState([]); // Inicia como un array vacío
+  const [tecnicos, setTecnicos] = useState([]); // Inicia como un array vacío
 
   const navigate = useNavigate();
 
@@ -37,16 +37,38 @@ const AltaCapacitaciones = () => {
   useEffect(() => {
     fetch('http://127.0.0.1:8000/api/obras/aprobadas/')
       .then(response => response.json())
-      .then(data => setObras(data))
-      .catch(error => console.error('Error fetching obras:', error));
+      .then(data => {
+        // Verificar que 'data' sea un array
+        if (Array.isArray(data)) {
+          setObras(data);
+        } else {
+          console.error('La respuesta de la API no es un array de obras:', data);
+          setObras([]); // Asignar un array vacío en caso de que la respuesta no sea válida
+        }
+      })
+      .catch(error => {
+        console.error('Error fetching obras:', error);
+        setObras([]); // Asegúrate de que 'obras' siga siendo un array
+      });
   }, []);
 
   // Obtener los técnicos desde la API
   useEffect(() => {
     fetch('http://localhost:8000/api/tecnicos/lista/')
       .then(response => response.json())
-      .then(data => setTecnicos(data))
-      .catch(error => console.error('Error fetching técnicos:', error));
+      .then(data => {
+        // Verificar que 'data' sea un array
+        if (Array.isArray(data)) {
+          setTecnicos(data);
+        } else {
+          console.error('La respuesta de la API no es un array de técnicos:', data);
+          setTecnicos([]); // Asignar un array vacío en caso de que la respuesta no sea válida
+        }
+      })
+      .catch(error => {
+        console.error('Error fetching técnicos:', error);
+        setTecnicos([]); // Asegúrate de que 'tecnicos' siga siendo un array
+      });
   }, []);
 
   const handleNext = () => {
@@ -120,9 +142,10 @@ const AltaCapacitaciones = () => {
       >
         <Box sx={{ width: '100%' }}>
           <Paper elevation={3} sx={{ padding: 6, borderRadius: 3 }}>
-            <Typography variant="h3" gutterBottom sx={{ mb: 4 }}>
-              Alta Capacitación
-            </Typography>
+          <Typography variant="h3" gutterBottom sx={{ mb: 4, textAlign: 'center' }}>
+            Alta Capacitación
+          </Typography>
+
 
             <Stepper activeStep={activeStep} alternativeLabel>
               {steps.map((label, index) => (

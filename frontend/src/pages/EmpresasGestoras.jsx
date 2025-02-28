@@ -1,7 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { AuthContext } from './context/AuthContext'; // Importar el contexto
 import Tabla from '../components/Table';
-import { Button, IconButton, Menu, MenuItem } from '@mui/material';
+import { Button, IconButton, Menu, MenuItem, Typography } from '@mui/material';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import EditIcon from '@mui/icons-material/Edit';
@@ -12,15 +13,29 @@ import '../styles/EmpresasGestoras.css';
 
 const EmpresasGestoras = () => {
   const [empresas, setEmpresas] = useState([]);
+  const [anchorEl, setAnchorEl] = useState(null);
+  const [selectedEmpresa, setSelectedEmpresa] = useState(null);
+  const { token } = useContext(AuthContext);
   const navigate = useNavigate();
 
-  // Se hace fetch a la API para obtener la lista de empresas gestoras
   useEffect(() => {
-    fetch('http://127.0.0.1:8000/api/empresas/lista/')
-      .then(response => response.json())
-      .then(data => setEmpresas(data))
-      .catch(error => console.error('Error fetching empresas:', error));
-  }, []);
+    if (!token) return;
+    fetch('http://127.0.0.1:8000/api/empresas/lista/', {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Token ${token}`,
+      },
+    })
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error(`Error HTTP: ${response.status}`);
+        }
+        return response.json();
+      })
+      .then((data) => setEmpresas(data))
+      .catch((error) => console.error('Error al obtener empresas:', error));
+  }, [token]); // Dependencia del token
 
   const eliminarEmpresa = (id) => {
     const confirmacion = window.confirm("¿Seguro que deseas eliminar esta empresa?");
@@ -28,9 +43,6 @@ const EmpresasGestoras = () => {
       setEmpresas(empresas.filter((empresa) => empresa.id !== id));
     }
   };
-
-  const [anchorEl, setAnchorEl] = useState(null);
-  const [selectedEmpresa, setSelectedEmpresa] = useState(null);
 
   const handleMenuOpen = (event, empresa) => {
     setAnchorEl(event.currentTarget);
@@ -61,7 +73,9 @@ const EmpresasGestoras = () => {
 
   return (
     <div>
-      <h1>Empresas Gestoras</h1>
+      <Typography variant="h4" align="center" sx={{ mb: 4 }}>
+        Empresas Gestoras
+      </Typography>
       <Tabla
         datos={empresas}
         columnas={columnasEmpresas}
@@ -89,9 +103,9 @@ const EmpresasGestoras = () => {
         variant="contained"
         sx={{
           marginTop: '20px',
-          backgroundColor: '#abbf9d', // Verde personalizado
+          backgroundColor: '#abbf9d',
           '&:hover': {
-            backgroundColor: '#d1e063', // Color al hacer hover
+            backgroundColor: '#d1e063',
           },
         }}
         startIcon={<AddIcon />}

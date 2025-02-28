@@ -1,4 +1,4 @@
-import React, { createContext, useState } from "react";
+import React, { createContext, useState, useEffect } from "react";
 
 export const AuthContext = createContext();
 
@@ -7,10 +7,21 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [token, setToken] = useState(null);
 
+  useEffect(() => {
+    const storedToken = localStorage.getItem("token");
+    const storedUser = JSON.parse(localStorage.getItem("user"));
+    const storedRole = localStorage.getItem("role");
+
+    if (storedToken && storedUser && storedRole) {
+      setToken(storedToken);
+      setUser(storedUser);
+      setRole(storedRole);
+    }
+  }, []);
+
   const login = (userData, tokenData) => {
     setUser(userData);
     setToken(tokenData);
-    // Mapeamos el rol recibido a la nomenclatura que espera el Drawer
     const roleMapping = {
       super_administrador: "superadmin",
       coordinador_obra: "coordinador",
@@ -21,6 +32,8 @@ export const AuthProvider = ({ children }) => {
     };
     setRole(roleMapping[userData.rol] || userData.rol);
     localStorage.setItem("token", tokenData);
+    localStorage.setItem("user", JSON.stringify(userData));
+    localStorage.setItem("role", roleMapping[userData.rol] || userData.rol);
   };
 
   const logout = () => {
@@ -28,6 +41,8 @@ export const AuthProvider = ({ children }) => {
     setToken(null);
     setRole(null);
     localStorage.removeItem("token");
+    localStorage.removeItem("user");
+    localStorage.removeItem("role");
   };
 
   return (

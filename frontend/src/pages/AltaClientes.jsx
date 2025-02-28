@@ -125,7 +125,7 @@ const AltaCliente = () => {
           }}
         >
           <Paper elevation={3} sx={{ padding: 6, borderRadius: 3 }}>
-            <Typography variant="h3" gutterBottom sx={{ mb: 8 }}>
+            <Typography variant="h3" gutterBottom sx={{ mb: 8, textAlign: "center" }}>
               Alta Cliente
             </Typography>
 

@@ -3,6 +3,7 @@ import Tabla from '../components/Table';
 import { IconButton, Tab, Tabs, Box } from '@mui/material';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import CancelIcon from '@mui/icons-material/Cancel';
+import { Typography } from '@mui/material';
 import '../styles/Solicitudes.css';
 import { AuthContext } from '../pages/context/AuthContext';
 
@@ -210,7 +211,21 @@ const Solicitudes = () => {
 
   return (
     <div className="solicitudes-container">
-      <Box sx={{ width: '100%' }}>
+      <Typography variant="h4" sx={{ textAlign: 'center', mb: 4 }}>
+        Solicitudes de Aprobación
+      </Typography>
+      <Box sx={{
+            "& .MuiTab-root": {
+              color: "#000000",
+            },
+            "& .Mui-selected": {
+              backgroundColor: "#abbf9d",
+              color: "#ffff",
+            },
+            "& .MuiTabs-indicator": {
+              backgroundColor: "#abbf9d",
+            },
+          }}>
         <Tabs value={value} onChange={handleChangeTab} aria-label="Solicitudes">
           <Tab label="Pendientes" />
           <Tab label="Aceptadas" />

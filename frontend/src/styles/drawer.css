@@ -13,13 +13,13 @@
   transition: width 0.2s ease-in-out;
   overflow-y: auto;
   scrollbar-width: none;
+  transition: width 0.01s ease-in-out;
 }
 
 .drawer-menu {
   list-style: none;
   padding: 0;
   margin: 0;
-  width: 100%;
 }
 
 .drawer-item {
@@ -64,11 +64,8 @@
   opacity: 1;
 }
 
+
 .drawer-link:hover {
   background-color: #000000;
   color: #ffffff;
-}
-
-.drawer::-webkit-scrollbar {
-  display: none; /* Chrome, Safari, Opera */
 }

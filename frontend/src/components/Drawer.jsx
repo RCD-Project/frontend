@@ -7,7 +7,6 @@ import { AuthContext } from "../pages/context/AuthContext"; // Se asume que el A
 
 // Agregamos la propiedad roles a cada item de menú
 const menuItems = [
-
   { path: "/clientes", label: "Clientes", icon: <Users size={24} />, roles: ["superadmin", "coordinador", "coordinadorlogistico"] },
   { path: "/listadeobras", label: "Obras", icon: <Hammer size={24} />, roles: ["superadmin", "cliente"] },
   { path: "/solicitudes", label: "Solicitudes", icon: <ClipboardList size={24} />, roles: ["superadmin", "coordinador", "coordinadorlogistico"] },
@@ -21,8 +20,7 @@ const menuItems = [
 ];
 
 const Drawer = () => {
-  const [isOpen, setIsOpen] = useState(false);
-  // Se asume que el AuthContext provee una propiedad 'role' con el rol del usuario
+  const [isOpen, setIsOpen] = useState(false); // Controlar si el Drawer está abierto o cerrado
   const { role } = useContext(AuthContext);
 
   // Filtramos los items que se mostrarán según el rol
@@ -32,10 +30,10 @@ const Drawer = () => {
     <motion.nav
       className={`drawer ${isOpen ? "open" : ""}`}
       initial={{ width: "60px" }}
-      animate={{ width: isOpen ? "225px" : "60px" }}
-      transition={{ duration: 0.1, ease: "easeInOut" }}
-      onMouseEnter={() => setIsOpen(true)}
-      onMouseLeave={() => setIsOpen(false)}
+      animate={{ width: isOpen ? "220px" : "60px" }} // 220px cuando está abierto, 60px cuando está cerrado
+      transition={{ duration: 0.3 }}
+      onMouseEnter={() => setIsOpen(true)} // Se abre cuando el mouse entra
+      onMouseLeave={() => setIsOpen(false)} // Se cierra cuando el mouse sale
     >
       <ul className="drawer-menu">
         {filteredMenuItems.map((item, index) => (

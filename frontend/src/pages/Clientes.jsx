@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { Typography } from '@mui/material';
 import Tabla from '../components/Table';
 import { Button, IconButton, Menu, MenuItem } from '@mui/material';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
@@ -90,7 +91,9 @@ const Clientes = () => {
 
   return (
     <div>
-      <h1>Listado de Clientes</h1>
+      <Typography variant="h4" sx={{ textAlign: 'center', mb: 4 }}>
+        Listado de Clientes
+      </Typography>
       <Tabla
         datos={clientes}
         columnas={columnasClientes}

@@ -104,7 +104,9 @@ const EditarPuntoLimpio = () => {
     <ThemeProvider theme={theme}>
       <Container maxWidth="md">
         <Paper elevation={3} sx={{ padding: 6, marginTop: 6, borderRadius: 3 }}>
-          <Typography variant="h3" gutterBottom>Editar Punto Limpio</Typography>
+        <Typography variant="h3" gutterBottom>
+          Editar Punto Limpio
+        </Typography>
           {successMessage && <Alert severity="success">{successMessage}</Alert>}
           <Stepper activeStep={activeStep} alternativeLabel>
             {steps.map((label, index) => (
