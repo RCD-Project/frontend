@@ -83,7 +83,7 @@ const AltaPuntoLimpio = () => {
 
   // Actualiza la cantidad para cada tipo de material
   const handleMaterialQuantityChange = (materialType, quantity) => {
-    setFormData(prevState => ({
+    setFormData((prevState) => ({
       ...prevState,
       materiales: {
         ...prevState.materiales,
@@ -119,7 +119,8 @@ const AltaPuntoLimpio = () => {
         return res.json();
       })
       .then((data) => {
-        navigate("/listapuntolimpio", {
+        console.log("Punto Limpio creado:", data); // Muestra en consola todos los datos del punto limpio creado
+        navigate("/puntolimpio", {
           state: { successMessage: "Punto Limpio registrado con éxito." },
         });
       })
@@ -160,10 +161,9 @@ const AltaPuntoLimpio = () => {
       >
         <Box className="inner-content" sx={{ width: "100%", display: "flex", flexDirection: "column", alignItems: "center" }}>
           <Paper elevation={3} sx={{ padding: 6, borderRadius: 3 }}>
-          <Typography variant="h3" align="center" gutterBottom sx={{ mb: 4 }}>
-            Alta Punto Limpio
-          </Typography>
-
+            <Typography variant="h3" align="center" gutterBottom sx={{ mb: 4 }}>
+              Alta Punto Limpio
+            </Typography>
 
             <Stepper activeStep={activeStep} alternativeLabel sx={{ mb: 4 }}>
               {steps.map((label, index) => (

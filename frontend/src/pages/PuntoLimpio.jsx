@@ -42,7 +42,7 @@ const PuntoLimpio = () => {
   const toggleEstado = (id) => {
     const puntoLimpio = puntosLimpios.find((p) => p.id === id);
     if (!puntoLimpio) return;
-    const newEstado = puntoLimpio.estado === "activo" ? "inactivo" : "activo";
+    const newEstado = puntoLimpio.estado.trim().toLowerCase() === "activo" ? "inactivo" : "activo";
 
     fetch(`http://127.0.0.1:8000/api/puntos-limpios/modificar/${id}/`, {
       method: "PATCH",
@@ -85,7 +85,6 @@ const PuntoLimpio = () => {
 
   const columnasPuntosLimpios = [
     { field: "obra", headerName: "Nombre de la Obra", flex: 1 },
-    // { field: "tipo_material", headerName: "Tipo de Material", flex: 1 },
     { field: "tipo_contenedor", headerName: "Tipo de Contenedor", flex: 1 },
     { field: "estado", headerName: "Estado", flex: 1 },
     {
@@ -93,6 +92,7 @@ const PuntoLimpio = () => {
       headerName: "Acciones",
       flex: 1,
       sortable: false,
+      align: "center",
       renderCell: (params) => (
         <IconButton onClick={(event) => handleMenuOpen(event, params.row)}>
           <MoreVertIcon />
@@ -138,7 +138,9 @@ const PuntoLimpio = () => {
         {value === 0 && (
           <div>
             <Tabla
-              datos={puntosLimpios.filter((p) => p.estado === "activo")}
+              datos={puntosLimpios.filter(
+                (p) => p.estado && p.estado.trim().toLowerCase() === "activo"
+              )}
               columnas={columnasPuntosLimpios}
               filtroClave="id"
               filtroPlaceholder="Buscar por nombre de obra"
@@ -149,7 +151,9 @@ const PuntoLimpio = () => {
         {value === 1 && (
           <div>
             <Tabla
-              datos={puntosLimpios.filter((p) => p.estado === "inactivo")}
+              datos={puntosLimpios.filter(
+                (p) => p.estado && p.estado.trim().toLowerCase() === "inactivo"
+              )}
               columnas={columnasPuntosLimpios}
               filtroClave="obra"
               filtroPlaceholder="Buscar por nombre de obra"
@@ -189,7 +193,7 @@ const PuntoLimpio = () => {
             toggleEstado(selectedPuntoLimpio?.id);
           }}
         >
-          {selectedPuntoLimpio?.estado === "activo" ? (
+          {selectedPuntoLimpio?.estado.trim().toLowerCase() === "activo" ? (
             <ToggleOffIcon />
           ) : (
             <ToggleOnIcon />

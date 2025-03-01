@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from "react";
 import { 
   Container, 
   TextField, 
@@ -11,11 +11,12 @@ import {
   MenuItem, 
   Paper, 
   Box 
-} from '@mui/material';
+} from "@mui/material";
 import { createTheme, ThemeProvider } from '@mui/material/styles';
 import { LocalizationProvider, DatePicker } from '@mui/x-date-pickers';
-import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
-import { useNavigate } from 'react-router-dom';
+import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
+import { useNavigate } from "react-router-dom";
+import { AuthContext } from "../pages/context/AuthContext"; // Asegúrate de importar el contexto
 
 const steps = ['Información de la Capacitación'];
 
@@ -28,48 +29,57 @@ const AltaCapacitaciones = () => {
     tecnico: '',
     comentario: '',
   });
-  const [obras, setObras] = useState([]); // Inicia como un array vacío
-  const [tecnicos, setTecnicos] = useState([]); // Inicia como un array vacío
+  const [obras, setObras] = useState([]); // Array para las obras
+  const [tecnicos, setTecnicos] = useState([]); // Array para los técnicos
 
   const navigate = useNavigate();
+  const { token } = useContext(AuthContext); // Obtenemos el token
 
-  // Obtener las obras aprobadas desde la API
+  // Obtener las obras aprobadas desde la API con el token en el header
   useEffect(() => {
-    fetch('http://127.0.0.1:8000/api/obras/aprobadas/')
+    fetch('http://127.0.0.1:8000/api/obras/aprobadas/', {
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Token ${token}`,
+      }
+    })
       .then(response => response.json())
       .then(data => {
-        // Verificar que 'data' sea un array
         if (Array.isArray(data)) {
           setObras(data);
         } else {
           console.error('La respuesta de la API no es un array de obras:', data);
-          setObras([]); // Asignar un array vacío en caso de que la respuesta no sea válida
+          setObras([]);
         }
       })
       .catch(error => {
         console.error('Error fetching obras:', error);
-        setObras([]); // Asegúrate de que 'obras' siga siendo un array
+        setObras([]);
       });
-  }, []);
+  }, [token]);
 
-  // Obtener los técnicos desde la API
+  // Obtener los técnicos desde la API con el token en el header
   useEffect(() => {
-    fetch('http://localhost:8000/api/tecnicos/lista/')
+    fetch('http://localhost:8000/api/tecnicos/lista/', {
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Token ${token}`,
+      }
+    })
       .then(response => response.json())
       .then(data => {
-        // Verificar que 'data' sea un array
         if (Array.isArray(data)) {
           setTecnicos(data);
         } else {
           console.error('La respuesta de la API no es un array de técnicos:', data);
-          setTecnicos([]); // Asignar un array vacío en caso de que la respuesta no sea válida
+          setTecnicos([]);
         }
       })
       .catch(error => {
         console.error('Error fetching técnicos:', error);
-        setTecnicos([]); // Asegúrate de que 'tecnicos' siga siendo un array
+        setTecnicos([]);
       });
-  }, []);
+  }, [token]);
 
   const handleNext = () => {
     setActiveStep(prevStep => prevStep + 1);
@@ -98,7 +108,8 @@ const AltaCapacitaciones = () => {
     fetch('http://localhost:8000/api/capacitaciones/registro/', {
       method: 'POST',
       headers: {
-        'Content-Type': 'application/json'
+        'Content-Type': 'application/json',
+        'Authorization': `Token ${token}`  // Se envía el token en el header
       },
       body: JSON.stringify(payload)
     })
@@ -142,10 +153,9 @@ const AltaCapacitaciones = () => {
       >
         <Box sx={{ width: '100%' }}>
           <Paper elevation={3} sx={{ padding: 6, borderRadius: 3 }}>
-          <Typography variant="h3" gutterBottom sx={{ mb: 4, textAlign: 'center' }}>
-            Alta Capacitación
-          </Typography>
-
+            <Typography variant="h3" gutterBottom sx={{ mb: 4, textAlign: 'center' }}>
+              Alta Capacitación
+            </Typography>
 
             <Stepper activeStep={activeStep} alternativeLabel>
               {steps.map((label, index) => (
