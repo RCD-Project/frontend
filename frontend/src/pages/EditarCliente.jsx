@@ -27,9 +27,18 @@ const EditarCliente = () => {
   const queryParams = new URLSearchParams(location.search);
   const id = queryParams.get("id");
 
+  // Se obtiene el token desde localStorage
+  const token = localStorage.getItem("token");
+
   useEffect(() => {
     if (id) {
-      fetch(`http://localhost:8000/api/clientes/${id}/`)
+      fetch(`http://localhost:8000/api/clientes/${id}/`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Token ${token}`
+        }
+      })
         .then((response) => {
           if (!response.ok) {
             throw new Error("Error al obtener los datos del cliente");
@@ -51,7 +60,7 @@ const EditarCliente = () => {
         })
         .catch((error) => console.error("Error:", error));
     }
-  }, [id]);
+  }, [id, token]);
 
   const validate = () => {
     let newErrors = {};
@@ -84,7 +93,8 @@ const EditarCliente = () => {
       newErrors.mail = "Correo electrónico inválido.";
     }
     
-    setErrors(newErrors);
+    // Si cuentas con un estado de errores, puedes actualizarlo aquí:
+    // setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
@@ -113,11 +123,12 @@ const EditarCliente = () => {
           ? formData.fecha_ingreso.format("YYYY-MM-DD") 
           : null,
       };
-  
+
       const response = await fetch(`http://localhost:8000/api/clientes/${id}/actualizar/`, {
         method: 'PATCH',
         headers: {
           "Content-Type": "application/json",
+          "Authorization": `Token ${token}`
         },
         body: JSON.stringify(payload),
       });
@@ -146,9 +157,9 @@ const EditarCliente = () => {
     <ThemeProvider theme={theme}>
       <Container maxWidth="md">
         <Paper elevation={3} sx={{ padding: 6, marginTop: 6, borderRadius: 3 }}>
-        <Typography variant="h3" gutterBottom sx={{ textAlign: "center" }}>
-          Editar Cliente
-        </Typography>
+          <Typography variant="h3" gutterBottom sx={{ textAlign: "center" }}>
+            Editar Cliente
+          </Typography>
           <Stepper activeStep={activeStep} alternativeLabel>
             {steps.map((label, index) => (
               <Step key={index}>
@@ -252,10 +263,26 @@ const EditarCliente = () => {
                 </>
               )}
             </Grid>
+            {/* Reserva de espacio para el botón "Atrás" */}
             <Grid container spacing={3} justifyContent="space-between" sx={{ marginTop: 3 }}>
-              {activeStep !== 0 && (<Button onClick={handleBack} size="large">Atrás</Button>)}
-              {activeStep < steps.length - 1 && (<Button onClick={handleNext} size="large">Siguiente</Button>)}
-              {activeStep === steps.length - 1 && (<Button type="submit" variant="contained" color="primary" size="large">Guardar Cambios</Button>)}
+              <Button 
+                onClick={handleBack} 
+                size="large" 
+                disabled={activeStep === 0}
+                sx={{ visibility: activeStep === 0 ? 'hidden' : 'visible' }}
+              >
+                Atrás
+              </Button>
+              {activeStep < steps.length - 1 && (
+                <Button onClick={handleNext} size="large">
+                  Siguiente
+                </Button>
+              )}
+              {activeStep === steps.length - 1 && (
+                <Button type="submit" variant="contained" color="primary" size="large">
+                  Guardar Cambios
+                </Button>
+              )}
             </Grid>
           </form>
         </Paper>
