@@ -71,8 +71,12 @@ const LoginForm = () => {
         elevation={3}
         sx={{
           padding: 4,
-          backgroundColor: "rgba(0, 0, 0, 0.8)",
+          backgroundColor: "rgba(0, 0, 0, 0.7)", // Fondo semitransparente
           backdropFilter: "blur(4px)",
+          maxWidth: "600px", // Ancho limitado
+          width: "100%",
+          textAlign: "center",
+          borderRadius: "8px", // Bordes redondeados
         }}
       >
         <Typography variant="h5" gutterBottom sx={{ color: "#fff" }}>
@@ -152,12 +156,14 @@ const LoginForm = () => {
               <Button
                 type="submit"
                 variant="contained"
-                color="primary"
                 sx={{
                   marginTop: "20px",
-                  backgroundColor: "#abbf9d",
-                  "&:hover": { backgroundColor: "#d1e063" },
+                  backgroundColor: "#abbf9d", // Color de fondo como en la landing
+                  "&:hover": { backgroundColor: "#d1e063" }, // Hover color
                   color: "#fff",
+                  padding: "8px 16px", // Botón más pequeño y amigable
+                  fontSize: "16px", // Ajustar tamaño de fuente
+                  borderRadius: "20px", // Bordes redondeados
                 }}
                 fullWidth
               >

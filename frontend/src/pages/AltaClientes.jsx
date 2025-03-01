@@ -39,6 +39,49 @@ const AltaCliente = () => {
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
 
+  const validate = () => {
+    let newErrors = {};
+
+    if (!formData.nombre.trim() || !/^[a-zA-Z\s]{3,}$/.test(formData.nombre)) {
+      newErrors.nombre = "Nombre inválido. Mínimo 3 letras y solo caracteres alfabéticos.";
+    }
+    if (!formData.direccion.trim()) {
+      newErrors.direccion = "La dirección es obligatoria.";
+    }
+    if (!/^\d{9}$/.test(formData.contacto)) {
+      newErrors.contacto = "El contacto debe tener exactamente 9 dígitos numéricos.";
+    }
+    if (!formData.nombre_contacto.trim() || !/^[a-zA-Z\s]{3,}$/.test(formData.nombre_contacto)) {
+      newErrors.nombre_contacto = "Nombre de contacto inválido. Mínimo 3 letras.";
+    }
+    if (!formData.razon_social.trim()) {
+      newErrors.razon_social = "Razón Social es obligatoria.";
+    }
+    if (!formData.direccion_fiscal.trim()) {
+      newErrors.direccion_fiscal = "Dirección fiscal es obligatoria.";
+    }
+    if (!/^\d{12}$/.test(formData.rut)) {
+      newErrors.rut = "RUT inválido. Debe contener exactamente 12 números.";
+    }
+    if (!formData.fecha_ingreso) {
+      newErrors.fecha_ingreso = "Fecha de ingreso es obligatoria.";
+    } else {
+      const fecha = new Date(formData.fecha_ingreso);
+      if (isNaN(fecha.getTime())) {
+        newErrors.fecha_ingreso = "Fecha de ingreso no válida.";
+      }
+    }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.mail)) {
+      newErrors.mail = "Correo electrónico inválido.";
+    }
+    if (!/(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$/.test(formData.password)) {
+      newErrors.password = "Contraseña inválida. Mínimo 8 caracteres, con al menos una letra y un número.";
+    }
+    
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
   const handleNext = () => {
     setActiveStep((prevStep) => prevStep + 1);
   };

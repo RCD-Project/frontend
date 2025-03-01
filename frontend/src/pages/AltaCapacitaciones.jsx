@@ -81,6 +81,27 @@ const AltaCapacitaciones = () => {
       });
   }, [token]);
 
+
+  const validate = () => {
+    let newErrors = {};
+
+    if (!formData.fecha || isNaN(new Date(formData.fecha).getTime())) {
+      newErrors.fecha = "Fecha no válida.";
+    }
+    if (!formData.motivo.trim()) {
+      newErrors.motivo = "El motivo es obligatorio.";
+    }
+    if (!formData.obra) {
+      newErrors.obra = "Debe seleccionar una obra.";
+    }
+    if (!formData.tecnico) {
+      newErrors.tecnico = "Debe seleccionar un técnico.";
+    }
+    
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+  
   const handleNext = () => {
     setActiveStep(prevStep => prevStep + 1);
   };

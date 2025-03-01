@@ -46,6 +46,29 @@ const EditarTransportista = () => {
     }
   }, [id]);
 
+  const validate = () => {
+    let newErrors = {};
+
+    if (!formData.nombre.trim()) {
+      newErrors.nombre = "El nombre es obligatorio.";
+    }
+    if (!/^\d{9}$/.test(formData.contacto)) {
+      newErrors.contacto = "El contacto debe tener exactamente 9 dígitos numéricos.";
+    }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
+      newErrors.email = "Correo electrónico inválido.";
+    }
+    if (!formData.tipoVehiculo.trim()) {
+      newErrors.tipoVehiculo = "El tipo de vehículo es obligatorio.";
+    }
+    if (!formData.tipoMaterial) {
+      newErrors.tipoMaterial = "Debe seleccionar un tipo de material.";
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+  
   const handleNext = () => {
     setActiveStep((prevStep) => prevStep + 1);
   };

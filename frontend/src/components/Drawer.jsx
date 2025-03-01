@@ -1,11 +1,22 @@
 import React, { useState, useContext } from "react";
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
-import { GraduationCap, FileText, Calendar, Users, ClipboardList, Truck, Factory, ClipboardPenLine, UserPlus, Hammer, MapPinCheck } from "lucide-react";
+import {
+  GraduationCap,
+  FileText,
+  Calendar,
+  Users,
+  ClipboardList,
+  Truck,
+  Factory,
+  ClipboardPenLine,
+  Hammer,
+  MapPinCheck,
+  LogOut
+} from "lucide-react";
 import "../styles/drawer.css";
-import { AuthContext } from "../pages/context/AuthContext"; // Se asume que el AuthContext tiene el rol
+import { AuthContext } from "../pages/context/AuthContext"; // Se asume que el AuthContext tiene el rol y la función logout
 
-// Agregamos la propiedad roles a cada item de menú
 const menuItems = [
   { path: "/clientes", label: "Clientes", icon: <Users size={24} />, roles: ["superadmin", "coordinador", "coordinadorlogistico"] },
   { path: "/listadeobras", label: "Obras", icon: <Hammer size={24} />, roles: ["superadmin", "cliente"] },
@@ -20,20 +31,23 @@ const menuItems = [
 ];
 
 const Drawer = () => {
-  const [isOpen, setIsOpen] = useState(false); // Controlar si el Drawer está abierto o cerrado
-  const { role } = useContext(AuthContext);
+  const [isOpen, setIsOpen] = useState(false);
+  const { role, logout } = useContext(AuthContext);
 
-  // Filtramos los items que se mostrarán según el rol
   const filteredMenuItems = menuItems.filter(item => item.roles.includes(role));
+
+  const handleLogout = () => {
+    logout();
+  };
 
   return (
     <motion.nav
       className={`drawer ${isOpen ? "open" : ""}`}
       initial={{ width: "60px" }}
-      animate={{ width: isOpen ? "220px" : "60px" }} // 220px cuando está abierto, 60px cuando está cerrado
+      animate={{ width: isOpen ? "220px" : "60px" }}
       transition={{ duration: 0.3 }}
-      onMouseEnter={() => setIsOpen(true)} // Se abre cuando el mouse entra
-      onMouseLeave={() => setIsOpen(false)} // Se cierra cuando el mouse sale
+      onMouseEnter={() => setIsOpen(true)}
+      onMouseLeave={() => setIsOpen(false)}
     >
       <ul className="drawer-menu">
         {filteredMenuItems.map((item, index) => (
@@ -45,21 +59,23 @@ const Drawer = () => {
             transition={{ duration: 0.1, delay: isOpen ? 0.15 : 0 }}
           >
             <Link to={item.path} className="drawer-link">
-              <div className="drawer-icon">
-                {item.icon}
-              </div>
-              <motion.span
-                className="drawer-text"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: isOpen ? 1 : 0 }}
-                transition={{ duration: 0.1, delay: isOpen ? 0.15 : 0 }}
-              >
+              <div className="drawer-icon">{item.icon}</div>
+              <motion.span className="drawer-text" animate={{ opacity: isOpen ? 1 : 0 }}>
                 {item.label}
               </motion.span>
             </Link>
           </motion.li>
         ))}
       </ul>
+
+      <div className="logout-button">
+        <Link to="/" className="logout-link" onClick={handleLogout}>
+          <div className="drawer-icon">
+            <LogOut size={24} />
+          </div>
+          <span className="drawer-text">Cerrar sesión</span>
+        </Link>
+      </div>
     </motion.nav>
   );
 };

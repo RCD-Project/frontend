@@ -48,6 +48,68 @@ const AltaObra = () => {
 
   const navigate = useNavigate();
 
+
+  const validate = () => {
+    let newErrors = {};
+
+    if (!formData.nombreObra.trim()) {
+      newErrors.nombreObra = "El nombre de la obra es obligatorio.";
+    }
+    if (!formData.localidad.trim()) {
+      newErrors.localidad = "La localidad es obligatoria.";
+    }
+    if (!formData.barrio.trim()) {
+      newErrors.barrio = "El barrio es obligatorio.";
+    }
+    if (!formData.direccion.trim()) {
+      newErrors.direccion = "La dirección es obligatoria.";
+    }
+    if (!/^[0-9]+$/.test(formData.visitasMes)) {
+      newErrors.visitasMes = "Debe ser un número válido.";
+    }
+    if (!formData.inicioObra || isNaN(new Date(formData.inicioObra).getTime())) {
+      newErrors.inicioObra = "Fecha de inicio no válida.";
+    }
+    if (!formData.duracionObra.trim()) {
+      newErrors.duracionObra = "La duración de la obra es obligatoria.";
+    }
+    if (!formData.etapaObra.trim()) {
+      newErrors.etapaObra = "La etapa de la obra es obligatoria.";
+    }
+    if (!formData.jefeObra.trim()) {
+      newErrors.jefeObra = "El nombre del jefe de obra es obligatorio.";
+    }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.emailJefe)) {
+      newErrors.emailJefe = "Correo electrónico inválido.";
+    }
+    if (!/^\d{9}$/.test(formData.telefonoJefe)) {
+      newErrors.telefonoJefe = "El teléfono debe tener exactamente 9 dígitos.";
+    }
+    if (!formData.capataz.trim()) {
+      newErrors.capataz = "El nombre del capataz es obligatorio.";
+    }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.emailCapataz)) {
+      newErrors.emailCapataz = "Correo electrónico inválido.";
+    }
+    if (!/^\d{9}$/.test(formData.telefonoCapataz)) {
+      newErrors.telefonoCapataz = "El teléfono debe tener exactamente 9 dígitos.";
+    }
+    if (!formData.encargado.trim()) {
+      newErrors.encargado = "El nombre del encargado es obligatorio.";
+    }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.emailEncargado)) {
+      newErrors.emailEncargado = "Correo electrónico inválido.";
+    }
+    if (!/^\d{9}$/.test(formData.telefonoEncargado)) {
+      newErrors.telefonoEncargado = "El teléfono debe tener exactamente 9 dígitos.";
+    }
+    
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+
+
   const handleNext = () => setActiveStep((prev) => prev + 1);
   const handleBack = () => setActiveStep((prev) => prev - 1);
   const handleChange = (e) =>

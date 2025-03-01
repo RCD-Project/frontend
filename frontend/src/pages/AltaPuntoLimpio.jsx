@@ -65,6 +65,33 @@ const AltaPuntoLimpio = () => {
       .catch((err) => console.error("Error al cargar las obras:", err));
   }, [token]);
 
+  const validate = () => {
+    let newErrors = {};
+
+    if (!formData.obra) {
+      newErrors.obra = "Debe seleccionar una obra.";
+    }
+    if (!formData.ubicacion.trim()) {
+      newErrors.ubicacion = "La ubicación es obligatoria.";
+    }
+    if (!/^[0-9]+$/.test(formData.cantidad)) {
+      newErrors.cantidad = "Debe ser un número válido.";
+    }
+    if (!/^[0-9]+$/.test(formData.metros_cuadrados)) {
+      newErrors.metros_cuadrados = "Debe ser un número válido.";
+    }
+    if (!formData.tipo_contenedor.trim()) {
+      newErrors.tipo_contenedor = "El tipo de contenedor es obligatorio.";
+    }
+    if (!formData.fecha_ingreso || isNaN(new Date(formData.fecha_ingreso).getTime())) {
+      newErrors.fecha_ingreso = "Fecha de ingreso no válida.";
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  
   const handleNext = () => {
     setActiveStep((prevStep) => prevStep + 1);
   };

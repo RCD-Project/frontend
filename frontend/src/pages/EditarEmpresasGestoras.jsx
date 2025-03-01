@@ -40,6 +40,27 @@ const EditarEmpresaGestora = () => {
     }
   }, [id]);
 
+  const validate = () => {
+    let newErrors = {};
+
+    if (!formData.nombre.trim()) {
+      newErrors.nombre = "El nombre es obligatorio.";
+    }
+    if (!formData.ubicacion.trim()) {
+      newErrors.ubicacion = "La ubicación es obligatoria.";
+    }
+    if (!/^\d{9}$/.test(formData.contacto)) {
+      newErrors.contacto = "El contacto debe tener exactamente 9 dígitos numéricos.";
+    }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
+      newErrors.email = "Correo electrónico inválido.";
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  
   const handleNext = () => {
     setActiveStep((prevStep) => prevStep + 1);
   };

@@ -43,6 +43,39 @@ const FormularioCoordinaciones = () => {
       .catch((err) => console.error("Error al obtener obras:", err));
   }, [role, user, token]);
 
+  const validate = () => {
+    let newErrors = {};
+
+    if (!formData.obra) {
+      newErrors.obra = "Debe seleccionar una obra.";
+    }
+    if (!formData.descripcion.trim()) {
+      newErrors.descripcion = "La descripción es obligatoria.";
+    }
+    if (!formData.observacion.trim()) {
+      newErrors.observacion = "La observación es obligatoria.";
+    }
+    if (!formData.estado.trim()) {
+      newErrors.estado = "El estado es obligatorio.";
+    }
+    if (!formData.fechaSolicitud || isNaN(new Date(formData.fechaSolicitud).getTime())) {
+      newErrors.fechaSolicitud = "Fecha de solicitud no válida.";
+    }
+    if (!formData.fechaRetiro || isNaN(new Date(formData.fechaRetiro).getTime())) {
+      newErrors.fechaRetiro = "Fecha de retiro no válida.";
+    }
+    if (!/^[0-9]+(\.[0-9]+)?$/.test(formData.pesaje)) {
+      newErrors.pesaje = "El pesaje debe ser un número válido.";
+    }
+    if (!formData.tipoMaterial) {
+      newErrors.tipoMaterial = "Debe seleccionar un tipo de material.";
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };

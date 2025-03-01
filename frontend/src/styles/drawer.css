@@ -3,30 +3,41 @@
   left: 0;
   top: 0;
   height: 100%;
+  width: 60px;
   background: #abbf9d;
   box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
   z-index: 100;
   display: flex;
   flex-direction: column;
-  align-items: flex-start;
+  justify-content: space-between; /* Mantiene el logout anclado */
   padding: 10px 0;
-  transition: width 0.2s ease-in-out;
   overflow-y: auto;
-  scrollbar-width: none;
-  transition: width 0.01s ease-in-out;
+  overflow-x: hidden; /* 🔥 Elimina la barra de scroll horizontal */
+  transition: width 0.2s ease-in-out;
+  white-space: nowrap; /* Evita que el texto se expanda y cree scroll horizontal */
+}
+
+/* Ocultar scrollbars */
+.drawer::-webkit-scrollbar {
+  display: none;
 }
 
 .drawer-menu {
   list-style: none;
   padding: 0;
   margin: 0;
+  flex-grow: 1;
+  overflow-y: auto;
+  overflow-x: hidden; /* 🔥 Evita scroll horizontal dentro del menú */
 }
 
+/* Para que el contenido no se desborde */
 .drawer-item {
   width: 100%;
   display: flex;
   height: 70px;
   justify-content: flex-start;
+  overflow: hidden; /* 🔥 Evita que los elementos se expandan más de lo debido */
 }
 
 .drawer-link {
@@ -42,6 +53,9 @@
   padding: 10px 15px;
   border-bottom: 1px solid #ffffff;
   transition: background-color 0.3s, color 0.3s;
+  white-space: nowrap; /* 🔥 Evita que el texto de los enlaces cree scroll horizontal */
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .drawer-icon {
@@ -57,15 +71,63 @@
   opacity: 0;
   transition: opacity 0.1s ease-in-out;
   max-width: 150px;
-  white-space: normal;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .drawer.open .drawer-text {
   opacity: 1;
 }
 
-
+/* Hover normal para los botones del drawer */
 .drawer-link:hover {
   background-color: #000000;
   color: #ffffff;
+}
+
+.logout-button {
+  width: 100%;
+  background-color: #abbf9d;
+  border-top: 1px solid #ffffff;
+  display: flex;
+  justify-content: center; /* Centra el contenido */
+  align-items: center; /* Centra verticalmente */
+  padding: 10px 0;
+}
+
+.logout-link {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start; /* Alineación inicial como los otros botones */
+  gap: 10px;
+  font-family: 'Montserrat', sans-serif;
+  font-weight: 600;
+  font-size: 1.1rem;
+  color: #000000;
+  text-decoration: none;
+  padding: 10px 15px;
+  transition: background-color 0.3s ease-in-out, color 0.3s ease-in-out;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Asegura que el icono tenga la misma alineación */
+.logout-button .drawer-icon {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 40px;
+  height: 40px;
+  flex-shrink: 0;
+}
+
+/* 🔥 Hover SOLO para el botón de logout */
+.logout-button:hover {
+  background-color: #ff0000 !important;
+}
+
+.logout-button:hover .logout-link {
+  color: #ffffff !important;
 }

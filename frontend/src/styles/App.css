@@ -15,7 +15,6 @@ body {
   overflow-y: auto;
 }
 
-
 /* Contenedor principal: organiza Header y Main Content */
 .app-container {
   display: flex;

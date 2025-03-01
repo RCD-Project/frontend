@@ -43,3 +43,20 @@
   width: var(--logo-width);
   height: auto;
 }
+
+/* Estilo para el botón de volver */
+.header-back-button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  margin-right: 20px; /* Espacio entre el botón y el título */
+  display: flex;
+  align-items: center;
+}
+
+/* Alineación del ícono de la flecha */
+.header-back-button svg {
+  color: #fff;
+  font-size: 30px; /* Ajusta el tamaño de la flecha */
+}
