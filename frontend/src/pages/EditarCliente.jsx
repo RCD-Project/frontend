@@ -15,7 +15,7 @@ const EditarCliente = () => {
     direccion: "",
     contacto: "",
     nombre_contacto: "",
-    mail: "",
+    email: "",
     fecha_ingreso: null,
     razon_social: "",
     direccion_fiscal: "",
@@ -51,7 +51,8 @@ const EditarCliente = () => {
             direccion: data.direccion,
             contacto: data.contacto,
             nombre_contacto: data.nombre_contacto,
-            mail: data.mail,
+            // Aquí se extrae el email desde el usuario asociado
+            email: data.usuario ? data.usuario.email : data.email || "",
             fecha_ingreso: dayjs(data.fecha_ingreso),
             razon_social: data.razon_social,
             direccion_fiscal: data.direccion_fiscal,
@@ -89,12 +90,10 @@ const EditarCliente = () => {
     if (!formData.fecha_ingreso || isNaN(new Date(formData.fecha_ingreso).getTime())) {
       newErrors.fecha_ingreso = "Fecha de ingreso no válida.";
     }
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.mail)) {
-      newErrors.mail = "Correo electrónico inválido.";
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
+      newErrors.email = "Correo electrónico inválido.";
     }
     
-    // Si cuentas con un estado de errores, puedes actualizarlo aquí:
-    // setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
@@ -116,6 +115,7 @@ const EditarCliente = () => {
 
   const handleSubmit = async (event) => {
     event.preventDefault();
+    if (!validate()) return;
     try {
       const payload = {
         ...formData,
@@ -254,8 +254,8 @@ const EditarCliente = () => {
                       label="Email"
                       type="email"
                       fullWidth
-                      name="mail"
-                      value={formData.mail}
+                      name="email"
+                      value={formData.email}
                       onChange={handleChange}
                       required
                     />
@@ -263,7 +263,6 @@ const EditarCliente = () => {
                 </>
               )}
             </Grid>
-            {/* Reserva de espacio para el botón "Atrás" */}
             <Grid container spacing={3} justifyContent="space-between" sx={{ marginTop: 3 }}>
               <Button 
                 onClick={handleBack} 

@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { useNavigate, useLocation, Link } from 'react-router-dom';
 import Tabla from '../components/Table';
-import { Typography, Button, IconButton, Menu, MenuItem, Alert } from '@mui/material';
+import { Typography, Button, IconButton, Menu, MenuItem, Alert, CircularProgress } from '@mui/material';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import EditIcon from '@mui/icons-material/Edit';
@@ -18,9 +18,8 @@ const ListaDeCoordinaciones = () => {
   const successMessage = location.state?.successMessage || "";
 
   useEffect(() => {
-    // Se asume que el endpoint devuelve solo coordinaciones aceptadas,
-    // o se puede filtrar en el frontend si se envían todas.
-    fetch("http://127.0.0.1:8000/api/coordinaciones/aceptadas/", {
+    // Se asume que el endpoint devuelve coordinaciones aceptadas
+    fetch("http://127.0.0.1:8000/api/coordinacionretiro/aceptadas/", {
       headers: {
         "Content-Type": "application/json",
         "Authorization": `Token ${token}`,
@@ -53,9 +52,21 @@ const ListaDeCoordinaciones = () => {
     setSelectedCoordinacion(null);
   };
 
-  // Se definen las columnas para mostrar los campos solicitados
+  // Definición de columnas. En la columna "Obra" se utiliza renderCell para mostrar el nombre de la obra:
   const columnasCoordinaciones = [
-    { field: 'obra', headerName: 'Obra', flex: 1 },
+    {
+      field: 'obra',
+      headerName: 'Obra',
+      flex: 1,
+      renderCell: (params) => {
+        // Si params.row.obra es un objeto, intentamos extraer 'nombre_obra'
+        if (params.row.obra && typeof params.row.obra === 'object') {
+          return params.row.obra.nombre_obra || params.row.obra.nombre || "Sin nombre";
+        }
+        // Si es un valor primitivo (por ejemplo, el ID), lo mostramos tal cual
+        return params.row.obra || "Sin nombre";
+      },
+    },
     { field: 'tipo_material', headerName: 'Tipo de Material', flex: 1 },
     { field: 'transportista', headerName: 'Transportista', flex: 1 },
     { field: 'fecha_solicitud', headerName: 'Fecha de Solicitud', flex: 1 },
@@ -96,13 +107,22 @@ const ListaDeCoordinaciones = () => {
       />
 
       <Menu anchorEl={anchorEl} open={Boolean(anchorEl)} onClose={handleMenuClose}>
-        <MenuItem onClick={() => { handleMenuClose(); navigate(`/detallescoordinacion?id=${selectedCoordinacion?.id}`); }}>
+        <MenuItem onClick={() => { 
+            handleMenuClose(); 
+            navigate(`/detallescoordinacion?id=${selectedCoordinacion?.id}`);
+          }}>
           <VisibilityIcon /> Ver detalles
         </MenuItem>
-        <MenuItem onClick={() => { handleMenuClose(); navigate(`/editarcoordinacion?id=${selectedCoordinacion?.id}`); }}>
+        <MenuItem onClick={() => { 
+            handleMenuClose(); 
+            navigate(`/editarcoordinacion?id=${selectedCoordinacion?.id}`);
+          }}>
           <EditIcon /> Editar
         </MenuItem>
-        <MenuItem onClick={() => { handleMenuClose(); /* Aquí podrías agregar la lógica de eliminación */ }}>
+        <MenuItem onClick={() => { 
+            handleMenuClose(); 
+            /* Lógica de eliminación aquí */
+          }}>
           <DeleteIcon style={{ color: 'red' }} /> Eliminar
         </MenuItem>
       </Menu>

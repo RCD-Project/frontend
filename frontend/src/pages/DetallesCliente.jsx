@@ -102,9 +102,10 @@ const DetallesCliente = () => {
             <Grid item xs={12} sm={6}>
               <Paper sx={{ padding: 2, backgroundColor: '#f8f9f9' }}>
                 <Typography variant="body1" sx={{ fontWeight: 'bold' }}>Email</Typography>
-                <Typography variant="body2">{cliente.mail}</Typography>
+                <Typography variant="body2">{cliente.email}</Typography>
               </Paper>
             </Grid>
+            
 
             {/* Fecha de Ingreso */}
             <Grid item xs={12} sm={6}>

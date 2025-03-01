@@ -25,51 +25,45 @@ const theme = createTheme({
 const AltaUsuario = () => {
   const { token } = useContext(AuthContext);
   const [formData, setFormData] = useState({
-    nombre: "",
+    username: "",
     email: "",
     password: "",
     rol: "",
   });
   const [successMessage, setSuccessMessage] = useState("");
+  const [errorMessage, setErrorMessage] = useState("");
   const navigate = useNavigate();
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = (event) => {
+  const handleSubmit = async (event) => {
     event.preventDefault();
-
     console.log("Enviando formulario:", formData);
 
-    fetch("http://127.0.0.1:8000/api/usuarios/super-admin-crear-usuario/", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": `Token ${token}`, // Se utiliza el token extraído del AuthContext
-      },
-      body: JSON.stringify(formData),
-    })
-      .then((res) => {
-        if (!res.ok) {
-          return res.text().then((errorText) => {
-            console.error("Respuesta de error:", errorText);
-            throw new Error(errorText);
-          });
-        }
-        return res.json();
-      })
-      .then((data) => {
-        console.log("Usuario registrado:", data);
-        setSuccessMessage("Usuario registrado con éxito.");
-        navigate("/", {
-          state: { successMessage: "Usuario registrado con éxito." },
-        });
-      })
-      .catch((err) => {
-        console.error("Error al registrar el usuario:", err);
-        alert("Error al registrar el usuario:\n" + err.message);
+    try {
+      const response = await fetch("http://127.0.0.1:8000/api/usuarios/crear-usuario/", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Token ${token}`,
+        },
+        body: JSON.stringify(formData),
       });
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error("Respuesta de error:", errorText);
+        throw new Error(errorText);
+      }
+      const data = await response.json();
+      console.log("Usuario registrado:", data);
+      setSuccessMessage("Usuario registrado con éxito.");
+      navigate("/", { state: { successMessage: "Usuario registrado con éxito." } });
+    } catch (err) {
+      console.error("Error al registrar el usuario:", err);
+      setErrorMessage("Error al registrar el usuario: " + err.message);
+    }
   };
 
   return (
@@ -95,13 +89,19 @@ const AltaUsuario = () => {
               </Alert>
             )}
 
+            {errorMessage && (
+              <Alert severity="error" sx={{ mb: 4 }}>
+                {errorMessage}
+              </Alert>
+            )}
+
             <form onSubmit={handleSubmit}>
               <Grid container spacing={4}>
                 <Grid item xs={12}>
                   <TextField
                     label="Nombre"
-                    name="nombre"
-                    value={formData.nombre}
+                    name="username"
+                    value={formData.username}
                     onChange={handleChange}
                     fullWidth
                     required
@@ -139,11 +139,12 @@ const AltaUsuario = () => {
                     fullWidth
                     required
                   >
+                    <MenuItem value="tecnico">Técnico</MenuItem>
                     <MenuItem value="coordinador">Coordinador</MenuItem>
                     <MenuItem value="coordinadorlogistico">
                       Coordinador Logístico
                     </MenuItem>
-                    <MenuItem value="tecnico">Técnico</MenuItem>
+                    <MenuItem value="supervisor">Supervisor</MenuItem>
                   </TextField>
                 </Grid>
               </Grid>

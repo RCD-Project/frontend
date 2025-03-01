@@ -10,6 +10,7 @@ import Body from "./components/body";
 // Importa tus páginas
 import Clientes from "./pages/Clientes";
 import AltaCliente from "./pages/AltaClientes";
+import AltaUsuario from "./pages/AltaUsuario";  // <-- Nueva página AltaUsuario
 import DetallesCliente from "./pages/DetallesCliente";
 import EditarCliente from "./pages/EditarCliente";
 import PuntoLimpio from "./pages/PuntoLimpio";
@@ -46,9 +47,9 @@ import "./styles/App.css";
 const AppContent = () => {
   const [headerOpacity, setHeaderOpacity] = useState(1);
   const [drawerWidth, setDrawerWidth] = useState("60px");
-  const [isDrawerOpen, setIsDrawerOpen] = useState(false); // Definir estado para el drawer visible  
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const { token: authToken, login, logout } = useContext(AuthContext);
-  const isLoggedIn = Boolean(authToken); // Usa authToken aquí
+  const isLoggedIn = Boolean(authToken);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -65,11 +66,11 @@ const AppContent = () => {
 
   const handleDrawerHover = (hoverState) => {
     if (hoverState) {
-      setDrawerWidth("220px"); // Se expandirá cuando se pase el ratón
-      setIsDrawerOpen(true); // Se abrirá el Drawer
+      setDrawerWidth("220px");
+      setIsDrawerOpen(true);
     } else {
-      setDrawerWidth("60px"); // Se reducirá cuando se retire el ratón
-      setIsDrawerOpen(false); // Se cerrará el Drawer
+      setDrawerWidth("60px");
+      setIsDrawerOpen(false);
     }
   };
 
@@ -78,53 +79,34 @@ const AppContent = () => {
     if (isLoggedIn) {
       logout();
     } else {
-      // Simulamos un login asignando un token (por ejemplo, "test")
       login({ name: "Test User" }, "test");
     }
   };
+
   useEffect(() => {
     if (isLoggedIn) {
-      setIsDrawerOpen(true); // Cambia 'setDrawerVisible' por 'setIsDrawerOpen'
+      setIsDrawerOpen(true);
     } else {
-      setIsDrawerOpen(false); // Cambia 'setDrawerVisible' por 'setIsDrawerOpen'
+      setIsDrawerOpen(false);
     }
   }, [isLoggedIn]);
   
-
   return (
     <div className="app-container">
-      {/* Botón de prueba para alternar logueo */}
-      <button
-        onClick={toggleAuth}
-        style={{
-          position: "fixed",
-          top: "80px",
-          right: "20px",
-          zIndex: 300,
-          padding: "0.5rem 1rem",
-        }}
-      >
-        {isLoggedIn ? "Simular deslogueo" : "Simular logueo"}
-      </button>
-
-      {/* Componente para seleccionar rol en pruebas */}
-      {/* {isLoggedIn && <RoleSelector />} */}
-
       <Header opacity={headerOpacity} isLoggedIn={isLoggedIn} />
       {isLoggedIn && (
         <Drawer
           isOpen={isDrawerOpen}
-          onMouseEnter={() => handleDrawerHover(true)} // Cuando el ratón entra
-          onMouseLeave={() => handleDrawerHover(false)} // Cuando el ratón sale
+          onMouseEnter={() => handleDrawerHover(true)}
+          onMouseLeave={() => handleDrawerHover(false)}
         />
       )}
       <main
         className="body-content"
         style={{
-          marginLeft: isLoggedIn ? "60px" : 0, // Solo mover el contenido si el drawer está visible
-          transition: "margin-left 0.3s ease", // Suavizar la transición
-          marginTop: "70px",  // Ajuste para que no se superponga al header
-          
+          marginLeft: isLoggedIn ? "60px" : 0,
+          transition: "margin-left 0.3s ease",
+          marginTop: "70px",
         }}
       >
         <Body>
@@ -133,24 +115,20 @@ const AppContent = () => {
             <Route
               path="/clientes"
               element={
-                <RoleBasedRoute allowedRoles={["superadmin", "coordinadorlogistico", "coordinador"]}>
+                <RoleBasedRoute allowedRoles={["superadmin", "coordinador", "coordinadorlogistico"]}>
                   <Clientes />
                 </RoleBasedRoute>
               }
             />
+            <Route path="/altacoordinaciones" element={
+              <RoleBasedRoute allowedRoles={["superadmin", "supervisor", "cliente"]}>
+                <Coordinaciones />
+              </RoleBasedRoute>
+            } />
             <Route
-              path="/altacoordinaciones"
-              element={
-                <RoleBasedRoute allowedRoles={["superadmin", "supervisor", "cliente" ]}>
-                  <Coordinaciones />
-                </RoleBasedRoute>
-              }
-            />
-
-<Route
               path="/coordinaciones"
               element={
-                <RoleBasedRoute allowedRoles={["superadmin", "supervisor", "cliente" ]}>
+                <RoleBasedRoute allowedRoles={["superadmin", "supervisor", "cliente"]}>
                   <ListaDeCoordinaciones />
                 </RoleBasedRoute>
               }
@@ -158,7 +136,7 @@ const AppContent = () => {
             <Route
               path="/transportistas"
               element={
-                <RoleBasedRoute allowedRoles={["superadmin", "coordinadorlogistico" ]}>
+                <RoleBasedRoute allowedRoles={["superadmin", "coordinadorlogistico"]}>
                   <Transportistas />
                 </RoleBasedRoute>
               }
@@ -166,12 +144,17 @@ const AppContent = () => {
             <Route
               path="/empresasgestoras"
               element={
-                <RoleBasedRoute allowedRoles={["superadmin", "coordinadorlogistico" ]}>
+                <RoleBasedRoute allowedRoles={["superadmin", "coordinadorlogistico"]}>
                   <EmpresasGestoras />
                 </RoleBasedRoute>
               }
             />
             <Route path="/altacliente" element={<AltaCliente />} />
+            <Route path="/altausuario" element={
+              <RoleBasedRoute allowedRoles={["superadmin"]}>
+                <AltaUsuario />
+              </RoleBasedRoute>
+            } />
             <Route path="/detallescliente" element={isLoggedIn ? <DetallesCliente /> : <Landing />} />
             <Route
               path="/editarcliente"
@@ -231,7 +214,6 @@ const AppContent = () => {
                 </RoleBasedRoute>
               }
             />
-
             <Route
               path="/altaobra"
               element={
@@ -240,7 +222,6 @@ const AppContent = () => {
                 </RoleBasedRoute>
               }
             />
-
             <Route
               path="/detallesobra"
               element={
@@ -249,7 +230,6 @@ const AppContent = () => {
                 </RoleBasedRoute>
               }
             />
-
             <Route
               path="/editarobra"
               element={
@@ -258,7 +238,6 @@ const AppContent = () => {
                 </RoleBasedRoute>
               }
             />
-
             <Route
               path="/altapuntolimpio"
               element={
@@ -267,7 +246,6 @@ const AppContent = () => {
                 </RoleBasedRoute>
               }
             />
-
             <Route
               path="/detallespuntolimpio"
               element={
@@ -276,7 +254,6 @@ const AppContent = () => {
                 </RoleBasedRoute>
               }
             />
-
             <Route
               path="/editarpuntolimpio"
               element={
@@ -285,9 +262,7 @@ const AppContent = () => {
                 </RoleBasedRoute>
               }
             />
-
             <Route path="/login" element={<LoginForm />} />
-            
             <Route path="/detalletransportista" element={<DetallesTransportista />} />
             <Route
               path="/detallestransportista"
@@ -297,7 +272,6 @@ const AppContent = () => {
                 </RoleBasedRoute>
               }
             />
-
             <Route
               path="/editartransportista"
               element={
@@ -306,7 +280,6 @@ const AppContent = () => {
                 </RoleBasedRoute>
               }
             />
-
             <Route
               path="/altatransportistas"
               element={
@@ -315,7 +288,6 @@ const AppContent = () => {
                 </RoleBasedRoute>
               }
             />
-
             <Route path="/altaempresas" element={<AltaEmpresas />} />
             <Route
               path="/altaempresas"
@@ -325,7 +297,6 @@ const AppContent = () => {
                 </RoleBasedRoute>
               }
             />
-
             <Route
               path="/editarempresasgestoras"
               element={
@@ -334,7 +305,6 @@ const AppContent = () => {
                 </RoleBasedRoute>
               }
             />
-
             <Route
               path="/altacapacitaciones"
               element={
@@ -351,7 +321,6 @@ const AppContent = () => {
                 </RoleBasedRoute>
               }
             />
-
             <Route
               path="/Formularios"
               element={

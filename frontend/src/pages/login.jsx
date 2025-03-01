@@ -33,16 +33,19 @@ const LoginForm = () => {
       );
       if (response.ok) {
         const data = await response.json();
-        // Se envía un objeto con email y rol, de acuerdo a lo que devuelve el backend
         login({ email: data.email, rol: data.rol }, data.token);
         navigate("/");
       } else {
-        console.error("Error al iniciar sesión");
+        const errorText = await response.text();
+        console.error("Error al iniciar sesión:", errorText);
+        alert("Error al iniciar sesión. Revisa la consola para más detalles.");
       }
     } catch (error) {
       console.error("Error en la red:", error);
+      alert("Error en la red, por favor intenta nuevamente.");
     }
   };
+  
 
   return (
     <Container

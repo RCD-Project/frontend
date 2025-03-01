@@ -27,63 +27,81 @@ const AltaCliente = () => {
     direccion: "",
     contacto: "",
     nombre_contacto: "",
-    mail: "",
+    email: "",
     password: "",
     fecha_ingreso: null,
     razon_social: "",
     direccion_fiscal: "",
     rut: "",
   });
+  const [errors, setErrors] = useState({});
   const [successMessage, setSuccessMessage] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
 
-  const validate = () => {
+  // Validación específica para cada paso
+  const validateStep = (step) => {
     let newErrors = {};
-
-    if (!formData.nombre.trim() || !/^[a-zA-Z\s]{3,}$/.test(formData.nombre)) {
-      newErrors.nombre = "Nombre inválido. Mínimo 3 letras y solo caracteres alfabéticos.";
-    }
-    if (!formData.direccion.trim()) {
-      newErrors.direccion = "La dirección es obligatoria.";
-    }
-    if (!/^\d{9}$/.test(formData.contacto)) {
-      newErrors.contacto = "El contacto debe tener exactamente 9 dígitos numéricos.";
-    }
-    if (!formData.nombre_contacto.trim() || !/^[a-zA-Z\s]{3,}$/.test(formData.nombre_contacto)) {
-      newErrors.nombre_contacto = "Nombre de contacto inválido. Mínimo 3 letras.";
-    }
-    if (!formData.razon_social.trim()) {
-      newErrors.razon_social = "Razón Social es obligatoria.";
-    }
-    if (!formData.direccion_fiscal.trim()) {
-      newErrors.direccion_fiscal = "Dirección fiscal es obligatoria.";
-    }
-    if (!/^\d{12}$/.test(formData.rut)) {
-      newErrors.rut = "RUT inválido. Debe contener exactamente 12 números.";
-    }
-    if (!formData.fecha_ingreso) {
-      newErrors.fecha_ingreso = "Fecha de ingreso es obligatoria.";
-    } else {
-      const fecha = new Date(formData.fecha_ingreso);
-      if (isNaN(fecha.getTime())) {
-        newErrors.fecha_ingreso = "Fecha de ingreso no válida.";
+    if (step === 0) {
+      // Validar Información General
+      if (!formData.nombre.trim() || !/^[a-zA-Z\s]{3,}$/.test(formData.nombre)) {
+        newErrors.nombre =
+          "Nombre inválido. Mínimo 3 letras y solo caracteres alfabéticos.";
+      }
+      if (!formData.direccion.trim()) {
+        newErrors.direccion = "La dirección es obligatoria.";
+      }
+      if (!/^\d{9}$/.test(formData.contacto)) {
+        newErrors.contacto =
+          "El contacto debe tener exactamente 9 dígitos numéricos.";
+      }
+      if (
+        !formData.nombre_contacto.trim() ||
+        !/^[a-zA-Z\s]{3,}$/.test(formData.nombre_contacto)
+      ) {
+        newErrors.nombre_contacto =
+          "Nombre de contacto inválido. Mínimo 3 letras.";
+      }
+    } else if (step === 1) {
+      // Validar Detalles Fiscales
+      if (!formData.razon_social.trim()) {
+        newErrors.razon_social = "Razón Social es obligatoria.";
+      }
+      if (!formData.direccion_fiscal.trim()) {
+        newErrors.direccion_fiscal = "Dirección fiscal es obligatoria.";
+      }
+      if (!/^\d{12}$/.test(formData.rut)) {
+        newErrors.rut = "RUT inválido. Debe contener exactamente 12 números.";
+      }
+    } else if (step === 2) {
+      // Validar Contacto
+      if (!formData.fecha_ingreso) {
+        newErrors.fecha_ingreso = "Fecha de ingreso es obligatoria.";
+      } else {
+        const fecha = new Date(formData.fecha_ingreso);
+        if (isNaN(fecha.getTime())) {
+          newErrors.fecha_ingreso = "Fecha de ingreso no válida.";
+        }
+      }
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
+        newErrors.email = "Correo electrónico inválido.";
+      }
+      if (
+        !/(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$/.test(formData.password)
+      ) {
+        newErrors.password =
+          "Contraseña inválida. Mínimo 8 caracteres, con al menos una letra y un número.";
       }
     }
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.mail)) {
-      newErrors.mail = "Correo electrónico inválido.";
-    }
-    if (!/(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$/.test(formData.password)) {
-      newErrors.password = "Contraseña inválida. Mínimo 8 caracteres, con al menos una letra y un número.";
-    }
-    
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
   const handleNext = () => {
-    setActiveStep((prevStep) => prevStep + 1);
+    if (validateStep(activeStep)) {
+      setActiveStep((prevStep) => prevStep + 1);
+    }
   };
 
   const handleBack = () => {
@@ -100,6 +118,8 @@ const AltaCliente = () => {
 
   const handleSubmit = (event) => {
     event.preventDefault();
+    // Validar paso 2 antes de enviar
+    if (!validateStep(activeStep)) return;
     setIsLoading(true);
 
     // Convertir la fecha a formato "YYYY-MM-DD" si existe
@@ -131,20 +151,22 @@ const AltaCliente = () => {
       .then((data) => {
         console.log("Cliente registrado:", data);
         setSuccessMessage("Cliente registrado con éxito.");
-        setErrorMessage(""); // Limpiar error en caso de éxito
+        setErrorMessage("");
         setIsLoading(false);
-        // Redirigir a la lista de clientes y pasar un mensaje de éxito
         navigate("/", {
           state: { successMessage: "Cliente registrado con éxito." },
         });
       })
       .catch((err) => {
         console.error("Error al dar de alta el cliente:", err);
-        // Personalizar el mensaje de error de acuerdo a lo sucedido
         if (err.message.toLowerCase().includes("email")) {
-          setErrorMessage("El email ya está registrado. Por favor, utiliza otro email.");
+          setErrorMessage(
+            "El email ya está registrado. Por favor, utiliza otro email."
+          );
         } else {
-          setErrorMessage("Ocurrió un error al registrar el cliente. Intenta nuevamente.");
+          setErrorMessage(
+            "Ocurrió un error al registrar el cliente. Intenta nuevamente."
+          );
         }
         setIsLoading(false);
       });
@@ -214,6 +236,8 @@ const AltaCliente = () => {
                         name="nombre"
                         value={formData.nombre}
                         onChange={handleChange}
+                        error={!!errors.nombre}
+                        helperText={errors.nombre}
                         required
                       />
                     </Grid>
@@ -224,6 +248,8 @@ const AltaCliente = () => {
                         name="direccion"
                         value={formData.direccion}
                         onChange={handleChange}
+                        error={!!errors.direccion}
+                        helperText={errors.direccion}
                         required
                       />
                     </Grid>
@@ -234,6 +260,8 @@ const AltaCliente = () => {
                         name="contacto"
                         value={formData.contacto}
                         onChange={handleChange}
+                        error={!!errors.contacto}
+                        helperText={errors.contacto}
                         required
                       />
                     </Grid>
@@ -244,6 +272,8 @@ const AltaCliente = () => {
                         name="nombre_contacto"
                         value={formData.nombre_contacto}
                         onChange={handleChange}
+                        error={!!errors.nombre_contacto}
+                        helperText={errors.nombre_contacto}
                         required
                       />
                     </Grid>
@@ -258,6 +288,8 @@ const AltaCliente = () => {
                         name="razon_social"
                         value={formData.razon_social}
                         onChange={handleChange}
+                        error={!!errors.razon_social}
+                        helperText={errors.razon_social}
                         required
                       />
                     </Grid>
@@ -268,6 +300,8 @@ const AltaCliente = () => {
                         name="direccion_fiscal"
                         value={formData.direccion_fiscal}
                         onChange={handleChange}
+                        error={!!errors.direccion_fiscal}
+                        helperText={errors.direccion_fiscal}
                         required
                       />
                     </Grid>
@@ -278,6 +312,8 @@ const AltaCliente = () => {
                         name="rut"
                         value={formData.rut}
                         onChange={handleChange}
+                        error={!!errors.rut}
+                        helperText={errors.rut}
                         required
                       />
                     </Grid>
@@ -292,7 +328,13 @@ const AltaCliente = () => {
                           value={formData.fecha_ingreso || null}
                           onChange={handleDateChange}
                           renderInput={(params) => (
-                            <TextField {...params} fullWidth required />
+                            <TextField
+                              {...params}
+                              fullWidth
+                              error={!!errors.fecha_ingreso}
+                              helperText={errors.fecha_ingreso}
+                              required
+                            />
                           )}
                         />
                       </LocalizationProvider>
@@ -302,9 +344,11 @@ const AltaCliente = () => {
                         label="Email"
                         type="email"
                         fullWidth
-                        name="mail"
-                        value={formData.mail}
+                        name="email"
+                        value={formData.email}
                         onChange={handleChange}
+                        error={!!errors.email}
+                        helperText={errors.email}
                         required
                       />
                     </Grid>
@@ -316,6 +360,8 @@ const AltaCliente = () => {
                         name="password"
                         value={formData.password}
                         onChange={handleChange}
+                        error={!!errors.password}
+                        helperText={errors.password}
                         required
                       />
                     </Grid>
@@ -328,19 +374,16 @@ const AltaCliente = () => {
                     <Button onClick={handleBack}>Atrás</Button>
                   </Grid>
                 )}
-
                 {activeStep === 0 && (
                   <Grid item xs={12} sx={{ textAlign: "right" }}>
                     <Button onClick={handleNext}>Siguiente</Button>
                   </Grid>
                 )}
-
                 {activeStep !== 0 && activeStep < steps.length - 1 && (
                   <Grid item xs={6} sx={{ textAlign: "right" }}>
                     <Button onClick={handleNext}>Siguiente</Button>
                   </Grid>
                 )}
-
                 {activeStep === steps.length - 1 && (
                   <Grid item xs={6} sx={{ textAlign: "right" }}>
                     <Button
@@ -348,7 +391,9 @@ const AltaCliente = () => {
                       variant="contained"
                       color="primary"
                       disabled={isLoading}
-                      startIcon={isLoading && <CircularProgress size={20} color="inherit" />}
+                      startIcon={
+                        isLoading && <CircularProgress size={20} color="inherit" />
+                      }
                     >
                       {isLoading ? "Procesando..." : "Finalizar"}
                     </Button>

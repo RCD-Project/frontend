@@ -1,3 +1,4 @@
+// Solicitudes.jsx
 import React, { useState, useEffect, useContext } from 'react';
 import Tabla from '../components/Table';
 import { Button, Tab, Tabs, Box, Alert, CircularProgress } from '@mui/material';
@@ -47,6 +48,7 @@ const Solicitudes = () => {
       }).then((res) => res.json()),
     ])
       .then(([clientesSolicitudes, obrasSolicitudes, coordinacionesSolicitudes]) => {
+        // Mapeo para solicitudes de clientes
         const clientesData = clientesSolicitudes.map((item) => ({
           ...item,
           tipo: 'cliente',
@@ -57,31 +59,33 @@ const Solicitudes = () => {
             item.cliente_nombre ||
             (item.cliente && item.cliente.cliente_nombre) ||
             'Sin nombre',
-          solicitante: item.cliente_nombre || 'Sin solicitante',
+          solicitante: "Alta Cliente",
           fecha: formatDate(item.cliente?.fecha_solicitud || item.fecha_solicitud),
         }));
 
+        // Mapeo para solicitudes de obra
         const obrasData = obrasSolicitudes.map((item) => ({
           ...item,
           tipo: 'obra',
-          id: item.obra
-            ? `obra-${item.obra}`
-            : `obra-${item.obra?.obra || Math.random()}`,
-          nombre: item.obra?.obra || item.obra || 'Sin nombre',
-          solicitante: item.cliente || 'Sin solicitante',
+          id: item.obra ? `obra-${item.obra}` : `obra-${Math.random()}`,
+          // Extraer el nombre de la obra; se asume que la API retorna la propiedad "nombre_obra"
+          nombre: item.obra?.nombre_obra || item.nombre_obra || 'Sin nombre',
+          solicitante: "Alta obra",
           fecha: formatDate(item.fecha_solicitud),
         }));
 
+        // Mapeo para solicitudes de coordinación
         const coordinacionesData = coordinacionesSolicitudes.map((item) => ({
           ...item,
           tipo: 'coordinacion',
           id: `coordinacion-${item.id}`,
-          // Puedes personalizar estos campos según la información que quieras mostrar
-          nombre: item.obra ? item.obra.nombre : 'Sin obra',
-          solicitante: item.transportista ? item.transportista.nombre : 'Sin transportista',
+          // Se intenta extraer el nombre de la obra desde el objeto anidado
+          nombre: item.obra ? (item.obra.nombre_obra || item.obra.nombre || 'Sin obra') : 'Sin obra',
+          solicitante: "Coordinacion retiro",
           fecha: formatDate(item.fecha_solicitud),
         }));
 
+        // Se combinan todas las solicitudes
         setSolicitudes([...clientesData, ...obrasData, ...coordinacionesData]);
       })
       .catch((error) => {
@@ -107,7 +111,7 @@ const Solicitudes = () => {
       url = `http://127.0.0.1:8000/api/obras/solicitudes/${obraId}/aprobar/`;
     } else if (solicitud.tipo === "coordinacion") {
       const coordId = id.split('-')[1];
-      url = `http://127.0.0.1:8000/api/coordinaciones/solicitudes/${coordId}/aprobar/`;
+      url = `http://127.0.0.1:8000/api/coordinacionretiro/${coordId}/aceptar/`;
     }
 
     fetch(url, {
@@ -161,7 +165,7 @@ const Solicitudes = () => {
       url = `http://127.0.0.1:8000/api/obras/solicitudes/${obraId}/rechazar/`;
     } else if (solicitud.tipo === "coordinacion") {
       const coordId = id.split('-')[1];
-      url = `http://127.0.0.1:8000/api/coordinaciones/solicitudes/${coordId}/rechazar/`;
+      url = `http://127.0.0.1:8000/api/coordinacionretiro/solicitudes/${coordId}/rechazar/`;
     }
 
     fetch(url, {
@@ -202,6 +206,7 @@ const Solicitudes = () => {
     setLoadingSolicitudId(null);
   };
 
+  // Columnas para cada pestaña
   const columnasPendientes = [
     { field: 'nombre', headerName: 'Nombre', flex: 1 },
     { field: 'solicitante', headerName: 'Solicitante', flex: 1 },
@@ -213,7 +218,6 @@ const Solicitudes = () => {
       sortable: false,
       renderCell: (params) => (
         <div
-          className="acciones-container"
           style={{
             display: 'flex',
             justifyContent: 'center',
@@ -256,7 +260,6 @@ const Solicitudes = () => {
       sortable: false,
       renderCell: (params) => (
         <div
-          className="acciones-container"
           style={{
             display: 'flex',
             justifyContent: 'center',
