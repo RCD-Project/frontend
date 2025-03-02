@@ -53,6 +53,7 @@ const Transportistas = () => {
       method: 'PATCH',
       headers: {
         'Content-Type': 'application/json',
+        'Authorization': `Token ${token}`,
       },
       body: JSON.stringify({ estado: newEstado }),
     })
