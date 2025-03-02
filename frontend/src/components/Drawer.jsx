@@ -49,6 +49,7 @@ const Drawer = () => {
       initial={{ width: "60px" }}
       animate={{ width: isOpen ? "220px" : "60px" }}
       transition={{ duration: 0.3 }}
+      style={{ overflowX: "hidden", maxWidth: "100vw" }} // 🔹 Evita que sobrepase la pantalla
       onMouseEnter={() => setIsOpen(true)}
       onMouseLeave={() => setIsOpen(false)}
     >

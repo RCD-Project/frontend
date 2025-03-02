@@ -1,10 +1,20 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { Container, Typography, Button, Grid, Paper } from "@mui/material";
 import { Link } from "react-router-dom";
-import logo from "../assets/logo.png"; // Importa la imagen logo
-import section4 from "../assets/section6.jpg"; // Importa la imagen de fondo
+import logo from "../assets/logo.png"; 
+import section4 from "../assets/section6.jpg";
+import recurso from "../assets/recurso.png";
+
+
 
 const Landing = () => {
+  useEffect(() => {
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = "auto"; // Restaura el scroll al salir
+    };
+  }, []);
+
   return (
     <Container
       maxWidth={false}
@@ -13,12 +23,10 @@ const Landing = () => {
         position: "fixed",
         top: 0,
         left: 0,
-        margin: 0,
-        padding: 0,
         width: "100vw",
         height: "100vh",
         zIndex: 1000,
-        backgroundImage: `url(${section4})`, // Imagen de fondo
+        backgroundImage: `url(${section4})`,
         backgroundSize: "cover",
         backgroundPosition: "center",
         backgroundRepeat: "no-repeat",
@@ -26,20 +34,42 @@ const Landing = () => {
         alignItems: "center",
         justifyContent: "center",
         overflowY: "hidden",
+        paddingTop: "60px",
+        marginBottom: "50px", // 🔹 Empuja el contenido hacia arriba
       }}
     >
-      <Paper
-        elevation={3}
-        sx={{
-          padding: "40px", // Un poco más de padding
-          backgroundColor: "rgba(0, 0, 0, 0.7)", // Fondo negro como el login
-          backdropFilter: "blur(6px)", // Efecto de desenfoque más suave
-          maxWidth: "600px", // Cuadro más estrecho, con tamaño máximo restaurado
-          width: "100%",
-          textAlign: "center",
-          borderRadius: "8px", // Bordes redondeados
+     
+     <img
+        src={recurso}
+        alt="Recurso"
+        style={{
+          position: "absolute",
+          top: "0px",
+          left: "0px",
+          width: "120px",
+          height: "auto",
+          zIndex: 1100,
         }}
-      >
+      />
+
+
+    <Paper
+      elevation={3}
+      sx={{
+        padding: "40px",
+        backgroundColor: "rgba(0, 0, 0, 0.7)",
+        backdropFilter: "blur(6px)",
+        maxWidth: "600px",
+        width: "100%",
+        textAlign: "center",
+        borderRadius: "8px",
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        justifyContent: "center",
+        transform: "translateY(-50px)", // 🔹 Mueve el Paper 50px hacia arriba
+      }}
+    >
         {/* Logo más pequeño */}
         <img
           src={logo}

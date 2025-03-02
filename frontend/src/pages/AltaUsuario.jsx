@@ -34,6 +34,26 @@ const AltaUsuario = () => {
   const [errorMessage, setErrorMessage] = useState("");
   const navigate = useNavigate();
 
+  const validate = () => {
+    let newErrors = {};
+
+    if (!formData.username.trim()) {
+      newErrors.username = "El nombre de usuario es obligatorio.";
+    }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
+      newErrors.email = "Correo electrónico inválido.";
+    }
+    if (!/(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$/.test(formData.password)) {
+      newErrors.password = "La contraseña debe tener al menos 8 caracteres, con una letra y un número.";
+    }
+    if (!formData.rol) {
+      newErrors.rol = "Debe seleccionar un rol.";
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+  
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
@@ -79,7 +99,7 @@ const AltaUsuario = () => {
       >
         <Box sx={{ width: "100%" }}>
           <Paper elevation={3} sx={{ padding: 6, borderRadius: 3 }}>
-            <Typography variant="h3" gutterBottom sx={{ mb: 4 }}>
+          <Typography variant="h3" gutterBottom sx={{ textAlign: 'center' }}>
               Alta Usuario
             </Typography>
 
