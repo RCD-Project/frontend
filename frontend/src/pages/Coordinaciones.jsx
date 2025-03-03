@@ -33,8 +33,8 @@ const initialFormState = {
   pesaje: "",
   comentarios: "",
   tipoMaterial: "", // clave del material, ej: "madera"
-  transportista: "",         // id del transportista seleccionado
-  empresa_tratamiento: "",   // id de la empresa seleccionada
+  transportista: "", // id del transportista seleccionado
+  empresa_tratamiento: "", // id de la empresa seleccionada
 };
 
 const FormularioCoordinaciones = () => {
@@ -143,7 +143,7 @@ const FormularioCoordinaciones = () => {
     }
   }, [formData.transportista, transportistas]);
 
-  // Si se selecciona un material, y el transportista actual no coincide, se limpia el transportista
+  // Si se selecciona un material y el transportista actual no coincide, se limpia el transportista
   useEffect(() => {
     if (formData.tipoMaterial && formData.transportista) {
       const selectedTransportista = transportistas.find(
@@ -171,9 +171,11 @@ const FormularioCoordinaciones = () => {
 
   const handleSubmit = async (event) => {
     event.preventDefault();
-
+  
+    // (Aquí puedes tener validaciones previas)
+  
     const payload = {
-      obra: formData.obra,
+      obra: parseInt(formData.obra), // Aseguramos enviar un número
       descripcion: formData.descripcion,
       observaciones: formData.observacion,
       fecha_retiro: formData.fechaRetiro
@@ -181,36 +183,33 @@ const FormularioCoordinaciones = () => {
         : null,
       pesaje: formData.pesaje,
       comentarios: formData.comentarios,
-      tipo_material: formData.tipoMaterial, // Se envía como tipo_material
-      transportista: formData.transportista,
-      empresa_tratamiento: formData.empresa_tratamiento,
+      tipo_material: formData.tipoMaterial,
+      transportista: formData.transportista ? parseInt(formData.transportista) : null,
+      empresa_tratamiento: formData.empresa_tratamiento ? parseInt(formData.empresa_tratamiento) : null,
     };
-
-    console.log("Enviando solicitud de coordinación:", payload);
-
+  
     try {
-      const response = await fetch(
-        "http://127.0.0.1:8000/api/coordinacionretiro/registro/",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Token ${token}`,
-          },
-          body: JSON.stringify(payload),
-        }
-      );
-
+      const response = await fetch("http://127.0.0.1:8000/api/coordinacionretiro/registro/", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Token ${token}`,
+        },
+        body: JSON.stringify(payload),
+      });
+  
       if (response.ok) {
         const data = await response.json();
         console.log("Solicitud de coordinación creada:", data);
         navigate("/", { state: { successMessage: "Solicitud enviada con éxito." } });
       } else {
+        // Leer el cuerpo de la respuesta una sola vez:
+        const errorText = await response.text();
         let errorData;
         try {
-          errorData = await response.json();
+          errorData = JSON.parse(errorText);
         } catch (err) {
-          errorData = { detail: await response.text() };
+          errorData = { detail: errorText };
         }
         console.error("Error específico:", errorData);
         setErrorMessage("Error al enviar la solicitud: " + JSON.stringify(errorData));
@@ -220,8 +219,9 @@ const FormularioCoordinaciones = () => {
       setErrorMessage("Error de red. Intenta nuevamente.");
     }
   };
+  
 
-  // Función para limpiar el formulari
+  // Función para limpiar el formulario
   const handleReset = () => {
     setFormData(initialFormState);
   };
@@ -255,7 +255,10 @@ const FormularioCoordinaciones = () => {
                 <MenuItem key={obra.id} value={obra.id}>
                   {obra.nombre_constructora && obra.nombre_obra
                     ? `${obra.nombre_constructora} - ${obra.nombre_obra}`
-                    : obra.nombre_constructora || obra.nombre_obra || obra.nombre || "Sin nombre"}
+                    : obra.nombre_constructora ||
+                      obra.nombre_obra ||
+                      obra.nombre ||
+                      "Sin nombre"}
                 </MenuItem>
               ))}
             </TextField>
@@ -340,8 +343,6 @@ const FormularioCoordinaciones = () => {
             />
           </Grid>
 
-        
-
           <Grid item xs={6}>
             <LocalizationProvider dateAdapter={AdapterDayjs}>
               <DatePicker
@@ -396,7 +397,12 @@ const FormularioCoordinaciones = () => {
           </Grid>
         </Grid>
 
-        <Grid container spacing={2} justifyContent="center" sx={{ marginTop: "20px" }}>
+        <Grid
+          container
+          spacing={2}
+          justifyContent="center"
+          sx={{ marginTop: "20px" }}
+        >
           <Grid item>
             <Button
               type="submit"
