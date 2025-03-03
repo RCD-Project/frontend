@@ -3,7 +3,7 @@ import { Container, Typography, Button, Grid, Paper } from "@mui/material";
 import { Link } from "react-router-dom";
 import logo from "../assets/logo.png"; 
 import section4 from "../assets/section6.jpg";
-import recurso from "../assets/recurso.png";
+// import recurso from "../assets/recurso.png";
 
 
 
@@ -39,7 +39,7 @@ const Landing = () => {
       }}
     >
      
-     <img
+     {/* <img
         src={recurso}
         alt="Recurso"
         style={{
@@ -50,7 +50,7 @@ const Landing = () => {
           height: "auto",
           zIndex: 1100,
         }}
-      />
+      /> */}
 
 
     <Paper

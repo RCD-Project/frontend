@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import {
   Container,
   FormControl,
@@ -14,8 +14,9 @@ import {
 import { LocalizationProvider, DatePicker } from "@mui/x-date-pickers";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { useFormStore } from "../context/FormContext";
+import { useNavigate } from "react-router-dom";
+import dayjs from "dayjs";
 
-const tecnicos = ["Técnico 1", "Técnico 2", "Técnico 3"];
 const motivos = [
   "Capacitación Inicial",
   "Capacitación Intermedia",
@@ -26,38 +27,81 @@ const motivos = [
 
 const Page1 = ({ nextStep }) => {
   const { data, updateData } = useFormStore();
+  const [tecnicoList, setTecnicoList] = useState([]);
+  const [selectedTecnico, setSelectedTecnico] = useState("");
+  const navigate = useNavigate();
 
-  // Se cargan los datos guardados en el estado global
+  // Extraer email del usuario almacenado en localStorage
+  const userData = JSON.parse(localStorage.getItem("user") || "{}");
+  const loggedEmail = userData?.email || "";
+  const token = localStorage.getItem("token");
+
+  useEffect(() => {
+    const fetchTecnicos = async () => {
+      try {
+        const res = await fetch("http://localhost:8000/api/tecnicos/lista/", {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Token ${token}`,
+          },
+        });
+
+        if (!res.ok) throw new Error(`Error HTTP: ${res.status}`);
+
+        const techs = await res.json();
+        if (!Array.isArray(techs)) throw new Error("Formato de respuesta inválido");
+
+        const filteredTecnicos = techs.filter((tecnico) => {
+          const emailCandidate = tecnico?.usuario?.email || tecnico.email;
+          return emailCandidate?.toLowerCase() === loggedEmail.toLowerCase();
+        });
+
+        setTecnicoList(filteredTecnicos);
+        if (filteredTecnicos.length > 0) {
+          const firstId = String(filteredTecnicos[0].id);
+          setSelectedTecnico(firstId);
+          updateData("page1", { ...data.page1, tecnico: firstId });
+        }
+      } catch (error) {
+        console.error("❌ Error al obtener técnicos:", error);
+      }
+    };
+
+    if (token && loggedEmail) {
+      fetchTecnicos();
+    }
+  }, [loggedEmail, token, updateData]);
+
+  // Datos seguros del formulario
   const safeFormData = {
-    tecnico: data?.page1?.tecnico || "",
-    obra: data?.page1?.obra || "", // Nombre de la obra
+    obra: data?.page1?.obraId || "",
     fecha: data?.page1?.fecha || null,
-    motivos: data?.page1?.motivos || [],
+    motivos: Array.isArray(data?.page1?.motivos) ? data.page1.motivos : [],
     otroMotivo: data?.page1?.otroMotivo || "",
   };
 
-  // Calcula el string a mostrar combinando nombre y dirección
   const obraDisplay =
     safeFormData.obra && data?.page1?.direccion
-      ? `${safeFormData.obra} - ${data.page1.direccion}`
+      ? `${data?.page1?.obra} - ${data.page1.direccion}`
       : safeFormData.obra;
 
-  const handleChange = (field, value) => {
-    updateData("page1", { ...safeFormData, [field]: value });
+  const handleFieldChange = (field, value) => {
+    updateData("page1", { ...data.page1, [field]: value });
   };
 
   const handleMotivoChange = (motivo) => {
-    const nuevosMotivos = safeFormData.motivos.includes(motivo)
+    const nuevosMotivos = (safeFormData.motivos || []).includes(motivo)
       ? safeFormData.motivos.filter((m) => m !== motivo)
       : [...safeFormData.motivos, motivo];
-
-    updateData("page1", { ...safeFormData, motivos: nuevosMotivos });
+  
+    updateData("page1", { ...data.page1, motivos: nuevosMotivos });
   };
+  
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (!safeFormData.tecnico || !safeFormData.obra || !safeFormData.fecha) {
-      alert("Todos los campos obligatorios deben completarse");
+    if (!selectedTecnico || !safeFormData.obra || !safeFormData.fecha) {
+      alert("⚠ Todos los campos obligatorios deben completarse");
       return;
     }
     nextStep();
@@ -70,18 +114,27 @@ const Page1 = ({ nextStep }) => {
         <FormControl fullWidth margin="normal" required>
           <InputLabel>Técnico</InputLabel>
           <Select
-            value={safeFormData.tecnico}
-            onChange={(e) => handleChange("tecnico", e.target.value)}
+            value={selectedTecnico}
+            onChange={(e) => {
+              const newValue = e.target.value;
+              setSelectedTecnico(newValue);
+              updateData("page1", { ...data.page1, tecnico: newValue });
+            }}
           >
-            {tecnicos.map((tecnico) => (
-              <MenuItem key={tecnico} value={tecnico}>
-                {tecnico}
+            {tecnicoList.length > 0 ? (
+              tecnicoList.map((tecnico) => (
+                <MenuItem key={tecnico.id} value={String(tecnico.id)}>
+                  {tecnico.nombre}
+                </MenuItem>
+              ))
+            ) : (
+              <MenuItem value="">
+                {loggedEmail ? "No se encontró técnico registrado" : "Usuario no autenticado"}
               </MenuItem>
-            ))}
+            )}
           </Select>
         </FormControl>
 
-        {/* Se muestra el nombre y la dirección de la obra de forma no editable */}
         <TextField
           label="Obra / Dirección"
           value={obraDisplay}
@@ -94,8 +147,8 @@ const Page1 = ({ nextStep }) => {
         <LocalizationProvider dateAdapter={AdapterDayjs}>
           <DatePicker
             label="Fecha"
-            value={safeFormData.fecha}
-            onChange={(newValue) => handleChange("fecha", newValue)}
+            value={safeFormData.fecha ? dayjs(safeFormData.fecha) : null}
+            onChange={(newValue) => handleFieldChange("fecha", newValue)}
             slotProps={{
               textField: { fullWidth: true, required: true, margin: "normal" },
             }}

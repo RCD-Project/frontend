@@ -17,15 +17,26 @@ import {
 import { LocalizationProvider, DatePicker } from "@mui/x-date-pickers";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { useNavigate } from "react-router-dom";
-import { createTheme, ThemeProvider } from '@mui/material/styles';
-import { Anvil, TreeDeciduous, CupSoda, TriangleAlert, TrendingUpDown, Recycle } from 'lucide-react';
-import { AuthContext } from "../pages/context/AuthContext";  // Asegúrate de que el contexto se importa correctamente
+import { createTheme, ThemeProvider } from "@mui/material/styles";
+import {
+  Anvil,
+  TreeDeciduous,
+  CupSoda,
+  TriangleAlert,
+  TrendingUpDown,
+  Recycle,
+  FileText
+} from "lucide-react";
+import { AuthContext } from "../pages/context/AuthContext";
+import dayjs from "dayjs";
 
 const steps = ["Información General", "Detalles de Material", "Fecha"];
 
 const AltaPuntoLimpio = () => {
   const [activeStep, setActiveStep] = useState(0);
-  const [obras, setObras] = useState([]); // Estado para guardar las obras de la API
+  const [obras, setObras] = useState([]);
+  const [transportistas, setTransportistas] = useState([]);
+  const [errors, setErrors] = useState({});
   const [formData, setFormData] = useState({
     obra: "",
     ubicacion: "",
@@ -37,22 +48,22 @@ const AltaPuntoLimpio = () => {
     observaciones: "",
     clasificacion: "correcta",
     fecha_ingreso: null,
+    // Se guardarán las cantidades por cada tipo, por ejemplo: { escombro_limpio: "3", plastico: "2", ... }
     materiales: {},
   });
 
-  const { token } = useContext(AuthContext);  // Obtener el token desde el AuthContext
+  const { token } = useContext(AuthContext);
   const navigate = useNavigate();
 
-  // Obtener las obras aprobadas de la API al cargar el componente
+  // Cargar las obras aprobadas
   useEffect(() => {
-    if (!token) return; // No realizar la petición si no hay token
-
+    if (!token) return;
     fetch("http://127.0.0.1:8000/api/obras/aprobadas/", {
       method: "GET",
       headers: {
         Accept: "application/json",
         "Content-Type": "application/json",
-        "Authorization": `Token ${token}`,  // Incluir el token en los headers
+        Authorization: `Token ${token}`,
       },
     })
       .then((res) => {
@@ -65,17 +76,35 @@ const AltaPuntoLimpio = () => {
       .catch((err) => console.error("Error al cargar las obras:", err));
   }, [token]);
 
+  // Cargar la lista de transportistas
+  useEffect(() => {
+    if (!token) return;
+    fetch("http://127.0.0.1:8000/api/transportistas/lista/", {
+      method: "GET",
+      headers: {
+        Accept: "application/json",
+        "Content-Type": "application/json",
+        Authorization: `Token ${token}`,
+      },
+    })
+      .then((res) => {
+        if (!res.ok) {
+          throw new Error(`Error HTTP: ${res.status}`);
+        }
+        return res.json();
+      })
+      .then((data) => setTransportistas(data))
+      .catch((err) => console.error("Error al cargar transportistas:", err));
+  }, [token]);
+
+  // Validación básica de campos obligatorios
   const validate = () => {
     let newErrors = {};
-
     if (!formData.obra) {
       newErrors.obra = "Debe seleccionar una obra.";
     }
     if (!formData.ubicacion.trim()) {
       newErrors.ubicacion = "La ubicación es obligatoria.";
-    }
-    if (!/^[0-9]+$/.test(formData.cantidad)) {
-      newErrors.cantidad = "Debe ser un número válido.";
     }
     if (!/^[0-9]+$/.test(formData.metros_cuadrados)) {
       newErrors.metros_cuadrados = "Debe ser un número válido.";
@@ -83,15 +112,16 @@ const AltaPuntoLimpio = () => {
     if (!formData.tipo_contenedor.trim()) {
       newErrors.tipo_contenedor = "El tipo de contenedor es obligatorio.";
     }
-    if (!formData.fecha_ingreso || isNaN(new Date(formData.fecha_ingreso).getTime())) {
+    if (
+      !formData.fecha_ingreso ||
+      isNaN(new Date(formData.fecha_ingreso).getTime())
+    ) {
       newErrors.fecha_ingreso = "Fecha de ingreso no válida.";
     }
-
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
-  
   const handleNext = () => {
     setActiveStep((prevStep) => prevStep + 1);
   };
@@ -108,7 +138,7 @@ const AltaPuntoLimpio = () => {
     setFormData({ ...formData, fecha_ingreso: newValue });
   };
 
-  // Actualiza la cantidad para cada tipo de material
+  // Actualiza la cantidad ingresada para cada tipo de material
   const handleMaterialQuantityChange = (materialType, quantity) => {
     setFormData((prevState) => ({
       ...prevState,
@@ -122,19 +152,67 @@ const AltaPuntoLimpio = () => {
   const handleSubmit = (event) => {
     event.preventDefault();
 
-    // Verificar que el token está presente antes de enviar la solicitud
     if (!token) {
       alert("No estás autenticado. Por favor, inicia sesión.");
       return;
     }
+    if (!validate()) return;
+
+    // Convertir el objeto de materiales en un arreglo de objetos con los campos requeridos
+    const materialesArray = Object.entries(formData.materiales)
+      .filter(([type, qty]) => parseInt(qty) > 0)
+      .map(([type, qty]) => {
+        // Buscar un transportista que tenga el mismo tipo de material y esté activo
+        const transporte = transportistas.find(
+          (t) =>
+            t.tipo_material === type &&
+            t.estado.toLowerCase() === "activo"
+        );
+        if (!transporte) {
+          // Si no se encuentra un transportista adecuado, puedes asignar un valor por defecto o manejar el error.
+          console.error(
+            `No se encontró transportista activo para el tipo: ${type}`
+          );
+          // Aquí asignamos null o podrías asignar un valor por defecto.
+          return null;
+        }
+        return {
+          tipo_material: type,
+          cantidad: parseInt(qty),
+          transportista: transporte.id,
+          // Se asignan valores por defecto para los otros campos obligatorios
+          descripcion: "Sin descripción",
+          proteccion: "Sin protección",
+          tipo_contenedor: formData.tipo_contenedor,
+          estado_del_contenedor: "No especificado",
+          ventilacion: type === "peligrosos" ? "necesario" : "", // Dejar vacío si no es peligroso
+        };
+      })
+      .filter((item) => item !== null);
+
+    if (materialesArray.length === 0) {
+      alert("Debe asignarse al menos un material con transportista válido.");
+      return;
+    }
+
+    const dataToSend = {
+      ...formData,
+      fecha_ingreso: formData.fecha_ingreso
+        ? dayjs(formData.fecha_ingreso).format("YYYY-MM-DD")
+        : null,
+      materiales: materialesArray,
+    };
+
+    // Opcional: Si "cantidad" no forma parte del modelo PuntoLimpio, puedes eliminarlo:
+    // delete dataToSend.cantidad;
 
     fetch("http://127.0.0.1:8000/api/puntolimpio/registro/", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "Authorization": `Token ${token}`,  // Incluir el token en los headers
+        Authorization: `Token ${token}`,
       },
-      body: JSON.stringify(formData),
+      body: JSON.stringify(dataToSend),
     })
       .then((res) => {
         if (!res.ok) {
@@ -146,7 +224,7 @@ const AltaPuntoLimpio = () => {
         return res.json();
       })
       .then((data) => {
-        console.log("Punto Limpio creado:", data); // Muestra en consola todos los datos del punto limpio creado
+        console.log("Punto Limpio creado:", data);
         navigate("/puntolimpio", {
           state: { successMessage: "Punto Limpio registrado con éxito." },
         });
@@ -169,11 +247,13 @@ const AltaPuntoLimpio = () => {
   const materialTypes = [
     { value: "escombro_limpio", label: "Escombro Limpio", icon: <Recycle /> },
     { value: "plastico", label: "Plástico", icon: <CupSoda /> },
+    { value: "papel_carton", label: "Papel y Cartón", icon: <FileText /> },
     { value: "metales", label: "Metales", icon: <Anvil /> },
     { value: "madera", label: "Madera", icon: <TreeDeciduous /> },
     { value: "mezclados", label: "Mezclados", icon: <TrendingUpDown /> },
     { value: "peligrosos", label: "Peligrosos", icon: <TriangleAlert /> },
   ];
+  
 
   return (
     <ThemeProvider theme={theme}>
@@ -186,11 +266,32 @@ const AltaPuntoLimpio = () => {
           alignItems: "center",
         }}
       >
-        <Box className="inner-content" sx={{ width: "100%", display: "flex", flexDirection: "column", alignItems: "center" }}>
+        <Box
+          className="inner-content"
+          sx={{
+            width: "100%",
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+          }}
+        >
           <Paper elevation={3} sx={{ padding: 6, borderRadius: 3 }}>
-            <Typography variant="h3" align="center" gutterBottom sx={{ mb: 4 }}>
+            <Typography
+              variant="h3"
+              align="center"
+              gutterBottom
+              sx={{ mb: 4 }}
+            >
               Alta Punto Limpio
             </Typography>
+
+            {Object.keys(errors).length > 0 && (
+              <Alert severity="error">
+                {Object.values(errors).map((err, index) => (
+                  <div key={index}>{err}</div>
+                ))}
+              </Alert>
+            )}
 
             <Stepper activeStep={activeStep} alternativeLabel sx={{ mb: 4 }}>
               {steps.map((label, index) => (
@@ -255,6 +356,7 @@ const AltaPuntoLimpio = () => {
                     </Grid>
                   </>
                 )}
+
                 {activeStep === 1 && (
                   <>
                     <Grid item xs={12}>
@@ -277,14 +379,19 @@ const AltaPuntoLimpio = () => {
                           <Grid item xs={12} sm={6} key={material.value}>
                             <Box display="flex" alignItems="center">
                               <IconButton>{material.icon}</IconButton>
-                              <Typography sx={{ marginLeft: 1 }}>{material.label}</Typography>
+                              <Typography sx={{ marginLeft: 1 }}>
+                                {material.label}
+                              </Typography>
                             </Box>
                             <TextField
                               label="Cantidad"
                               type="number"
                               value={formData.materiales[material.value] || ""}
                               onChange={(e) =>
-                                handleMaterialQuantityChange(material.value, e.target.value)
+                                handleMaterialQuantityChange(
+                                  material.value,
+                                  e.target.value
+                                )
                               }
                               fullWidth
                             />
@@ -294,6 +401,7 @@ const AltaPuntoLimpio = () => {
                     </Grid>
                   </>
                 )}
+
                 {activeStep === 2 && (
                   <>
                     <Grid item xs={12}>
@@ -302,13 +410,16 @@ const AltaPuntoLimpio = () => {
                           label="Fecha de Ingreso"
                           value={formData.fecha_ingreso || null}
                           onChange={handleDateChange}
-                          renderInput={(params) => <TextField {...params} fullWidth required />}
+                          renderInput={(params) => (
+                            <TextField {...params} fullWidth required />
+                          )}
                         />
                       </LocalizationProvider>
                     </Grid>
                   </>
                 )}
               </Grid>
+
               <Grid container spacing={2} sx={{ mt: 2 }}>
                 {activeStep !== 0 && (
                   <Grid item xs={6}>

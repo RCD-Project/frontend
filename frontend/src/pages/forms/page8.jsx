@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import {
   Box,
   FormControl,
@@ -7,20 +7,22 @@ import {
   Select,
   Typography,
   Checkbox,
+  FormGroup,
   FormControlLabel,
   TextField,
 } from "@mui/material";
 import { useFormStore } from "../context/FormContext";
 
-const opcionesPlastico = [
-  "Vacio (no se ha clasificado o no se está generando)",
-  "Lleno (cambiar contenedor, trasladar a punto de acopio, coordinar retiro)",
-  "Contiene plásticos no reciclables",
-  "Contiene residuos que no corresponden",
-  "Sucio y/o contaminado",
-  "Poca compactación",
+const opcionesPlastico = ["Aplica", "No Aplica"];
+const opcionesCheck = [
+  "Acopio a granel",
+  "En volqueta",
+  "En bolson azul",
   "Poco accesible",
-  "No está implementada la fracción",
+  "Vacío",
+  "Lleno (Coordinar retiro)",
+  "Se está reutilizando en obra",
+  "Contiene residuos que no corresponden",
   "Otro",
 ];
 
@@ -28,68 +30,100 @@ const Page8 = () => {
   const { data, updateData } = useFormStore();
   const pageIndex = "page8";
 
-  const storedData = data[pageIndex] || {};
-  const formData = {
-    plastico: storedData.plastico ?? "",
-    plasticoOpciones: storedData.plasticoOpciones ?? [],
-    plasticoObservaciones: storedData.plasticoObservaciones ?? "",
+  const defaultPage8 = {
+    plastico: "no_aplica",
+    plasticoOpciones: {}, // ✅ Siempre inicializado como objeto vacío
+    plasticoOtro: "",
+    plasticoObservaciones: "",
   };
 
+  const [formData, setFormData] = useState(data[pageIndex] || defaultPage8);
+
+  // ✅ Solo actualiza `data` si está vacío
+  useEffect(() => {
+    if (!data[pageIndex] || Object.keys(data[pageIndex]).length === 0) {
+      updateData(pageIndex, { ...defaultPage8 });
+    }
+  }, [data, pageIndex, updateData]);
+
   const handleChange = (field, value) => {
-    updateData(pageIndex, { ...formData, [field]: value });
+    setFormData((prevData) => {
+      const updatedData = { ...prevData, [field]: value };
+      updateData(pageIndex, updatedData);
+      return updatedData;
+    });
   };
 
   const handleCheckboxChange = (option) => {
-    const newOpciones = formData.plasticoOpciones.includes(option)
-      ? formData.plasticoOpciones.filter((item) => item !== option)
-      : [...formData.plasticoOpciones, option];
-    handleChange("plasticoOpciones", newOpciones);
+    setFormData((prevData) => {
+      const updatedChecks = {
+        ...prevData.plasticoOpciones,
+        [option]: !prevData.plasticoOpciones[option],
+      };
+      updateData(pageIndex, { ...prevData, plasticoOpciones: updatedChecks });
+      return { ...prevData, plasticoOpciones: updatedChecks };
+    });
   };
 
   return (
     <Box sx={{ width: "90%", margin: "auto", mt: 4 }}>
-      <h2>Formulario Técnico - Página 8</h2>
-      
-      <Typography variant="h6" sx={{ mb: 2 }}>Plástico</Typography>
+      <Typography variant="h6" sx={{ mb: 2 }}>
+        Plástico
+      </Typography>
       <FormControl fullWidth sx={{ mb: 3 }}>
-        <InputLabel>Seleccionar</InputLabel>
+        <InputLabel>Seleccione una opción</InputLabel>
         <Select
           value={formData.plastico}
-          onChange={(e) => handleChange("plastico", e.target.value)}
+          onChange={(e) => {
+            const value = e.target.value;
+            handleChange("plastico", value);
+            if (value === "No Aplica") {
+              handleChange("plasticoOpciones", {});
+              handleChange("plasticoOtro", "");
+            }
+          }}
         >
-          <MenuItem value="Aplica">Aplica</MenuItem>
-          <MenuItem value="No aplica">No aplica</MenuItem>
+          {opcionesPlastico.map((op, index) => (
+            <MenuItem key={index} value={op}>
+              {op}
+            </MenuItem>
+          ))}
         </Select>
       </FormControl>
 
-      {/* Mostrar checkboxes solo si se selecciona "Aplica" */}
-      {formData.plastico === "Aplica" && (
-        <Box sx={{ mb: 3, display: "flex", flexDirection: "column" }}>
-          {opcionesPlastico.map((option, index) => (
-            <FormControlLabel
-              key={index}
-              control={
-                <Checkbox
-                  checked={formData.plasticoOpciones.includes(option)}
-                  onChange={() => handleCheckboxChange(option)}
-                />
-              }
-              label={option}
-            />
-          ))}
-          {formData.plasticoOpciones.includes("Otro") && (
+      {formData.plastico === "aplica" && (
+        <>
+          <Typography variant="h6" sx={{ mb: 2 }}>
+            Estado del plástico
+          </Typography>
+          <FormGroup>
+            {opcionesCheck.map((op, index) => (
+              <FormControlLabel
+                key={index}
+                control={
+                  <Checkbox
+                    checked={!!formData.plasticoOpciones[op]}
+                    onChange={() => handleCheckboxChange(op)}
+                  />
+                }
+                label={op}
+              />
+            ))}
+          </FormGroup>
+
+          {formData.plasticoOpciones["Otro"] && (
             <TextField
-              label="Especificar Otro"
+              label="Especificar otro"
               fullWidth
               sx={{ mt: 2 }}
               value={formData.plasticoOtro}
               onChange={(e) => handleChange("plasticoOtro", e.target.value)}
             />
           )}
-        </Box>
+        </>
       )}
 
-      <Typography variant="h6" sx={{ mb: 2 }}>
+      <Typography variant="h6" sx={{ mt: 3, mb: 2 }}>
         Plástico - Otras observaciones / Sugerencias / Acciones a tomar
       </Typography>
       <TextField

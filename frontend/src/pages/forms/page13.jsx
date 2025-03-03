@@ -45,36 +45,57 @@ const Page13 = () => {
   };
 
   const storedData = data[pageIndex] || defaultPage13;
-  const formData = { ...defaultPage13, ...storedData };
+  const formData = {
+    puntoAcopio: storedData.puntoAcopio ?? "",
+    puntoAcopioGrid: storedData.puntoAcopioGrid ?? Array(5).fill(null),
+    puntoAcopioOpciones: storedData.puntoAcopioOpciones ?? [],
+    puntoAcopioOtro: storedData.puntoAcopioOtro ?? "",
+    puntoAcopioObservaciones: storedData.puntoAcopioObservaciones ?? "",
+  };
+  
 
   useEffect(() => {
-    if (!data[pageIndex]) {
-      updateData(pageIndex, defaultPage13);
+    if (!data[pageIndex] || Object.keys(data[pageIndex]).length === 0) {
+        updateData(pageIndex, defaultPage13);
     }
-  }, [data, pageIndex, updateData]);
+}, [data, pageIndex, updateData]);
+
+  
 
   const handleDropdownChange = (event) => {
     updateData(pageIndex, { ...formData, puntoAcopio: event.target.value });
   };
 
   const handleGridChange = (rowIndex, colIndex) => {
-    const newGrid = formData.puntoAcopioGrid.map((val, idx) =>
-      idx === rowIndex ? colIndex : val
-    );
+    const newGrid = [...formData.puntoAcopioGrid]; // Copia para evitar mutaciones directas
+    newGrid[rowIndex] = colIndex; // Actualiza la selección
+  
     updateData(pageIndex, { ...formData, puntoAcopioGrid: newGrid });
   };
+  
 
   const handleCheckboxChange = (option) => {
-    const newOpciones = formData.puntoAcopioOpciones.includes(option)
+    let newOpciones = formData.puntoAcopioOpciones.includes(option)
       ? formData.puntoAcopioOpciones.filter((item) => item !== option)
       : [...formData.puntoAcopioOpciones, option];
-
-    updateData(pageIndex, { ...formData, puntoAcopioOpciones: newOpciones });
+  
+    let newData = { ...formData, puntoAcopioOpciones: newOpciones };
+  
+    // Si "Otro" fue deseleccionado, limpiamos su valor
+    if (!newOpciones.includes("Otro")) {
+      newData.puntoAcopioOtro = "";
+    }
+  
+    updateData(pageIndex, newData);
   };
+  
 
   const handleOtroChange = (event) => {
-    updateData(pageIndex, { ...formData, puntoAcopioOtro: event.target.value });
+    if (formData.puntoAcopioOpciones.includes("Otro")) {
+      updateData(pageIndex, { ...formData, puntoAcopioOtro: event.target.value });
+    }
   };
+  
 
   const handleObservationsChange = (event) => {
     updateData(pageIndex, { ...formData, puntoAcopioObservaciones: event.target.value });

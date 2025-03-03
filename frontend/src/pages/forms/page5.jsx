@@ -42,29 +42,27 @@ const Page5 = () => {
   // Si no existe, usamos el valor por defecto
   const page5Data = data.page5 || defaultPage5;
 
-  // Inicializamos page5 en el estado global si aún no existe.
+  // Inicializa page5 en el estado global si aún no existe.
   useEffect(() => {
-    if (!data.page5) {
-      updateData("page5", defaultPage5);
-    } else if (!data.page5.grilla) {
-      updateData("page5", { ...data.page5, grilla: defaultPage5.grilla });
+    if (!data.page5 || !data.page5.grilla) {
+      updateData("page5", { ...defaultPage5, ...data.page5 });
     }
   }, [data.page5, updateData]);
 
   // Maneja el cambio en el dropdown
   const handleDropdownChange = (event) => {
-    updateData("page5", { ...data.page5, acopioContenedores: event.target.value });
+    updateData("page5", { ...page5Data, acopioContenedores: event.target.value });
   };
 
   // Maneja el cambio en las observaciones
   const handleObservationChange = (event) => {
-    updateData("page5", { ...data.page5, observaciones: event.target.value });
+    updateData("page5", { ...page5Data, observaciones: event.target.value });
   };
 
   // Actualiza la grilla: para la fila indicada (clave) se guarda el string de la columna seleccionada.
   const handleCheckboxChange = (fila, colIndex) => {
     updateData("page5", {
-      ...data.page5,
+      ...page5Data,
       grilla: {
         ...page5Data.grilla,
         [fila]: titulosColumnas[colIndex],
@@ -80,11 +78,7 @@ const Page5 = () => {
           Lugar de acopio de contenedores llenos para su traspaso al camión de retiro
         </InputLabel>
         <Select
-          value={
-            ["Si hay", "No hay"].includes(data.page5?.acopioContenedores)
-              ? data.page5.acopioContenedores
-              : ""
-          }
+          value={page5Data.acopioContenedores || ""}
           onChange={handleDropdownChange}
         >
           <MenuItem value="Si hay">Si hay</MenuItem>
@@ -122,9 +116,9 @@ const Page5 = () => {
             {titulosColumnas.map((_, colIndex) => (
               <Grid item xs={2.25} key={colIndex} sx={{ textAlign: "center", p: 1 }}>
                 <Checkbox
-                  checked={page5Data.grilla[fila] === titulosColumnas[colIndex]}
+                  checked={page5Data.grilla?.[fila] === titulosColumnas[colIndex]}
                   onChange={() => handleCheckboxChange(fila, colIndex)}
-                  disabled={data.page5?.acopioContenedores === "No hay"}
+                  disabled={page5Data.acopioContenedores === "No hay"}
                 />
               </Grid>
             ))}
@@ -139,7 +133,7 @@ const Page5 = () => {
         rows={4}
         fullWidth
         margin="normal"
-        value={data.page5?.observaciones || ""}
+        value={page5Data.observaciones || ""}
         onChange={handleObservationChange}
       />
     </div>

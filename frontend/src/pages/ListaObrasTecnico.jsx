@@ -20,8 +20,16 @@ const ObrasList = () => {
   const { data, updateData } = useFormStore();
 
   useEffect(() => {
-    // obras aprobadas
-    fetch("http://localhost:8000/api/obras/aprobadas/")
+    // Obtener el token desde localStorage
+    const token = localStorage.getItem("token");
+
+    // Fetch de obras aprobadas con el token en la cabecera
+    fetch("http://localhost:8000/api/obras/aprobadas/", {
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Token ${token}`
+      }
+    })
       .then((res) => {
         if (!res.ok) {
           throw new Error(`Error HTTP: ${res.status}`);
@@ -31,27 +39,26 @@ const ObrasList = () => {
       .then((data) => {
         setObras(data); // Guardar obras en el estado
       })
-      .catch((err) => console.error("Error al obtener obras aprobadas:", err));
+      .catch((err) =>
+        console.error("Error al obtener obras aprobadas:", err)
+      );
   }, []);
 
   const handleSelectObra = (obra) => {
     updateData("page1", {
       ...data.page1,
-
       obra: obra.nombre_obra,
       obraId: obra.id,
       direccion: obra.direccion,
       obrasDisponibles: obras,
     });
-  
+
     updateData("pageIndex", 0);
-  
+
     setTimeout(() => {
       navigate("../Formularios");
     }, 100);
   };
-  
-  
 
   return (
     <Container>
@@ -77,16 +84,15 @@ const ObrasList = () => {
                     <Button
                       variant="contained"
                       sx={{
-                        backgroundColor: '#abbf9d',
-                        '&:hover': {
-                          backgroundColor: '#d1e063', // Color al hacer hover
+                        backgroundColor: "#abbf9d",
+                        "&:hover": {
+                          backgroundColor: "#d1e063", // Color al hacer hover
                         },
                       }}
-                      onClick={() => handleSelectObra(obra)
-                      }
+                      onClick={() => handleSelectObra(obra)}
                     >
                       Seleccionar
-                    </Button> 
+                    </Button>
                   </TableCell>
                 </TableRow>
               ))

@@ -30,7 +30,7 @@ const Page9 = () => {
 
   const storedData = data[pageIndex] || {};
   const formData = {
-    papelCarton: storedData.papelCarton ?? "",
+    papelCarton: storedData.papelCarton ?? "no_aplica",
     papelCartonOpciones: storedData.papelCartonOpciones ?? [],
     papelCartonObservaciones: storedData.papelCartonObservaciones ?? "",
     papelCartonOtro: storedData.papelCartonOtro ?? "",

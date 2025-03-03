@@ -27,7 +27,7 @@ const Page10 = () => {
 
   const storedData = data[pageIndex] || {};
   const formData = {
-    metales: storedData.metales ?? "",
+    metales: storedData.metales ?? "no_aplica",
     metalesOpciones: storedData.metalesOpciones ?? [],
     metalesOtroTexto: storedData.metalesOtroTexto ?? "",
     metalesObservaciones: storedData.metalesObservaciones ?? "",

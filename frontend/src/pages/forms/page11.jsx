@@ -27,7 +27,7 @@ const Page11 = () => {
 
   const storedData = data[pageIndex] || {};
   const formData = {
-    madera: storedData.madera ?? "",
+    madera: storedData.madera ?? "no_aplica",
     maderaOpciones: storedData.maderaOpciones ?? [],
     maderaOtro: storedData.maderaOtro ?? "",
     maderaObservaciones: storedData.maderaObservaciones ?? "",

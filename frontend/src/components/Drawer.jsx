@@ -27,7 +27,7 @@ const menuItems = [
   { path: "/empresasgestoras", label: "Empresa Gestora", icon: <Factory size={24} />, roles: ["superadmin", "coordinadorlogistico"] },
   { path: "/capacitaciones", label: "Capacitaciones", icon: <GraduationCap size={24} />, roles: ["superadmin", "tecnico"] },
   { path: "/informes", label: "Informes", icon: <FileText size={24} />, roles: ["superadmin", "coordinadorlogistico", "coordinador"] },
-  { path: "/Formularios", label: "Formularios", icon: <ClipboardPenLine size={24} />, roles: ["superadmin", "tecnico"] },
+  { path: "/obraslist", label: "Formularios", icon: <ClipboardPenLine size={24} />, roles: ["superadmin", "tecnico"] },
   { path: "/puntolimpio", label: "Puntos Limpios", icon: <MapPinCheck size={24} />, roles: ["superadmin", "cliente"] },
   // Nueva opción para Alta Usuario, visible solo para superadmin
   { path: "/altausuario", label: "Alta Usuario", icon: <UserPlus size={24} />, roles: ["superadmin"] },

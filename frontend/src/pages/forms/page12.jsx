@@ -36,7 +36,7 @@ const Page12 = () => {
 
   const storedData = data[pageIndex] || defaultPage12;
   const formData = {
-    mezclados: storedData.mezclados ?? "",
+    mezclados: storedData.mezclados ?? "no_aplica",
     gridSelection: storedData.gridSelection ?? null,
     mezcladosOpciones: storedData.mezcladosOpciones ?? [],
     mezcladosOtro: storedData.mezcladosOtro ?? "",
@@ -135,7 +135,9 @@ const Page12 = () => {
         multiline
         rows={4}
         value={formData.mezcladosObservaciones}
-        onChange={(e) => handleChange("mezcladosObservaciones", e.target.value)}
+        onChange={(e) =>
+          handleChange("mezcladosObservaciones", e.target.value)
+        }
       />
     </Box>
   );

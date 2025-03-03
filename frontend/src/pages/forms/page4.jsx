@@ -1,7 +1,6 @@
-import React from "react";
+import React, { useState } from "react";
 import {
   Box,
-  TextField,
   FormControl,
   InputLabel,
   MenuItem,
@@ -10,6 +9,7 @@ import {
   Grid,
   Paper,
   Checkbox,
+  TextField,
 } from "@mui/material";
 import { useFormStore } from "../context/FormContext";
 
@@ -33,45 +33,54 @@ const Page4 = () => {
   const pageIndex = "page4";
 
   const storedData = data[pageIndex] || {};
-  const formData = {
-    puntosLimpiosEdificio: storedData.puntosLimpiosEdificio ?? "",
-    grillaPuntosLimpiosPisos:
-      typeof storedData.grillaPuntosLimpiosPisos === "object"
-        ? storedData.grillaPuntosLimpiosPisos
-        : {},
-    puntosLimpiosEdificioObservaciones:
-      storedData.puntosLimpiosEdificioObservaciones ?? "",
-  };
+  const [formData, setFormData] = useState({
+    puntosLimpiosEdificio: storedData.puntosLimpiosEdificio || "",
+    grillaPuntosLimpiosPisos: storedData.grillaPuntosLimpiosPisos || {},
+    puntosLimpiosEdificioObservaciones: storedData.puntosLimpiosEdificioObservaciones || "",
+  });
+
+  const grillaVisiblePage3 = data.page3?.grillaVisible || [];
+  const puntosLimpiosPage3 = data.page3?.puntosLimpiosList || [];
+  const puntosParaPage4 = puntosLimpiosPage3.filter((_, index) => !grillaVisiblePage3[index]);
 
   const handleChange = (field, value) => {
-    updateData(pageIndex, { ...formData, [field]: value });
+    const updated = { ...formData, [field]: value };
+    setFormData(updated);
+    updateData(pageIndex, updated);
   };
 
-  const handlePuntosLimpiosEdificioChange = (value) => {
-    if (value === "No hay") {
-      handleChange("grillaPuntosLimpiosPisos", {});
-    }
-    handleChange("puntosLimpiosEdificio", value);
-  };
-
-  // Al hacer clic en el checkbox se guarda el valor de la columna
   const handleGridCheckboxChange = (row, col) => {
-    handleChange("grillaPuntosLimpiosPisos", {
-      ...formData.grillaPuntosLimpiosPisos,
-      [row]: titulosColumnas[col],
+    setFormData((prevState) => ({
+      ...prevState,
+      grillaPuntosLimpiosPisos: {
+        ...prevState.grillaPuntosLimpiosPisos,
+        [row]: titulosColumnas[col],
+      },
+    }));
+    updateData(pageIndex, {
+      ...formData,
+      grillaPuntosLimpiosPisos: {
+        ...formData.grillaPuntosLimpiosPisos,
+        [row]: titulosColumnas[col],
+      },
     });
   };
 
   return (
     <Box sx={{ width: "90%", margin: "auto", mt: 4 }}>
       <Typography variant="h6" sx={{ mb: 2 }}>
-        Son los puntos limpios ubicados por pisos en edificio
+        Puntos limpios por pisos en edificio (complementarios)
       </Typography>
       <FormControl fullWidth sx={{ mb: 3 }}>
         <InputLabel>Punto limpio por pisos</InputLabel>
         <Select
           value={formData.puntosLimpiosEdificio}
-          onChange={(e) => handlePuntosLimpiosEdificioChange(e.target.value)}
+          onChange={(e) => {
+            if (e.target.value === "No hay") {
+              handleChange("grillaPuntosLimpiosPisos", {});
+            }
+            handleChange("puntosLimpiosEdificio", e.target.value);
+          }}
         >
           {opcionesPuntoLimpio.map((op, index) => (
             <MenuItem key={index} value={op}>
@@ -89,11 +98,7 @@ const Page4 = () => {
           <Paper elevation={3} sx={{ p: 2, mb: 3 }}>
             <Grid container spacing={1}>
               <Grid container item>
-                <Grid
-                  item
-                  xs={3}
-                  sx={{ fontWeight: "bold", textAlign: "center", p: 1 }}
-                >
+                <Grid item xs={3} sx={{ fontWeight: "bold", textAlign: "center", p: 1 }}>
                   -
                 </Grid>
                 {titulosColumnas.map((titulo, index) => (
@@ -109,28 +114,16 @@ const Page4 = () => {
               </Grid>
               {titulosFilas.map((fila, rowIndex) => (
                 <Grid container item key={rowIndex} alignItems="center">
-                  <Grid
-                    item
-                    xs={3}
-                    sx={{ fontWeight: "bold", textAlign: "center", p: 1 }}
-                  >
+                  <Grid item xs={3} sx={{ fontWeight: "bold", textAlign: "center", p: 1 }}>
                     {fila}
                   </Grid>
                   {titulosColumnas.map((_, colIndex) => (
-                    <Grid
-                      item
-                      xs={2.25}
-                      key={colIndex}
-                      sx={{ textAlign: "center", p: 1 }}
-                    >
+                    <Grid item xs={2.25} key={colIndex} sx={{ textAlign: "center", p: 1 }}>
                       <Checkbox
                         checked={
-                          formData.grillaPuntosLimpiosPisos[fila] ===
-                          titulosColumnas[colIndex]
+                          formData.grillaPuntosLimpiosPisos[fila] === titulosColumnas[colIndex]
                         }
-                        onChange={() =>
-                          handleGridCheckboxChange(fila, colIndex)
-                        }
+                        onChange={() => handleGridCheckboxChange(fila, colIndex)}
                       />
                     </Grid>
                   ))}

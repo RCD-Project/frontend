@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { Box, TextField, Typography } from "@mui/material";
 import { useFormStore } from "../context/FormContext";
 
@@ -6,15 +6,22 @@ const Page6 = () => {
   const { data, updateData } = useFormStore();
   const pageIndex = "page6";
 
-  // Recuperamos los datos guardados o asignamos valores por defecto
-  const storedData = data[pageIndex] || {};
-  const formData = {
-    accionesTomadas: storedData.accionesTomadas ?? "",
-    otrasObservaciones: storedData.otrasObservaciones ?? "",
-  };
+  // Estado local para evitar problemas con la actualización asíncrona de FormContext
+  const [formData, setFormData] = useState({
+    accionesTomadas: data[pageIndex]?.accionesTomadas || "",
+    otrasObservaciones: data[pageIndex]?.otrasObservaciones || "",
+  });
+
+  // Sincroniza el estado local con FormContext cuando se actualiza
+  useEffect(() => {
+    updateData(pageIndex, formData);
+  }, [formData, pageIndex, updateData]);
 
   const handleChange = (field, value) => {
-    updateData(pageIndex, { ...formData, [field]: value });
+    setFormData((prevData) => ({
+      ...prevData,
+      [field]: value,
+    }));
   };
 
   return (
