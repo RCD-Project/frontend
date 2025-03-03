@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Container, TextField, Button, Grid, Typography, Stepper, Step, StepLabel, Paper } from "@mui/material";
+import { Container, TextField, Button, Grid, Typography, Stepper, Step, StepLabel, Paper, Alert } from "@mui/material";
 import { LocalizationProvider, DatePicker } from "@mui/x-date-pickers";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import dayjs from "dayjs";
@@ -26,6 +26,10 @@ const EditarCliente = () => {
   const location = useLocation();
   const queryParams = new URLSearchParams(location.search);
   const id = queryParams.get("id");
+  const [errors, setErrors] = useState({});
+  const [errorMessage, setErrorMessage] = useState("");
+  const [successMessage, setSuccessMessage] = useState("");
+
 
   // Se obtiene el token desde localStorage
   const token = localStorage.getItem("token");
@@ -41,7 +45,7 @@ const EditarCliente = () => {
       })
         .then((response) => {
           if (!response.ok) {
-            throw new Error("Error al obtener los datos del cliente");
+            setErrorMessage("Error al obtener los datos del cliente.");
           }
           return response.json();
         })
@@ -63,42 +67,55 @@ const EditarCliente = () => {
     }
   }, [id, token]);
 
-  const validate = () => {
+  const validateStep = (step) => {
     let newErrors = {};
-
-    if (!formData.nombre.trim() || !/^[a-zA-Z\s]{3,}$/.test(formData.nombre)) {
-      newErrors.nombre = "Nombre inválido. Mínimo 3 letras y solo caracteres alfabéticos.";
-    }
-    if (!formData.direccion.trim()) {
-      newErrors.direccion = "La dirección es obligatoria.";
-    }
-    if (!/^\d{9}$/.test(formData.contacto)) {
-      newErrors.contacto = "El contacto debe tener exactamente 9 dígitos numéricos.";
-    }
-    if (!formData.nombre_contacto.trim() || !/^[a-zA-Z\s]{3,}$/.test(formData.nombre_contacto)) {
-      newErrors.nombre_contacto = "Nombre de contacto inválido. Mínimo 3 letras.";
-    }
-    if (!formData.razon_social.trim()) {
-      newErrors.razon_social = "Razón Social es obligatoria.";
-    }
-    if (!formData.direccion_fiscal.trim()) {
-      newErrors.direccion_fiscal = "Dirección fiscal es obligatoria.";
-    }
-    if (!/^\d{12}$/.test(formData.rut)) {
-      newErrors.rut = "RUT inválido. Debe contener exactamente 12 números.";
-    }
-    if (!formData.fecha_ingreso || isNaN(new Date(formData.fecha_ingreso).getTime())) {
-      newErrors.fecha_ingreso = "Fecha de ingreso no válida.";
-    }
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
-      newErrors.email = "Correo electrónico inválido.";
-    }
     
+    if (step === 0) {
+      if (!formData.nombre?.trim() || !/^[a-zA-Z\s]{3,}$/.test(formData.nombre)) {
+        newErrors.nombre = "Nombre inválido. Mínimo 3 letras y solo caracteres alfabéticos.";
+      }
+      if (!formData.direccion?.trim()) {
+        newErrors.direccion = "La dirección es obligatoria.";
+      }
+      if (!formData.contacto?.trim() || !/^\d{9}$/.test(formData.contacto)) {
+        newErrors.contacto = "El contacto debe tener exactamente 9 dígitos numéricos.";
+      }
+      if (!formData.nombre_contacto?.trim() || !/^[a-zA-Z\s]{3,}$/.test(formData.nombre_contacto)) {
+        newErrors.nombre_contacto = "Nombre de contacto inválido. Mínimo 3 letras.";
+      }
+    } 
+    
+    else if (step === 1) {
+      if (!formData.razon_social?.trim()) {
+        newErrors.razon_social = "Razón Social es obligatoria.";
+      }
+      if (!formData.direccion_fiscal?.trim()) {
+        newErrors.direccion_fiscal = "Dirección fiscal es obligatoria.";
+      }
+      if (!formData.rut?.trim() || !/^\d{12}$/.test(formData.rut)) {
+        newErrors.rut = "RUT inválido. Debe contener exactamente 12 números.";
+      }
+    } 
+    
+    else if (step === 2) { // Contacto
+      if (!formData.fecha_ingreso || isNaN(new Date(formData.fecha_ingreso).getTime())) {
+        newErrors.fecha_ingreso = "Fecha de ingreso es obligatoria y debe ser válida.";
+      }
+      if (!formData.email?.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
+        newErrors.email = "Correo electrónico inválido.";
+      }
+    }
+  
+    setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
+  
+
 
   const handleNext = () => {
-    setActiveStep((prevStep) => prevStep + 1);
+    if (validateStep(activeStep)) {
+      setActiveStep((prevStep) => prevStep + 1);
+    }
   };
 
   const handleBack = () => {
@@ -115,7 +132,12 @@ const EditarCliente = () => {
 
   const handleSubmit = async (event) => {
     event.preventDefault();
-    if (!validate()) return;
+    setErrorMessage("");
+    setSuccessMessage("");
+
+    if (!validateStep(activeStep)) return;
+
+    setIsLoading(true);
     try {
       const payload = {
         ...formData,
@@ -138,7 +160,9 @@ const EditarCliente = () => {
         console.log("Cliente actualizado:", data);
         navigate("/clientes");
       } else {
-        console.error("Error al actualizar el cliente. Código de error:", response.status);
+        const errorText = await response.json();
+        setErrorMessage(errorText.detail || "Ocurrió un error al actualizar el cliente.");
+
       }
     } catch (error) {
       console.error("Error en la petición:", error);
@@ -160,6 +184,19 @@ const EditarCliente = () => {
           <Typography variant="h3" gutterBottom sx={{ textAlign: "center" }}>
             Editar Cliente
           </Typography>
+
+          {errorMessage && (
+            <Alert severity="error" sx={{ mb: 3 }}>
+              {errorMessage}
+            </Alert>
+          )}
+
+          {successMessage && (
+            <Alert severity="success" sx={{ mb: 3 }}>
+              {successMessage}
+            </Alert>
+          )}
+
           <Stepper activeStep={activeStep} alternativeLabel>
             {steps.map((label, index) => (
               <Step key={index}>
@@ -178,7 +215,8 @@ const EditarCliente = () => {
                       name="nombre"
                       value={formData.nombre}
                       onChange={handleChange}
-                      required
+                      error={!!errors.nombre} // ✅ Muestra el campo en rojo si hay error
+                      helperText={errors.nombre} // ✅ Muestra el mensaje de error debajo del campo
                     />
                   </Grid>
                   <Grid item xs={12}>
@@ -188,7 +226,8 @@ const EditarCliente = () => {
                       name="direccion"
                       value={formData.direccion}
                       onChange={handleChange}
-                      required
+                      error={!!errors.direccion}
+                      helperText={errors.direccion}
                     />
                   </Grid>
                   <Grid item xs={12}>
@@ -198,11 +237,13 @@ const EditarCliente = () => {
                       name="contacto"
                       value={formData.contacto}
                       onChange={handleChange}
-                      required
+                      error={!!errors.contacto}
+                      helperText={errors.contacto}
                     />
                   </Grid>
                 </>
               )}
+
               {activeStep === 1 && (
                 <>
                   <Grid item xs={12}>
@@ -212,7 +253,8 @@ const EditarCliente = () => {
                       name="razon_social"
                       value={formData.razon_social}
                       onChange={handleChange}
-                      required
+                      error={!!errors.razon_social}
+                      helperText={errors.razon_social}
                     />
                   </Grid>
                   <Grid item xs={12}>
@@ -222,7 +264,8 @@ const EditarCliente = () => {
                       name="direccion_fiscal"
                       value={formData.direccion_fiscal}
                       onChange={handleChange}
-                      required
+                      error={!!errors.direccion_fiscal}
+                      helperText={errors.direccion_fiscal}
                     />
                   </Grid>
                   <Grid item xs={12}>
@@ -232,11 +275,13 @@ const EditarCliente = () => {
                       name="rut"
                       value={formData.rut}
                       onChange={handleChange}
-                      required
+                      error={!!errors.rut}
+                      helperText={errors.rut}
                     />
                   </Grid>
                 </>
               )}
+
               {activeStep === 2 && (
                 <>
                   <Grid item xs={12}>
@@ -245,7 +290,14 @@ const EditarCliente = () => {
                         label="Fecha de Ingreso"
                         value={formData.fecha_ingreso || null}
                         onChange={handleDateChange}
-                        renderInput={(params) => <TextField {...params} fullWidth required />}
+                        renderInput={(params) => (
+                          <TextField
+                            {...params}
+                            fullWidth
+                            error={!!errors.fecha_ingreso}
+                            helperText={errors.fecha_ingreso}
+                          />
+                        )}
                       />
                     </LocalizationProvider>
                   </Grid>
@@ -257,12 +309,14 @@ const EditarCliente = () => {
                       name="email"
                       value={formData.email}
                       onChange={handleChange}
-                      required
+                      error={!!errors.email}
+                      helperText={errors.email}
                     />
                   </Grid>
                 </>
               )}
             </Grid>
+
             <Grid container spacing={3} justifyContent="space-between" sx={{ marginTop: 3 }}>
               <Button 
                 onClick={handleBack} 

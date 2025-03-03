@@ -7,6 +7,8 @@ import {
   Typography,
   Paper,
   InputAdornment,
+  CircularProgress,
+  Alert,
 } from "@mui/material";
 import EmailIcon from "@mui/icons-material/Email";
 import LockIcon from "@mui/icons-material/Lock";
@@ -17,32 +19,35 @@ import section4 from "../assets/section4.png";
 const LoginForm = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState(""); // Estado para el error
   const { login } = useContext(AuthContext);
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setIsLoading(true);
+    setErrorMessage(""); // Limpiar error antes de hacer la solicitud
+
     try {
-      const response = await fetch(
-        "http://127.0.0.1:8000/api/usuarios/login/",
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ email, password }),
-        }
-      );
+      const response = await fetch("http://127.0.0.1:8000/api/usuarios/login/", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
+      });
+  
       if (response.ok) {
         const data = await response.json();
         login({ email: data.email, rol: data.rol }, data.token);
         navigate("/");
       } else {
-        const errorText = await response.text();
-        console.error("Error al iniciar sesión:", errorText);
-        alert("Error al iniciar sesión. Revisa la consola para más detalles.");
+        const errorText = await response.json();
+        setErrorMessage(errorText.detail || "Error al iniciar sesión. Verifica tus credenciales.");
       }
     } catch (error) {
-      console.error("Error en la red:", error);
-      alert("Error en la red, por favor intenta nuevamente.");
+      setErrorMessage("Error en la red. Intenta nuevamente.");
+    } finally {
+      setIsLoading(false);
     }
   };
   
@@ -85,6 +90,22 @@ const LoginForm = () => {
         <Typography variant="h5" gutterBottom sx={{ color: "#fff" }}>
           Iniciar Sesión
         </Typography>
+        
+        {errorMessage && (
+          <Alert 
+            severity="error" 
+            sx={{
+              backgroundColor: "rgba(255, 0, 0, 0.2)",
+              color: "#ffcccc",
+              marginBottom: 2,
+              fontSize: "14px",
+              borderRadius: "6px",
+            }}
+          >
+            {errorMessage}
+          </Alert>
+        )}
+
         <form onSubmit={handleSubmit}>
           <Grid container spacing={2}>
             <Grid item xs={12}>
@@ -159,18 +180,35 @@ const LoginForm = () => {
               <Button
                 type="submit"
                 variant="contained"
+                disabled={isLoading}
                 sx={{
                   marginTop: "20px",
                   backgroundColor: "#abbf9d",
-                  "&:hover": { backgroundColor: "#d1e063" }, // Hover color
-                  color: "#fff",
-                  padding: "8px 16px", // Botón más pequeño y amigable
-                  fontSize: "16px", // Ajustar tamaño de fuente
-                  borderRadius: "20px", // Bordes redondeados
+                  "&:hover": { backgroundColor: "#d1e063" },
+                  color: "#ffffff",
+                  padding: "8px 16px", 
+                  fontSize: "16px", 
+                  borderRadius: "20px",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  gap: "10px",
+                  "&.Mui-disabled": {
+                    color: "#ffffff",
+                    backgroundColor: "#abbf9d",
+                    opacity: 0.8,
+                  },
                 }}
                 fullWidth
               >
-                Iniciar Sesión
+                {isLoading ? (
+              <>
+                <CircularProgress size={20} sx={{ color: "#ffffff" }} />
+                Cargando...
+              </>
+            ) : (
+                "Iniciar Sesión"
+              )}
               </Button>
             </Grid>
           </Grid>
