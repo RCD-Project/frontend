@@ -32,34 +32,40 @@ const Page7 = () => {
 
   const defaultPage7 = {
     escombro: "",
-    escombroChecks: {}, // ✅ Siempre inicializado como objeto vacío
+    escombroChecks: {},
     escombroOtroTexto: "",
     escombroObservaciones: "",
   };
 
+  // Estado local para el formulario de esta página
   const [formData, setFormData] = useState(data[pageIndex] || defaultPage7);
 
+  // Si no existe data en el context para esta página, se inicializa una vez
   useEffect(() => {
     if (!data[pageIndex] || Object.keys(data[pageIndex]).length === 0) {
-      updateData(pageIndex, { ...defaultPage7 });
+      updateData(pageIndex, defaultPage7);
     }
   }, [data, pageIndex, updateData]);
 
+  // Sincronizar el estado local con el context después de cada cambio
+  useEffect(() => {
+    updateData(pageIndex, formData);
+  }, [formData, pageIndex, updateData]);
+
+  // Actualiza el estado local sin llamar directamente a updateData
   const handleChange = (field, value) => {
-    setFormData((prevData) => {
-      const updatedData = { ...prevData, [field]: value };
-      updateData(pageIndex, updatedData);
-      return updatedData;
-    });
+    setFormData((prevData) => ({
+      ...prevData,
+      [field]: value,
+    }));
   };
 
   const handleCheckboxChange = (option) => {
     setFormData((prevData) => {
       const updatedChecks = {
         ...prevData.escombroChecks,
-        [option]: !prevData.escombroChecks[option], // ✅ Corrige el acceso a `checks`
+        [option]: !prevData.escombroChecks[option],
       };
-      updateData(pageIndex, { ...prevData, escombroChecks: updatedChecks });
       return { ...prevData, escombroChecks: updatedChecks };
     });
   };
@@ -77,6 +83,7 @@ const Page7 = () => {
             const value = e.target.value;
             handleChange("escombro", value);
             if (value === "No Aplica") {
+              // Reiniciamos campos relacionados si se selecciona "No Aplica"
               handleChange("escombroChecks", {});
               handleChange("escombroOtroTexto", "");
             }
@@ -116,7 +123,9 @@ const Page7 = () => {
               fullWidth
               sx={{ mt: 2 }}
               value={formData.escombroOtroTexto}
-              onChange={(e) => handleChange("escombroOtroTexto", e.target.value)}
+              onChange={(e) =>
+                handleChange("escombroOtroTexto", e.target.value)
+              }
             />
           )}
         </>
@@ -131,7 +140,9 @@ const Page7 = () => {
         multiline
         rows={4}
         value={formData.escombroObservaciones}
-        onChange={(e) => handleChange("escombroObservaciones", e.target.value)}
+        onChange={(e) =>
+          handleChange("escombroObservaciones", e.target.value)
+        }
       />
     </Box>
   );

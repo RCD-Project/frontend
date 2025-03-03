@@ -14,14 +14,18 @@ import {
 } from "@mui/material";
 import { useFormStore } from "../context/FormContext";
 
-const gridColumnTitles = ["Correcto", "Aceptable (con observaciones)", "Incorrecto"];
+const gridColumnTitles = [
+  "Correcto",
+  "Aceptable (con observaciones)",
+  "Incorrecto",
+];
 const gridRowLabels = [
   "Ubicacion",
   "Tipo contenedor",
   "Estado de contenedor",
   "Señalética",
-  "Ventilación"
-]
+  "Ventilación",
+];
 
 const checkboxOptions = [
   "Tanques vacíos",
@@ -52,53 +56,54 @@ const Page13 = () => {
     puntoAcopioOtro: storedData.puntoAcopioOtro ?? "",
     puntoAcopioObservaciones: storedData.puntoAcopioObservaciones ?? "",
   };
-  
 
   useEffect(() => {
     if (!data[pageIndex] || Object.keys(data[pageIndex]).length === 0) {
-        updateData(pageIndex, defaultPage13);
+      updateData(pageIndex, defaultPage13);
     }
-}, [data, pageIndex, updateData]);
-
-  
+  }, [data, pageIndex, updateData]);
 
   const handleDropdownChange = (event) => {
     updateData(pageIndex, { ...formData, puntoAcopio: event.target.value });
   };
 
+  // Función para manejar el cambio en la grilla:
   const handleGridChange = (rowIndex, colIndex) => {
     const newGrid = [...formData.puntoAcopioGrid]; // Copia para evitar mutaciones directas
-    newGrid[rowIndex] = colIndex; // Actualiza la selección
-  
+    // Asigna el valor seleccionado, en lugar del índice
+    newGrid[rowIndex] = gridColumnTitles[colIndex];
     updateData(pageIndex, { ...formData, puntoAcopioGrid: newGrid });
   };
-  
 
   const handleCheckboxChange = (option) => {
     let newOpciones = formData.puntoAcopioOpciones.includes(option)
       ? formData.puntoAcopioOpciones.filter((item) => item !== option)
       : [...formData.puntoAcopioOpciones, option];
-  
+
     let newData = { ...formData, puntoAcopioOpciones: newOpciones };
-  
+
     // Si "Otro" fue deseleccionado, limpiamos su valor
     if (!newOpciones.includes("Otro")) {
       newData.puntoAcopioOtro = "";
     }
-  
+
     updateData(pageIndex, newData);
   };
-  
 
   const handleOtroChange = (event) => {
     if (formData.puntoAcopioOpciones.includes("Otro")) {
-      updateData(pageIndex, { ...formData, puntoAcopioOtro: event.target.value });
+      updateData(pageIndex, {
+        ...formData,
+        puntoAcopioOtro: event.target.value,
+      });
     }
   };
-  
 
   const handleObservationsChange = (event) => {
-    updateData(pageIndex, { ...formData, puntoAcopioObservaciones: event.target.value });
+    updateData(pageIndex, {
+      ...formData,
+      puntoAcopioObservaciones: event.target.value,
+    });
   };
 
   return (
@@ -107,7 +112,10 @@ const Page13 = () => {
         Punto de acopio
       </Typography>
       <Typography variant="body1" sx={{ mb: 3 }}>
-        Espacio accesible, con tanques de contención para los peligrosos, con bandeja antiderrame, bajo techo, accesibles y con ventilación. Separación de productos químicos / residuos con pinturas / residuos de hidrocarburos.
+        Espacio accesible, con tanques de contención para los peligrosos, con
+        bandeja antiderrame, bajo techo, accesibles y con ventilación.
+        Separación de productos químicos / residuos con pinturas / residuos de
+        hidrocarburos.
       </Typography>
 
       <FormControl fullWidth sx={{ mb: 3 }}>
@@ -126,7 +134,11 @@ const Page13 = () => {
           <Paper elevation={3} sx={{ p: 2 }}>
             <Grid container spacing={1}>
               <Grid container item>
-                <Grid item xs={3} sx={{ fontWeight: "bold", textAlign: "center", p: 1 }}>
+                <Grid
+                  item
+                  xs={3}
+                  sx={{ fontWeight: "bold", textAlign: "center", p: 1 }}
+                >
                   -
                 </Grid>
                 {gridColumnTitles.map((title, index) => (
@@ -160,10 +172,16 @@ const Page13 = () => {
                   >
                     {row}
                   </Grid>
-                  {gridColumnTitles.map((_, colIndex) => (
-                    <Grid item xs={1.5} key={colIndex} sx={{ textAlign: "center", p: 1 }}>
+                  {gridColumnTitles.map((title, colIndex) => (
+                    <Grid
+                      item
+                      xs={1.5}
+                      key={colIndex}
+                      sx={{ textAlign: "center", p: 1 }}
+                    >
                       <Checkbox
-                        checked={formData.puntoAcopioGrid[rowIndex] === colIndex}
+                        // Compara el valor almacenado con el título de la columna
+                        checked={formData.puntoAcopioGrid[rowIndex] === title}
                         onChange={() => handleGridChange(rowIndex, colIndex)}
                       />
                     </Grid>

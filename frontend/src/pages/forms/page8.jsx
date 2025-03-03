@@ -31,27 +31,31 @@ const Page8 = () => {
   const pageIndex = "page8";
 
   const defaultPage8 = {
-    plastico: "no_aplica",
-    plasticoOpciones: {}, // ✅ Siempre inicializado como objeto vacío
+    // Fijamos el valor por defecto de forma que coincida con las opciones disponibles
+    plastico: "No Aplica",
+    plasticoOpciones: {}, // Siempre inicializado como objeto vacío
     plasticoOtro: "",
     plasticoObservaciones: "",
   };
 
+  // Estado local para esta página
   const [formData, setFormData] = useState(data[pageIndex] || defaultPage8);
 
-  // ✅ Solo actualiza `data` si está vacío
+  // Si no existe data en el context para esta página, se inicializa
   useEffect(() => {
     if (!data[pageIndex] || Object.keys(data[pageIndex]).length === 0) {
-      updateData(pageIndex, { ...defaultPage8 });
+      updateData(pageIndex, defaultPage8);
     }
   }, [data, pageIndex, updateData]);
 
+  // Sincronizamos el estado local con el context una vez renderizado
+  useEffect(() => {
+    updateData(pageIndex, formData);
+  }, [formData, pageIndex, updateData]);
+
+  // Actualiza el estado local (sin llamar a updateData directamente aquí)
   const handleChange = (field, value) => {
-    setFormData((prevData) => {
-      const updatedData = { ...prevData, [field]: value };
-      updateData(pageIndex, updatedData);
-      return updatedData;
-    });
+    setFormData((prevData) => ({ ...prevData, [field]: value }));
   };
 
   const handleCheckboxChange = (option) => {
@@ -60,7 +64,6 @@ const Page8 = () => {
         ...prevData.plasticoOpciones,
         [option]: !prevData.plasticoOpciones[option],
       };
-      updateData(pageIndex, { ...prevData, plasticoOpciones: updatedChecks });
       return { ...prevData, plasticoOpciones: updatedChecks };
     });
   };
@@ -91,7 +94,8 @@ const Page8 = () => {
         </Select>
       </FormControl>
 
-      {formData.plastico === "aplica" && (
+      {/* Mostramos las opciones adicionales solo si se selecciona "Aplica" */}
+      {formData.plastico === "Aplica" && (
         <>
           <Typography variant="h6" sx={{ mb: 2 }}>
             Estado del plástico

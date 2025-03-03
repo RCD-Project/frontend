@@ -84,7 +84,7 @@ const PuntoLimpio = () => {
   };
 
   const columnasPuntosLimpios = [
-    { field: "obra", headerName: "Nombre de la Obra", flex: 1 },
+    { field: "nombre_obra", headerName: "Nombre de la Obra", flex: 1 },
     { field: "tipo_contenedor", headerName: "Tipo de Contenedor", flex: 1 },
     { field: "estado", headerName: "Estado", flex: 1 },
     {
@@ -155,7 +155,7 @@ const PuntoLimpio = () => {
                 (p) => p.estado && p.estado.trim().toLowerCase() === "inactivo"
               )}
               columnas={columnasPuntosLimpios}
-              filtroClave="obra"
+              filtroClave="nombre_obra"
               filtroPlaceholder="Buscar por nombre de obra"
             />
           </div>

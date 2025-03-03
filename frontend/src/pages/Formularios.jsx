@@ -53,93 +53,94 @@ const Formularios = () => {
     const page13Data = globalData["page13"] || {};
 
     return {
-      // Datos de Page 1:
-      tecnico: page1Data.tecnico || "",  // ✅ Asegura que no sea null
-      obra: page1Data.obraId || page1Data.obra || "",  // ✅ Evita NULL
-      fecha: page1Data.fecha ? dayjs(page1Data.fecha).format("YYYY-MM-DD") : "",  // ✅ Envía fecha vacía si no existe
-    
-      motivo_de_visita: Array.isArray(page1Data.motivos) ? page1Data.motivos.join(", ") : "No especificado",
-      otro_motivo: page1Data.otroMotivo || "",  // ✅ Evita NULL
-    
-      // Datos de Page 2:
+      // Página 1:
+      tecnico: page1Data.tecnico || "",
+      obra: page1Data.obraId || page1Data.obra || "",
+      fecha: page1Data.fecha ? dayjs(page1Data.fecha).format("YYYY-MM-DD") : null,
+      motivo_de_visita: Array.isArray(page1Data.motivos)
+        ? page1Data.motivos.join(", ")
+        : "No especificado",
+      otro_motivo: page1Data.otroMotivo || "",
+  
+      // Página 2:
       logistica_de_obra: page2Data.logistica || "No especificado",
       logistica_de_obra_observaciones: page2Data.logisticaObservaciones || "",
-      participante_jornal_ambiental: page2Data.participacion?.["Jornal Ambiental"] || "No especificado",
+      participante_jornal_ambiental:
+        page2Data.participacion?.["Jornal Ambiental"] || "No especificado",
       participante_operario: page2Data.participacion?.["Operarios"] || "No especificado",
-      participante_oficina_tecnica: page2Data.participacion?.["Oficina Técnica (jefe de obra, capataz, etc.)"] || "No especificado",
+      participante_oficina_tecnica:
+        page2Data.participacion?.["Oficina Técnica (jefe de obra, capataz, etc.)"] || "No especificado",
       participante_observaciones: page2Data.participantesObservaciones || "",
-    
       limpieza_general_en_terreno: page2Data.limpieza?.["En terreno"] || "No especificado",
       limpieza_general_en_pisos: page2Data.limpieza?.["Por pisos"] || "No especificado",
       limpieza_general_observaciones: page2Data.limpiezaObservaciones || "",
-    
-      // Datos de Page 3:
-      punto_limpio: page3Data.puntoLimpio || "no_hay",  
+  
+      // Página 3 (Punto Limpio):
+      punto_limpio: page3Data.puntoLimpio || "no_hay",
       punto_limpio_ubicacion: page3Data.puntoLimpioUbicacion || "No especificado",
       punto_limpio_estructura: page3Data.puntoLimpioEstructura || "No especificado",
       punto_limpio_tipo_contenedor: page3Data.puntoLimpioTipoContenedor || "No especificado",
       punto_limpio_estado_contenedor: page3Data.puntoLimpioEstadoContenedor || "No especificado",
       punto_limpio_señaletica: page3Data.puntoLimpioSeñaletica || "No especificado",
       punto_limpio_observaciones: page3Data.puntoLimpioObservaciones || "Sin observaciones",
-    
-      // Datos de Page 4:
+  
+      // Página 4:
       puntos_limpios_por_pisos: page4Data.puntosLimpiosEdificio || "No hay",
       grillaPuntosLimpiosPisos: page4Data.grillaPuntosLimpiosPisos || {},
-    
-      // Datos de Page 5:
+  
+      // Página 5:
       acopioContenedores: page5Data.acopioContenedores || "No especificado",
       grilla: page5Data.grilla || {},
       observaciones: page5Data.observaciones || "",
-    
-      // Datos de Page 6:
-      accionesTomadas: page6Data.accionesTomadas || "",
-      otrasObservaciones: page6Data.otrasObservaciones || "",
-    
-      // Datos de Page 7:
-      escombro: page7Data.escombro || "no_aplica",
-      escombroChecks: page7Data.checks || [],
-      escombroOtroTexto: page7Data.otroTexto || "",
-      escombroObservaciones: page7Data.observaciones || "",
-    
-      // Datos de Page 8:
+  
+      // Página 6:
+      acciones_tomadas: page6Data.accionesTomadas || "",
+      otras_observaciones: page6Data.otrasObservaciones || "",
+  
+      // Página 7 (Escombro):
+      escombro_limpio: page7Data.escombro || "no_aplica",
+      escombro_checks: page7Data.escombroChecks || [],
+      escombro_otro_texto: page7Data.escombroOtroTexto || "",
+      escombro_observaciones: page7Data.escombroObservaciones || "",
+  
+      // Página 8 (Plástico):
       plastico: page8Data.plastico || "no_aplica",
-      plasticoOpciones: page8Data.plasticoOpciones || [],
-      plasticoOtro: page8Data.plasticoOtro || "",
-      plasticoObservaciones: page8Data.plasticoObservaciones || "",
-    
-      // Datos de Page 9:
-      papelCarton: page9Data.papelCarton || "no_aplica",
-      papelCartonOpciones: page9Data.papelCartonOpciones || [],
-      papelCartonOtro: page9Data.papelCartonOtro || "",
-      papelCartonObservaciones: page9Data.papelCartonObservaciones || "",
-    
-      // Datos de Page 10:
+      plastico_opciones: page8Data.plasticoOpciones || [],
+      plastico_otro: page8Data.plasticoOtro || "",
+      plastico_observaciones: page8Data.plasticoObservaciones || "",
+  
+      // Página 9 (Papel y Cartón):
+      papel_y_carton: page9Data.papelCarton || "no_aplica",
+      papel_carton_opciones: page9Data.papelCartonOpciones || [],
+      papel_carton_otro: page9Data.papelCartonOtro || "",
+      papel_carton_observaciones: page9Data.papelCartonObservaciones || "",
+  
+      // Página 10 (Metales):
       metales: page10Data.metales || "no_aplica",
-      metalesOpciones: page10Data.metalesOpciones || [],
-      metalesOtroTexto: page10Data.metalesOtroTexto || "",
-      metalesObservaciones: page10Data.metalesObservaciones || "",
-    
-      // Datos de Page 11:
+      metales_opciones: page10Data.metalesOpciones || [],
+      metales_otro_texto: page10Data.metalesOtroTexto || "",
+      metales_observaciones: page10Data.metalesObservaciones || "",
+  
+      // Página 11 (Madera):
       madera: page11Data.madera || "no_aplica",
-      maderaOpciones: page11Data.maderaOpciones || [],
-      maderaOtro: page11Data.maderaOtro || "",
-      maderaObservaciones: page11Data.maderaObservaciones || "",
-    
-      // Datos de Page 12:
+      madera_opciones: page11Data.maderaOpciones || [],
+      madera_otro: page11Data.maderaOtro || "",
+      madera_observaciones: page11Data.maderaObservaciones || "",
+  
+      // Página 12 (Mezclados):
       mezclados: page12Data.mezclados || "no_aplica",
-      gridSelection: page12Data.gridSelection || null,
-      mezcladosOpciones: page12Data.mezcladosOpciones || [],
-      mezcladosOtro: page12Data.mezcladosOtro || "",
-      mezcladosObservaciones: page12Data.mezcladosObservaciones || "",
-    
-      // Datos de Page 13:
+      gridSelection: page12Data.gridSelection || {},
+      mezclados_opciones: page12Data.mezcladosOpciones || [],
+      mezclados_otro: page12Data.mezcladosOtro || "",
+      mezclados_observaciones: page12Data.mezcladosObservaciones || "",
+  
+      // Página 13 (Punto Acopio):
       puntoAcopio: page13Data.puntoAcopio || "no_aplica",
       puntoAcopioGrid: page13Data.puntoAcopioGrid || [],
       puntoAcopioOpciones: page13Data.puntoAcopioOpciones || [],
       puntoAcopioOtro: page13Data.puntoAcopioOtro || "",
       puntoAcopioObservaciones: page13Data.puntoAcopioObservaciones || "",
     };
-    
   };
 
   const handleNext = async (values) => {

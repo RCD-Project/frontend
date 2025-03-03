@@ -41,6 +41,7 @@ import RoleBasedRoute from "./pages/RutasProtegidas";
 import Landing from "./pages/Landing";
 import Error403 from "./403error";
 import Formularios from "./pages/Formularios";
+import DetallesFormulario from "./pages/DetallesFormulario"; // Importación de la nueva página
 
 import "./styles/App.css";
 
@@ -181,6 +182,16 @@ const AppContent = () => {
                 </RoleBasedRoute>
               }
             />
+            {/* Nueva ruta para DetallesFormulario */}
+            <Route
+  path="/formularios/detalle/:pk"
+  element={
+    <RoleBasedRoute allowedRoles={["tecnico", "superadmin"]}>
+      <DetallesFormulario />
+    </RoleBasedRoute>
+  }
+/>
+
             <Route path="/unauthorized" element={<Error403 />} />
             <Route
               path="/solicitudes"

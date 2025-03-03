@@ -86,8 +86,8 @@ const Page12 = () => {
                     {titulo}
                   </Typography>
                   <Radio
-                    checked={formData.gridSelection === index}
-                    onChange={() => handleChange("gridSelection", index)}
+                    checked={formData.gridSelection === titulo}
+                    onChange={() => handleChange("gridSelection", titulo)}
                   />
                 </Grid>
               )
@@ -117,9 +117,7 @@ const Page12 = () => {
               fullWidth
               sx={{ mt: 2 }}
               value={formData.mezcladosOtro}
-              onChange={(e) =>
-                handleChange("mezcladosOtro", e.target.value)
-              }
+              onChange={(e) => handleChange("mezcladosOtro", e.target.value)}
             />
           )}
         </>
@@ -135,9 +133,7 @@ const Page12 = () => {
         multiline
         rows={4}
         value={formData.mezcladosObservaciones}
-        onChange={(e) =>
-          handleChange("mezcladosObservaciones", e.target.value)
-        }
+        onChange={(e) => handleChange("mezcladosObservaciones", e.target.value)}
       />
     </Box>
   );

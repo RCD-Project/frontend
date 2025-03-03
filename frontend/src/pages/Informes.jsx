@@ -1,90 +1,100 @@
-import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import Tabla from '../components/Table';
-import { IconButton, Menu, MenuItem, Typography } from '@mui/material';
-import MoreVertIcon from '@mui/icons-material/MoreVert';
-import VisibilityIcon from '@mui/icons-material/Visibility';
-import DeleteIcon from '@mui/icons-material/Delete';
+// Informes.jsx
+import React, { useEffect, useState } from "react";
+import {
+  Box,
+  Paper,
+  Typography,
+  Grid,
+  Divider,
+  CircularProgress,
+  Button,
+} from "@mui/material";
+import { useNavigate } from "react-router-dom";
 
 const Informes = () => {
-  const [informes, setInformes] = useState([]);
+  const [formularios, setFormularios] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const navigate = useNavigate();
 
   useEffect(() => {
-    fetch('http://localhost:8000/api/informes/')
-      .then((response) => response.json())
-      .then((data) => {
-        const informesOrdenados = data.sort((a, b) => new Date(b.fecha) - new Date(a.fecha));
-        setInformes(informesOrdenados);
+    const token = localStorage.getItem("token");
+    fetch("http://localhost:8000/api/formularios/listar/", {
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Token ${token}`,
+      },
+    })
+      .then((res) => {
+        if (!res.ok) {
+          throw new Error("Error al cargar los formularios");
+        }
+        return res.json();
       })
-      .catch((error) => console.error('Error al obtener informes:', error));
+      .then((data) => {
+        setFormularios(data);
+        setLoading(false);
+      })
+      .catch((err) => {
+        console.error(err);
+        setError(err.message);
+        setLoading(false);
+      });
   }, []);
 
-  const eliminarInforme = (id) => {
-    const confirmacion = window.confirm("¿Seguro que deseas eliminar este informe?");
-    if (confirmacion) {
-      setInformes(informes.filter((informe) => informe.id !== id));
-    }
-  };
+  if (loading) {
+    return (
+      <Box sx={{ display: "flex", justifyContent: "center", mt: 4 }}>
+        <CircularProgress />
+      </Box>
+    );
+  }
 
-  const [anchorEl, setAnchorEl] = useState(null);
-  const [selectedInforme, setSelectedInforme] = useState(null);
-
-  const handleMenuOpen = (event, informe) => {
-    setAnchorEl(event.currentTarget);
-    setSelectedInforme(informe);
-  };
-
-  const handleMenuClose = () => {
-    setAnchorEl(null);
-    setSelectedInforme(null);
-  };
-
-  const columnasInformes = [
-    { field: 'nombreTecnico', headerName: 'Nombre del Técnico', flex: 1 },
-    { field: 'nombreObra', headerName: 'Nombre de la Obra', flex: 1 },
-    { field: 'fecha', headerName: 'Fecha', flex: 1 },
-    { field: 'hora', headerName: 'Hora', flex: 1 },
-    {
-      field: 'acciones',
-      headerName: 'Acciones',
-      flex: 1,
-      sortable: false,
-      renderCell: (params) => (
-        <>
-          <IconButton onClick={(event) => handleMenuOpen(event, params.row)}>
-            <MoreVertIcon />
-          </IconButton>
-        </>
-      ),
-    },
-  ];
+  if (error) {
+    return (
+      <Typography variant="h6" color="error" sx={{ textAlign: "center", mt: 4 }}>
+        {error}
+      </Typography>
+    );
+  }
 
   return (
-    <div>
-      <Typography variant="h4" align="center" sx={{ mb: 4 }}>
-        Listado de Informes
+    <Box sx={{ p: 2 }}>
+      <Typography variant="h4" sx={{ mb: 2, textAlign: "center" }}>
+        Listado de Formularios
       </Typography>
-      <Tabla
-        datos={informes}
-        columnas={columnasInformes}
-        filtroClave="nombreObra"
-        filtroPlaceholder="Nombre de la obra"
-      />
-
-      <Menu
-        anchorEl={anchorEl}
-        open={Boolean(anchorEl)}
-        onClose={handleMenuClose}
-      >
-        <MenuItem onClick={() => { handleMenuClose(); navigate(`/detallesinforme?id=${selectedInforme?.id}`); }}>
-          <VisibilityIcon /> Ver detalles
-        </MenuItem>
-        <MenuItem onClick={() => { handleMenuClose(); eliminarInforme(selectedInforme?.id); }}>
-          <DeleteIcon style={{ color: 'red' }} /> Eliminar
-        </MenuItem>
-      </Menu>
-    </div>
+      {formularios.map((formulario) => (
+        <Paper key={formulario.id} sx={{ p: 2, mb: 2 }}>
+          <Grid container spacing={2} alignItems="center">
+            <Grid item xs={12} sm={4}>
+              <Typography variant="subtitle2">Fecha:</Typography>
+              <Typography variant="body1">{formulario.fecha || "N/A"}</Typography>
+            </Grid>
+            <Grid item xs={12} sm={4}>
+              <Typography variant="subtitle2">Obra:</Typography>
+              <Typography variant="body1">
+                {formulario.obra_nombre || "N/A"}
+              </Typography>
+            </Grid>
+            <Grid item xs={12} sm={4}>
+              <Typography variant="subtitle2">Técnico:</Typography>
+              <Typography variant="body1">
+                {formulario.tecnico_nombre || "N/A"}
+              </Typography>
+            </Grid>
+          </Grid>
+          <Divider sx={{ my: 1 }} />
+          <Box sx={{ textAlign: "right" }}>
+            <Button
+              variant="contained"
+              onClick={() => navigate(`/formularios/detalle/${formulario.id}`)}
+            >
+              Ver Detalles
+            </Button>
+          </Box>
+        </Paper>
+      ))}
+    </Box>
   );
 };
 

@@ -25,7 +25,7 @@ import {
   TriangleAlert,
   TrendingUpDown,
   Recycle,
-  FileText
+  FileText,
 } from "lucide-react";
 import { AuthContext } from "../pages/context/AuthContext";
 import dayjs from "dayjs";
@@ -48,7 +48,6 @@ const AltaPuntoLimpio = () => {
     observaciones: "",
     clasificacion: "correcta",
     fecha_ingreso: null,
-    // Se guardarán las cantidades por cada tipo, por ejemplo: { escombro_limpio: "3", plastico: "2", ... }
     materiales: {},
   });
 
@@ -149,7 +148,8 @@ const AltaPuntoLimpio = () => {
     }));
   };
 
-  const handleSubmit = (event) => {
+  // Función para crear primero el Punto Limpio y luego los Materiales
+  const handleSubmit = async (event) => {
     event.preventDefault();
 
     if (!token) {
@@ -158,81 +158,98 @@ const AltaPuntoLimpio = () => {
     }
     if (!validate()) return;
 
-    // Convertir el objeto de materiales en un arreglo de objetos con los campos requeridos
-    const materialesArray = Object.entries(formData.materiales)
-      .filter(([type, qty]) => parseInt(qty) > 0)
-      .map(([type, qty]) => {
-        // Buscar un transportista que tenga el mismo tipo de material y esté activo
-        const transporte = transportistas.find(
-          (t) =>
-            t.tipo_material === type &&
-            t.estado.toLowerCase() === "activo"
-        );
-        if (!transporte) {
-          // Si no se encuentra un transportista adecuado, puedes asignar un valor por defecto o manejar el error.
-          console.error(
-            `No se encontró transportista activo para el tipo: ${type}`
-          );
-          // Aquí asignamos null o podrías asignar un valor por defecto.
-          return null;
-        }
-        return {
-          tipo_material: type,
-          cantidad: parseInt(qty),
-          transportista: transporte.id,
-          // Se asignan valores por defecto para los otros campos obligatorios
-          descripcion: "Sin descripción",
-          proteccion: "Sin protección",
-          tipo_contenedor: formData.tipo_contenedor,
-          estado_del_contenedor: "No especificado",
-          ventilacion: type === "peligrosos" ? "necesario" : "", // Dejar vacío si no es peligroso
-        };
-      })
-      .filter((item) => item !== null);
-
-    if (materialesArray.length === 0) {
-      alert("Debe asignarse al menos un material con transportista válido.");
-      return;
-    }
-
-    const dataToSend = {
-      ...formData,
+    // Extraer y preparar datos para el Punto Limpio (sin la propiedad 'materiales')
+    const { materiales, ...puntoData } = formData;
+    const dataPuntoLimpio = {
+      ...puntoData,
       fecha_ingreso: formData.fecha_ingreso
         ? dayjs(formData.fecha_ingreso).format("YYYY-MM-DD")
         : null,
-      materiales: materialesArray,
     };
 
-    // Opcional: Si "cantidad" no forma parte del modelo PuntoLimpio, puedes eliminarlo:
-    // delete dataToSend.cantidad;
-
-    fetch("http://127.0.0.1:8000/api/puntolimpio/registro/", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Token ${token}`,
-      },
-      body: JSON.stringify(dataToSend),
-    })
-      .then((res) => {
-        if (!res.ok) {
-          return res.text().then((errorText) => {
-            console.error("Respuesta de error:", errorText);
-            throw new Error(errorText);
-          });
+    try {
+      // Crear el Punto Limpio
+      const responsePunto = await fetch(
+        "http://127.0.0.1:8000/api/puntolimpio/registro/",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Token ${token}`,
+          },
+          body: JSON.stringify(dataPuntoLimpio),
         }
-        return res.json();
-      })
-      .then((data) => {
-        console.log("Punto Limpio creado:", data);
-        navigate("/puntolimpio", {
-          state: { successMessage: "Punto Limpio registrado con éxito." },
-        });
-      })
-      .catch((err) => {
-        console.error("Error al dar de alta el Punto Limpio:", err);
-        alert("Error al dar de alta el Punto Limpio:\n" + err.message);
+      );
+      if (!responsePunto.ok) {
+        const errorText = await responsePunto.text();
+        throw new Error(errorText);
+      }
+      const puntoDataResponse = await responsePunto.json();
+
+      // Preparar el arreglo de materiales
+      const materialesArray = Object.entries(materiales)
+        .filter(([type, qty]) => parseInt(qty) > 0)
+        .map(([type, qty]) => {
+          // Buscar un transportista que tenga el mismo tipo de material y esté activo
+          const transporte = transportistas.find(
+            (t) =>
+              t.tipo_material === type &&
+              t.estado.toLowerCase() === "activo"
+          );
+          if (!transporte) {
+            console.error(
+              `No se encontró transportista activo para el tipo: ${type}`
+            );
+            return null;
+          }
+          return {
+            tipo_material: type,
+            cantidad: parseInt(qty),
+            transportista: transporte.id,
+            // Valores por defecto para los otros campos
+            descripcion: "Sin descripción",
+            proteccion: "Sin protección",
+            tipo_contenedor: formData.tipo_contenedor,
+            estado_del_contenedor: "No especificado",
+            ventilacion: type === "peligrosos" ? "necesario" : "",
+            obra: formData.obra, // mismo valor que en el formData
+            punto_limpio: puntoDataResponse.id, // ID del PuntoLimpio creado
+          };
+        })
+        .filter((item) => item !== null);
+
+      if (materialesArray.length === 0) {
+        alert("Debe asignarse al menos un material con transportista válido.");
+        return;
+      }
+
+      // Crear cada material de forma individual
+      for (const material of materialesArray) {
+        const responseMaterial = await fetch(
+          "http://127.0.0.1:8000/api/materiales/registro/",
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Token ${token}`,
+            },
+            body: JSON.stringify(material),
+          }
+        );
+        if (!responseMaterial.ok) {
+          const errorText = await responseMaterial.text();
+          throw new Error(errorText);
+        }
+      }
+
+      console.log("Punto Limpio y materiales creados con éxito");
+      navigate("/puntolimpio", {
+        state: { successMessage: "Punto Limpio registrado con éxito." },
       });
+    } catch (err) {
+      console.error("Error al dar de alta el Punto Limpio:", err);
+      alert("Error al dar de alta el Punto Limpio:\n" + err.message);
+    }
   };
 
   const theme = createTheme({
@@ -253,7 +270,6 @@ const AltaPuntoLimpio = () => {
     { value: "mezclados", label: "Mezclados", icon: <TrendingUpDown /> },
     { value: "peligrosos", label: "Peligrosos", icon: <TriangleAlert /> },
   ];
-  
 
   return (
     <ThemeProvider theme={theme}>
