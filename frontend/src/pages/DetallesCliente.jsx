@@ -12,11 +12,9 @@ const DetallesCliente = () => {
   const [cargando, setCargando] = useState(true);
   const [error, setError] = useState(null);
   
-  // Obtenemos el token desde el AuthContext
   const { token } = useContext(AuthContext);
 
   useEffect(() => {
-    // Realiza una petición a la API para obtener los detalles del cliente
     fetch(`http://localhost:8000/api/clientes/${id}`, {
       headers: {
         'Content-Type': 'application/json',

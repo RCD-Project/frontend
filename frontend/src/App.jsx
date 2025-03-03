@@ -7,10 +7,9 @@ import Drawer from "./components/Drawer";
 import Body from "./components/body";
 // import RoleSelector from "./components/RolSelector";
 
-// Importa tus páginas
 import Clientes from "./pages/Clientes";
 import AltaCliente from "./pages/AltaClientes";
-import AltaUsuario from "./pages/AltaUsuario";  // <-- Nueva página AltaUsuario
+import AltaUsuario from "./pages/AltaUsuario";  
 import DetallesCliente from "./pages/DetallesCliente";
 import EditarCliente from "./pages/EditarCliente";
 import PuntoLimpio from "./pages/PuntoLimpio";
@@ -41,7 +40,7 @@ import RoleBasedRoute from "./pages/RutasProtegidas";
 import Landing from "./pages/Landing";
 import Error403 from "./403error";
 import Formularios from "./pages/Formularios";
-import DetallesFormulario from "./pages/DetallesFormulario"; // Importación de la nueva página
+import DetallesFormulario from "./pages/DetallesFormulario"; 
 
 import "./styles/App.css";
 

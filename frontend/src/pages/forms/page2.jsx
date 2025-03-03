@@ -41,7 +41,6 @@ const Page2 = () => {
   const { data, updateData } = useFormStore();
   const pageIndex = "page2";
 
-  // Estado inicial con campos específicos para cada sección
   const formData = data[pageIndex] || {
     logistica: "",
     logisticaObservaciones: "",
@@ -56,7 +55,6 @@ const Page2 = () => {
     updateData(pageIndex, { ...formData, [field]: value });
   };
 
-  // Al seleccionar un checkbox, se guarda el valor de la columna seleccionada.
   const handleCheckboxChange = (field, row, col, columns) => {
     handleChange(field, {
       ...formData[field],

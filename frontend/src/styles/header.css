@@ -17,7 +17,7 @@
   box-sizing: border-box;
   z-index: 100;
   transition: opacity 0.3s ease;
-  overflow-x: hidden; /* 🔹 Solución para evitar scroll */
+  overflow-x: hidden; 
 }
 
 
@@ -28,7 +28,6 @@
   height: 100%;
 }
 
-/* Elemento placeholder para equilibrar el espacio a la izquierda */
 .header-placeholder {
   width: var(--logo-width);
 }
@@ -54,7 +53,7 @@
   border: none;
   cursor: pointer;
   padding: 0;
-  margin-right: 10px; /* 🔹 Reducir margen para evitar exceso de espacio */
+  margin-right: 10px; 
   display: flex;
   align-items: center;
   max-width: 40px;

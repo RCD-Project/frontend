@@ -31,7 +31,6 @@ const Page1 = ({ nextStep }) => {
   const [selectedTecnico, setSelectedTecnico] = useState("");
   const navigate = useNavigate();
 
-  // Extraer email del usuario almacenado en localStorage
   const userData = JSON.parse(localStorage.getItem("user") || "{}");
   const loggedEmail = userData?.email || "";
   const token = localStorage.getItem("token");
@@ -72,7 +71,6 @@ const Page1 = ({ nextStep }) => {
     }
   }, [loggedEmail, token, updateData]);
 
-  // Datos seguros del formulario
   const safeFormData = {
     obra: data?.page1?.obraId || "",
     fecha: data?.page1?.fecha || null,

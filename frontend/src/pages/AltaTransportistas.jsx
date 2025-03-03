@@ -12,7 +12,7 @@ import {
   Paper,
   Box,
 } from '@mui/material';
-import { AuthContext } from './context/AuthContext'; // Importar el contexto
+import { AuthContext } from './context/AuthContext';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
 import { useNavigate } from 'react-router-dom';
 
@@ -29,7 +29,7 @@ const AltaTransportistas = () => {
   });
   const [errorMessage, setErrorMessage] = useState('');
 
-  const { token } = useContext(AuthContext); // Accede al token desde el contexto
+  const { token } = useContext(AuthContext);
   const navigate = useNavigate();
 
   const validate = () => {
@@ -117,7 +117,7 @@ const AltaTransportistas = () => {
   const theme = createTheme({
     palette: {
       primary: {
-        main: '#a8c948', // Color personalizado igual que en AltaCliente
+        main: '#a8c948', 
       },
     },
   });

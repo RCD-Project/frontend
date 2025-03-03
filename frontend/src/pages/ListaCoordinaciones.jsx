@@ -18,7 +18,6 @@ const ListaDeCoordinaciones = () => {
   const successMessage = location.state?.successMessage || "";
 
   useEffect(() => {
-    // Se asume que el endpoint devuelve coordinaciones aceptadas
     fetch("http://127.0.0.1:8000/api/coordinacionretiro/aceptadas/", {
       headers: {
         "Content-Type": "application/json",
@@ -52,18 +51,15 @@ const ListaDeCoordinaciones = () => {
     setSelectedCoordinacion(null);
   };
 
-  // Definición de columnas. En la columna "Obra" se utiliza renderCell para mostrar el nombre de la obra:
   const columnasCoordinaciones = [
     {
       field: 'obra',
       headerName: 'Obra',
       flex: 1,
       renderCell: (params) => {
-        // Si params.row.obra es un objeto, intentamos extraer 'nombre_obra'
         if (params.row.obra && typeof params.row.obra === 'object') {
           return params.row.obra.nombre_obra || params.row.obra.nombre || "Sin nombre";
         }
-        // Si es un valor primitivo (por ejemplo, el ID), lo mostramos tal cual
         return params.row.obra || "Sin nombre";
       },
     },

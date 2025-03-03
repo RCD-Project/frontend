@@ -13,7 +13,7 @@ import {
   Hammer,
   MapPinCheck,
   LogOut,
-  UserPlus, // Importa el ícono para Alta Usuario
+  UserPlus,
 } from "lucide-react";
 import "../styles/drawer.css";
 import { AuthContext } from "../pages/context/AuthContext";
@@ -29,7 +29,6 @@ const menuItems = [
   { path: "/informes", label: "Informes", icon: <FileText size={24} />, roles: ["superadmin", "coordinadorlogistico", "coordinador"] },
   { path: "/obraslist", label: "Formularios", icon: <ClipboardPenLine size={24} />, roles: ["superadmin", "tecnico"] },
   { path: "/puntolimpio", label: "Puntos Limpios", icon: <MapPinCheck size={24} />, roles: ["superadmin", "cliente"] },
-  // Nueva opción para Alta Usuario, visible solo para superadmin
   { path: "/altausuario", label: "Alta Usuario", icon: <UserPlus size={24} />, roles: ["superadmin"] },
 ];
 
@@ -49,7 +48,7 @@ const Drawer = () => {
       initial={{ width: "60px" }}
       animate={{ width: isOpen ? "220px" : "60px" }}
       transition={{ duration: 0.3 }}
-      style={{ overflowX: "hidden", maxWidth: "100vw" }} // 🔹 Evita que sobrepase la pantalla
+      style={{ overflowX: "hidden", maxWidth: "100vw" }} 
       onMouseEnter={() => setIsOpen(true)}
       onMouseLeave={() => setIsOpen(false)}
     >

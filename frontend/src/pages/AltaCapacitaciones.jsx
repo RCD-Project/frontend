@@ -16,7 +16,7 @@ import { createTheme, ThemeProvider } from '@mui/material/styles';
 import { LocalizationProvider, DatePicker } from '@mui/x-date-pickers';
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { useNavigate } from "react-router-dom";
-import { AuthContext } from "../pages/context/AuthContext"; // Asegúrate de importar el contexto
+import { AuthContext } from "../pages/context/AuthContext"; 
 
 const steps = ['Información de la Capacitación'];
 
@@ -29,13 +29,12 @@ const AltaCapacitaciones = () => {
     tecnico: '',
     comentario: '',
   });
-  const [obras, setObras] = useState([]); // Array para las obras
-  const [tecnicos, setTecnicos] = useState([]); // Array para los técnicos
+  const [obras, setObras] = useState([]); 
+  const [tecnicos, setTecnicos] = useState([]); 
 
   const navigate = useNavigate();
-  const { token } = useContext(AuthContext); // Obtenemos el token
+  const { token } = useContext(AuthContext); 
 
-  // Obtener las obras aprobadas desde la API con el token en el header
   useEffect(() => {
     fetch('http://127.0.0.1:8000/api/obras/aprobadas/', {
       headers: {
@@ -58,7 +57,6 @@ const AltaCapacitaciones = () => {
       });
   }, [token]);
 
-  // Obtener los técnicos desde la API con el token en el header
   useEffect(() => {
     fetch('http://localhost:8000/api/tecnicos/lista/', {
       headers: {
@@ -130,7 +128,7 @@ const AltaCapacitaciones = () => {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Token ${token}`  // Se envía el token en el header
+        'Authorization': `Token ${token}`  
       },
       body: JSON.stringify(payload)
     })

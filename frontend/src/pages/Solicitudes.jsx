@@ -68,7 +68,6 @@ const Solicitudes = () => {
           ...item,
           tipo: 'obra',
           id: item.obra ? `obra-${item.obra}` : `obra-${Math.random()}`,
-          // Extraer el nombre de la obra; se asume que la API retorna la propiedad "nombre_obra"
           nombre: item.obra?.nombre_obra || item.nombre_obra || 'Sin nombre',
           solicitante: "Alta obra",
           fecha: formatDate(item.fecha_solicitud),
@@ -79,7 +78,6 @@ const Solicitudes = () => {
           ...item,
           tipo: 'coordinacion',
           id: `coordinacion-${item.id}`,
-          // Se intenta extraer el nombre de la obra desde el objeto anidado
           nombre: item.obra ? (item.obra.nombre_obra || item.obra.nombre || 'Sin obra') : 'Sin obra',
           solicitante: "Coordinacion retiro",
           fecha: formatDate(item.fecha_solicitud),

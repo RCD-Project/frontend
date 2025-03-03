@@ -6,10 +6,8 @@ import { useFormStore } from "../pages/context/FormContext";
 import { useNavigate } from "react-router-dom";
 import dayjs from "dayjs";
 
-// Importa las páginas del formulario de forma dinámica
 const pages = import.meta.glob("../pages/forms/*.jsx", { eager: true });
 
-// Ordena las páginas según el número en el nombre del archivo (page1, page2, …, page13)
 const pageComponents = Object.entries(pages)
   .sort(([a], [b]) => {
     const numA = parseInt(a.match(/\d+/)?.[0] || "0", 10);
@@ -26,7 +24,6 @@ const Formularios = () => {
   const CurrentPage = pageComponents[pageIndex];
   if (!CurrentPage) return <div>No se encontró la página</div>;
 
-  // Convierte un objeto a uno plano (solo propiedades propias)
   const toPlainObject = (obj) => {
     if (obj === null || typeof obj !== "object") return obj;
     const plain = {};
@@ -36,7 +33,6 @@ const Formularios = () => {
     return plain;
   };
 
-  // Transforma la data global en el objeto final esperado por el backend.
   const transformData = (globalData) => {
     const page1Data = globalData["page1"] || {};
     const page2Data = globalData["page2"] || {};

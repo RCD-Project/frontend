@@ -52,7 +52,7 @@ const Clientes = () => {
           return res.text();
         })
         .then(() => {
-          // Actualizamos el estado eliminando el cliente borrado
+          // Actualizamos el estado eliminando el cliente
           setClientes(clientes.filter((cliente) => cliente.id !== id));
         })
         .catch((error) => console.error("Error al eliminar cliente:", error));

@@ -42,9 +42,8 @@ const Transportistas = () => {
         console.error('Error al obtener transportistas:', error);
         alert('Ocurrió un error al obtener los transportistas.');
       });
-  }, [token, navigate]); // Dependencias actualizadas para incluir `navigate` también
+  }, [token, navigate]);
   
-  // El resto de tu código sigue igual...
   const toggleEstado = (id) => {
     const transportista = transportistas.find((t) => t.id === id);
     const newEstado = transportista.estado === 'activo' ? 'inactivo' : 'activo';
@@ -75,7 +74,6 @@ const Transportistas = () => {
       });
   };
 
-  // Manejo de menú, renderizado de tablas y demás...
   const [anchorEl, setAnchorEl] = useState(null);
   const [selectedTransportista, setSelectedTransportista] = useState(null);
 

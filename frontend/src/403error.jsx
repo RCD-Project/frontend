@@ -1,5 +1,5 @@
 import React from 'react';
-import errorGif from './assets/403Error.gif'; // Asegúrate de que la ruta es correcta desde src/
+import errorGif from './assets/403Error.gif'; 
 
 const Error403 = () => {
   return (

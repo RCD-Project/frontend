@@ -158,7 +158,7 @@ const AltaPuntoLimpio = () => {
     }
     if (!validate()) return;
 
-    // Extraer y preparar datos para el Punto Limpio (sin la propiedad 'materiales')
+    // Extraer y preparar datos para el Punto Limpio
     const { materiales, ...puntoData } = formData;
     const dataPuntoLimpio = {
       ...puntoData,

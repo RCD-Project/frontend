@@ -175,7 +175,7 @@ const FormularioCoordinaciones = () => {
     const payload = {
       obra: formData.obra,
       descripcion: formData.descripcion,
-      observaciones: formData.observacion, // observacion se envía como observaciones
+      observaciones: formData.observacion,
       fecha_retiro: formData.fechaRetiro
         ? formData.fechaRetiro.format("YYYY-MM-DD")
         : null,
@@ -221,7 +221,7 @@ const FormularioCoordinaciones = () => {
     }
   };
 
-  // Función para limpiar el formulario (resetear el estado)
+  // Función para limpiar el formulari
   const handleReset = () => {
     setFormData(initialFormState);
   };

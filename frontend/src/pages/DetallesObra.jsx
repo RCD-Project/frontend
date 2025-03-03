@@ -34,7 +34,6 @@ const obras = [
     imagen: 'url-imagen.jpg',
     pedido: 'Materiales de construcción',
   },
-  // Puedes agregar más obras con una estructura similar
 ];
 
 const DetallesObra = () => {

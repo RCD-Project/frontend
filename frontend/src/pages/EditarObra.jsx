@@ -147,7 +147,7 @@ const EditarObra = () => {
   const handleSubmit = async (event) => {
     event.preventDefault();
 
-    // Convertimos los datos para enviar a la API (por ejemplo, formateamos la fecha)
+    // Convertimos los datos para enviar a la API
     const obraData = {
       cliente: 1,
       nombre_obra: formData.nombreObra,

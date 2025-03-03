@@ -24,7 +24,6 @@ const EditarTransportista = () => {
 
   useEffect(() => {
     if (id) {
-      // Realiza la petición para obtener los datos del transportista
       fetch(`http://localhost:8000/api/transportistas/${id}/`)
         .then((response) => {
           if (!response.ok) {
@@ -33,7 +32,6 @@ const EditarTransportista = () => {
           return response.json();
         })
         .then((data) => {
-          // Actualiza el estado formData con los datos obtenidos
           setFormData({
             nombre: data.nombre,
             contacto: data.contacto,

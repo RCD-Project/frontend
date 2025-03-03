@@ -12,7 +12,7 @@ import EmailIcon from "@mui/icons-material/Email";
 import LockIcon from "@mui/icons-material/Lock";
 import { useNavigate } from "react-router-dom";
 import { AuthContext } from "./context/AuthContext";
-import section4 from "../assets/section4.png"; // Importa la imagen
+import section4 from "../assets/section4.png"; 
 
 const LoginForm = () => {
   const [email, setEmail] = useState("");
@@ -161,7 +161,7 @@ const LoginForm = () => {
                 variant="contained"
                 sx={{
                   marginTop: "20px",
-                  backgroundColor: "#abbf9d", // Color de fondo como en la landing
+                  backgroundColor: "#abbf9d",
                   "&:hover": { backgroundColor: "#d1e063" }, // Hover color
                   color: "#fff",
                   padding: "8px 16px", // Botón más pequeño y amigable

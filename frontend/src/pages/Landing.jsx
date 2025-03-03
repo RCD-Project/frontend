@@ -11,7 +11,7 @@ const Landing = () => {
   useEffect(() => {
     document.body.style.overflow = "hidden";
     return () => {
-      document.body.style.overflow = "auto"; // Restaura el scroll al salir
+      document.body.style.overflow = "auto"; 
     };
   }, []);
 
@@ -35,7 +35,7 @@ const Landing = () => {
         justifyContent: "center",
         overflowY: "hidden",
         paddingTop: "60px",
-        marginBottom: "50px", // 🔹 Empuja el contenido hacia arriba
+        marginBottom: "50px", 
       }}
     >
      
@@ -67,7 +67,7 @@ const Landing = () => {
         flexDirection: "column",
         alignItems: "center",
         justifyContent: "center",
-        transform: "translateY(-50px)", // 🔹 Mueve el Paper 50px hacia arriba
+        transform: "translateY(-50px)", 
       }}
     >
         {/* Logo más pequeño */}

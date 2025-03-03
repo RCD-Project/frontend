@@ -34,9 +34,8 @@ const Page3 = () => {
 
   const [loading, setLoading] = useState(false);
 
-  // 🔹 Estado inicial de la grilla de evaluación general
   const [formData, setFormData] = useState({
-    grillaPuntosLimpios: Array(titulosFilas.length).fill(""),  // 🔹 Ahora es una sola grilla general
+    grillaPuntosLimpios: Array(titulosFilas.length).fill(""),  
     puntoLimpioObservaciones: data[pageIndex]?.puntoLimpioObservaciones || "",
   });
 
@@ -46,14 +45,12 @@ const Page3 = () => {
     }
   }, [formData, pageIndex, updateData]);
 
-  // ✅ Manejar cambios en la grilla general
   const handleCheckboxChange = (filaIndex, colIndex) => {
     const newGrilla = [...formData.grillaPuntosLimpios];
     newGrilla[filaIndex] = titulosColumnas[colIndex]; // Guarda la opción seleccionada
     setFormData({ ...formData, grillaPuntosLimpios: newGrilla });
   };
 
-  // ✅ Manejar cambios en observaciones generales
   const handleObservationChange = (e) => {
     setFormData({ ...formData, puntoLimpioObservaciones: e.target.value });
   };

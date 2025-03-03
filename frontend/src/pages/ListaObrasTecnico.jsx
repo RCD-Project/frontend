@@ -20,10 +20,8 @@ const ObrasList = () => {
   const { data, updateData } = useFormStore();
 
   useEffect(() => {
-    // Obtener el token desde localStorage
     const token = localStorage.getItem("token");
 
-    // Fetch de obras aprobadas con el token en la cabecera
     fetch("http://localhost:8000/api/obras/aprobadas/", {
       headers: {
         "Content-Type": "application/json",
@@ -86,7 +84,7 @@ const ObrasList = () => {
                       sx={{
                         backgroundColor: "#abbf9d",
                         "&:hover": {
-                          backgroundColor: "#d1e063", // Color al hacer hover
+                          backgroundColor: "#d1e063",
                         },
                       }}
                       onClick={() => handleSelectObra(obra)}

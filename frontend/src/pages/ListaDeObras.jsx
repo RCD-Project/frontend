@@ -22,7 +22,7 @@ const ListaDeObras = () => {
     fetch("http://127.0.0.1:8000/api/obras/aprobadas/", {
       headers: {
         "Content-Type": "application/json",
-        "Authorization": `Token ${token}`, // Se envía el token de autenticación
+        "Authorization": `Token ${token}`, 
       },
     })
       .then((res) => {
@@ -33,7 +33,7 @@ const ListaDeObras = () => {
       })
       .then((data) => {
         if (role === "cliente" && user) {
-          setObras(data.filter((obra) => obra.cliente === 1)); // cambiar user.id para probar
+          setObras(data.filter((obra) => obra.cliente === 1)); 
         } else {
           setObras(data);
         }

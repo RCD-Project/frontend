@@ -11,7 +11,6 @@ import {
 } from "@mui/material";
 import { useFormStore } from "../context/FormContext";
 
-// Definimos las columnas y filas
 const titulosColumnas = [
   "Correcta",
   "A mejorar (Con observaciones)",
@@ -59,7 +58,7 @@ const Page5 = () => {
     updateData("page5", { ...page5Data, observaciones: event.target.value });
   };
 
-  // Actualiza la grilla: para la fila indicada (clave) se guarda el string de la columna seleccionada.
+  // Actualiza la grilla para la fila indicada (clave) se guarda el string de la columna seleccionada.
   const handleCheckboxChange = (fila, colIndex) => {
     updateData("page5", {
       ...page5Data,

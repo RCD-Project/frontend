@@ -18,7 +18,7 @@ const PuntoLimpio = () => {
   const { token } = useContext(AuthContext);
 
   useEffect(() => {
-    if (!token) return; // Evita la petición si no hay token
+    if (!token) return; 
 
     fetch("http://localhost:8000/api/puntolimpio/lista/", {
       headers: {
