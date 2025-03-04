@@ -1,13 +1,16 @@
-// Informes.jsx
 import React, { useEffect, useState } from "react";
 import {
-  Box,
+  Container,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
   Paper,
-  Typography,
-  Grid,
-  Divider,
-  CircularProgress,
   Button,
+  Typography,
+  CircularProgress,
 } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 
@@ -22,7 +25,7 @@ const Informes = () => {
     fetch("http://localhost:8000/api/formularios/listar/", {
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Token ${token}`,
+        "Authorization": `Token ${token}`,
       },
     })
       .then((res) => {
@@ -44,9 +47,9 @@ const Informes = () => {
 
   if (loading) {
     return (
-      <Box sx={{ display: "flex", justifyContent: "center", mt: 4 }}>
+      <Container sx={{ display: "flex", justifyContent: "center", mt: 4 }}>
         <CircularProgress />
-      </Box>
+      </Container>
     );
   }
 
@@ -59,42 +62,54 @@ const Informes = () => {
   }
 
   return (
-    <Box sx={{ p: 2 }}>
-      <Typography variant="h4" sx={{ mb: 2, textAlign: "center" }}>
+    <Container>
+      <Typography variant="h4" align="center" sx={{ my: 3 }}>
         Listado de Formularios
       </Typography>
-      {formularios.map((formulario) => (
-        <Paper key={formulario.id} sx={{ p: 2, mb: 2 }}>
-          <Grid container spacing={2} alignItems="center">
-            <Grid item xs={12} sm={4}>
-              <Typography variant="subtitle2">Fecha:</Typography>
-              <Typography variant="body1">{formulario.fecha || "N/A"}</Typography>
-            </Grid>
-            <Grid item xs={12} sm={4}>
-              <Typography variant="subtitle2">Obra:</Typography>
-              <Typography variant="body1">
-                {formulario.obra_nombre || "N/A"}
-              </Typography>
-            </Grid>
-            <Grid item xs={12} sm={4}>
-              <Typography variant="subtitle2">Técnico:</Typography>
-              <Typography variant="body1">
-                {formulario.tecnico_nombre || "N/A"}
-              </Typography>
-            </Grid>
-          </Grid>
-          <Divider sx={{ my: 1 }} />
-          <Box sx={{ textAlign: "right" }}>
-            <Button
-              variant="contained"
-              onClick={() => navigate(`/formularios/detalle/${formulario.id}`)}
-            >
-              Ver Detalles
-            </Button>
-          </Box>
-        </Paper>
-      ))}
-    </Box>
+      <TableContainer component={Paper}>
+        <Table>
+          <TableHead>
+            <TableRow>
+              <TableCell>Fecha</TableCell>
+              <TableCell>Obra</TableCell>
+              <TableCell>Técnico</TableCell>
+              <TableCell align="center">Acción</TableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {formularios.length > 0 ? (
+              formularios.map((formulario) => (
+                <TableRow key={formulario.id}>
+                  <TableCell>{formulario.fecha || "N/A"}</TableCell>
+                  <TableCell>{formulario.obra_nombre || "N/A"}</TableCell>
+                  <TableCell>{formulario.tecnico_nombre || "N/A"}</TableCell>
+                  <TableCell align="center">
+                    <Button
+                      variant="contained"
+                      sx={{
+                        backgroundColor: "#abbf9d",
+                        "&:hover": {
+                          backgroundColor: "#d1e063",
+                        },
+                      }}
+                      onClick={() => navigate(`/formularios/detalle/${formulario.id}`)}
+                    >
+                      Ver Detalles
+                    </Button>
+                  </TableCell>
+                </TableRow>
+              ))
+            ) : (
+              <TableRow>
+                <TableCell colSpan={4} align="center">
+                  No hay formularios disponibles.
+                </TableCell>
+              </TableRow>
+            )}
+          </TableBody>
+        </Table>
+      </TableContainer>
+    </Container>
   );
 };
 
