@@ -73,8 +73,8 @@ const Capacitaciones = () => {
   const columnasCapacitaciones = [
     { field: 'fecha', headerName: 'Fecha', flex: 1 },
     { field: 'motivo', headerName: 'Motivo', flex: 1 },
-    { field: 'obra', headerName: 'Obra', flex: 1 },
-    { field: 'tecnico', headerName: 'Técnico', flex: 1 },
+    { field: 'obra_nombre', headerName: 'Obra', flex: 1 },
+    { field: 'tecnico_nombre', headerName: 'Técnico', flex: 1 },
     {
       field: 'acciones',
       headerName: 'Acciones',

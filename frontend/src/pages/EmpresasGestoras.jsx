@@ -91,7 +91,7 @@ const EmpresasGestoras = () => {
         <MenuItem onClick={() => { handleMenuClose(); navigate(`/detalleempresa?id=${selectedEmpresa?.id}`); }}>
           <VisibilityIcon /> Ver detalles
         </MenuItem>
-        <MenuItem onClick={() => { handleMenuClose(); navigate(`/editarempresa?id=${selectedEmpresa?.id}`); }}>
+        <MenuItem onClick={() => { handleMenuClose(); navigate(`/editarempresasgestoras?id=${selectedEmpresa?.id}`); }}>
           <EditIcon /> Editar
         </MenuItem>
         <MenuItem onClick={() => { handleMenuClose(); eliminarEmpresa(selectedEmpresa?.id); }}>

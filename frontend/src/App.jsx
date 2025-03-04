@@ -9,7 +9,7 @@ import Body from "./components/body";
 
 import Clientes from "./pages/Clientes";
 import AltaCliente from "./pages/AltaClientes";
-import AltaUsuario from "./pages/AltaUsuario";  
+import AltaUsuario from "./pages/AltaUsuario";
 import DetallesCliente from "./pages/DetallesCliente";
 import EditarCliente from "./pages/EditarCliente";
 import PuntoLimpio from "./pages/PuntoLimpio";
@@ -17,7 +17,7 @@ import AltaPuntoLimpio from "./pages/AltaPuntoLimpio";
 import DetallesPuntoLimpio from "./pages/DetallesPuntoLimpio";
 import EditarPuntoLimpio from "./pages/EditarPuntoLimpio";
 import Coordinaciones from "./pages/Coordinaciones";
-import ListaDeCoordinaciones from './pages/ListaCoordinaciones'; 
+import ListaDeCoordinaciones from "./pages/ListaCoordinaciones";
 import Transportistas from "./pages/Transportistas";
 import EmpresasGestoras from "./pages/EmpresasGestoras";
 import ListaDeObras from "./pages/ListaDeObras";
@@ -40,7 +40,8 @@ import RoleBasedRoute from "./pages/RutasProtegidas";
 import Landing from "./pages/Landing";
 import Error403 from "./403error";
 import Formularios from "./pages/Formularios";
-import DetallesFormulario from "./pages/DetallesFormulario"; 
+import DetallesFormulario from "./pages/DetallesFormulario";
+import DetallesEmpresaGestora from './pages/DetalleEmpresas';
 
 import "./styles/App.css";
 
@@ -57,7 +58,10 @@ const AppContent = () => {
       let newOpacity = 1 - scrollTop / 200;
       if (newOpacity < 0.5) newOpacity = 0.5;
       setHeaderOpacity(newOpacity);
-      document.documentElement.style.setProperty("--header-fade-opacity", newOpacity);
+      document.documentElement.style.setProperty(
+        "--header-fade-opacity",
+        newOpacity
+      );
     };
 
     window.addEventListener("scroll", handleScroll);
@@ -90,7 +94,7 @@ const AppContent = () => {
       setIsDrawerOpen(false);
     }
   }, [isLoggedIn]);
-  
+
   return (
     <div className="app-container">
       <Header opacity={headerOpacity} isLoggedIn={isLoggedIn} />
@@ -111,24 +115,50 @@ const AppContent = () => {
       >
         <Body>
           <Routes>
-            <Route path="/" element={isLoggedIn ? <ListaDeObras /> : <Landing />} />
+            <Route
+              path="/"
+              element={isLoggedIn ? <ListaDeObras /> : <Landing />}
+            />
             <Route
               path="/clientes"
               element={
-                <RoleBasedRoute allowedRoles={["superadmin", "coordinador", "coordinadorlogistico"]}>
+                <RoleBasedRoute
+                  allowedRoles={[
+                    "superadmin",
+                    "coordinador",
+                    "coordinadorlogistico",
+                  ]}
+                >
                   <Clientes />
                 </RoleBasedRoute>
               }
             />
-            <Route path="/altacoordinaciones" element={
-              <RoleBasedRoute allowedRoles={["superadmin", "supervisor", "cliente"]}>
-                <Coordinaciones />
-              </RoleBasedRoute>
-            } />
+            <Route
+              path="/altacoordinaciones"
+              element={
+                <RoleBasedRoute
+                  allowedRoles={["superadmin", "supervisor", "cliente"]}
+                >
+                  <Coordinaciones />
+                </RoleBasedRoute>
+              }
+            />
+            <Route
+              path="/detalleempresa"
+              element={
+                <RoleBasedRoute
+                  allowedRoles={["superadmin", "coordinador", "cliente"]}
+                >
+                  <DetallesEmpresaGestora />
+                </RoleBasedRoute>
+              }
+            />
             <Route
               path="/coordinaciones"
               element={
-                <RoleBasedRoute allowedRoles={["superadmin", "supervisor", "cliente"]}>
+                <RoleBasedRoute
+                  allowedRoles={["superadmin", "supervisor", "cliente"]}
+                >
                   <ListaDeCoordinaciones />
                 </RoleBasedRoute>
               }
@@ -136,7 +166,9 @@ const AppContent = () => {
             <Route
               path="/transportistas"
               element={
-                <RoleBasedRoute allowedRoles={["superadmin", "coordinadorlogistico"]}>
+                <RoleBasedRoute
+                  allowedRoles={["superadmin", "coordinadorlogistico"]}
+                >
                   <Transportistas />
                 </RoleBasedRoute>
               }
@@ -144,18 +176,26 @@ const AppContent = () => {
             <Route
               path="/empresasgestoras"
               element={
-                <RoleBasedRoute allowedRoles={["superadmin", "coordinadorlogistico"]}>
+                <RoleBasedRoute
+                  allowedRoles={["superadmin", "coordinadorlogistico"]}
+                >
                   <EmpresasGestoras />
                 </RoleBasedRoute>
               }
             />
             <Route path="/altacliente" element={<AltaCliente />} />
-            <Route path="/altausuario" element={
-              <RoleBasedRoute allowedRoles={["superadmin"]}>
-                <AltaUsuario />
-              </RoleBasedRoute>
-            } />
-            <Route path="/detallescliente" element={isLoggedIn ? <DetallesCliente /> : <Landing />} />
+            <Route
+              path="/altausuario"
+              element={
+                <RoleBasedRoute allowedRoles={["superadmin"]}>
+                  <AltaUsuario />
+                </RoleBasedRoute>
+              }
+            />
+            <Route
+              path="/detallescliente"
+              element={isLoggedIn ? <DetallesCliente /> : <Landing />}
+            />
             <Route
               path="/editarcliente"
               element={
@@ -176,26 +216,38 @@ const AppContent = () => {
             <Route
               path="/informes"
               element={
-                <RoleBasedRoute allowedRoles={["coordinadorlogistico", "superadmin", "coordinador"]}>
+                <RoleBasedRoute
+                  allowedRoles={[
+                    "coordinadorlogistico",
+                    "superadmin",
+                    "coordinador",
+                  ]}
+                >
                   <Informes />
                 </RoleBasedRoute>
               }
             />
             {/* Nueva ruta para DetallesFormulario */}
             <Route
-  path="/formularios/detalle/:pk"
-  element={
-    <RoleBasedRoute allowedRoles={["tecnico", "superadmin"]}>
-      <DetallesFormulario />
-    </RoleBasedRoute>
-  }
-/>
+              path="/formularios/detalle/:pk"
+              element={
+                <RoleBasedRoute allowedRoles={["tecnico", "superadmin"]}>
+                  <DetallesFormulario />
+                </RoleBasedRoute>
+              }
+            />
 
             <Route path="/unauthorized" element={<Error403 />} />
             <Route
               path="/solicitudes"
               element={
-                <RoleBasedRoute allowedRoles={["superadmin", "coordinador", "coordinadorlogistico"]}>
+                <RoleBasedRoute
+                  allowedRoles={[
+                    "superadmin",
+                    "coordinador",
+                    "coordinadorlogistico",
+                  ]}
+                >
                   <Solicitudes />
                 </RoleBasedRoute>
               }
@@ -203,7 +255,14 @@ const AppContent = () => {
             <Route
               path="/capacitaciones"
               element={
-                <RoleBasedRoute allowedRoles={["cliente", "superadmin", "tecnico", "coordinador"]}>
+                <RoleBasedRoute
+                  allowedRoles={[
+                    "cliente",
+                    "superadmin",
+                    "tecnico",
+                    "coordinador",
+                  ]}
+                >
                   <Capacitaciones />
                 </RoleBasedRoute>
               }
@@ -243,7 +302,9 @@ const AppContent = () => {
             <Route
               path="/editarobra"
               element={
-                <RoleBasedRoute allowedRoles={["cliente", "superadmin", "supervisor"]}>
+                <RoleBasedRoute
+                  allowedRoles={["cliente", "superadmin", "supervisor"]}
+                >
                   <EditarObra />
                 </RoleBasedRoute>
               }
@@ -273,11 +334,16 @@ const AppContent = () => {
               }
             />
             <Route path="/login" element={<LoginForm />} />
-            <Route path="/detalletransportista" element={<DetallesTransportista />} />
+            <Route
+              path="/detalletransportista"
+              element={<DetallesTransportista />}
+            />
             <Route
               path="/detallestransportista"
               element={
-                <RoleBasedRoute allowedRoles={["coordinadorlogistico", "superadmin"]}>
+                <RoleBasedRoute
+                  allowedRoles={["coordinadorlogistico", "superadmin"]}
+                >
                   <DetallesTransportista />
                 </RoleBasedRoute>
               }
@@ -285,7 +351,9 @@ const AppContent = () => {
             <Route
               path="/editartransportista"
               element={
-                <RoleBasedRoute allowedRoles={["coordinadorlogistico", "superadmin"]}>
+                <RoleBasedRoute
+                  allowedRoles={["coordinadorlogistico", "superadmin"]}
+                >
                   <EditarTransportista />
                 </RoleBasedRoute>
               }
@@ -293,7 +361,9 @@ const AppContent = () => {
             <Route
               path="/altatransportistas"
               element={
-                <RoleBasedRoute allowedRoles={["coordinadorlogistico", "superadmin"]}>
+                <RoleBasedRoute
+                  allowedRoles={["coordinadorlogistico", "superadmin"]}
+                >
                   <AltaTransportistas />
                 </RoleBasedRoute>
               }
@@ -310,7 +380,9 @@ const AppContent = () => {
             <Route
               path="/editarempresasgestoras"
               element={
-                <RoleBasedRoute allowedRoles={["coordinadorlogistico", "superadmin"]}>
+                <RoleBasedRoute
+                  allowedRoles={["coordinadorlogistico", "superadmin"]}
+                >
                   <EditarEmpresasGestoras />
                 </RoleBasedRoute>
               }

@@ -13,16 +13,16 @@ import {
 import { createTheme, ThemeProvider } from "@mui/material/styles";
 import { AuthContext } from "../pages/context/AuthContext";
 
-const DetallesCapacitacion = () => {
+const DetallesEmpresaGestora = () => {
   // Obtener el token desde el contexto
   const { token } = useContext(AuthContext);
 
-  // Se obtiene el id de la capacitación desde la query string
+  // Se obtiene el id de la empresa gestora desde la query string
   const location = useLocation();
   const queryParams = new URLSearchParams(location.search);
   const id = queryParams.get("id");
 
-  const [capacitacion, setCapacitacion] = useState(null);
+  const [empresa, setEmpresa] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
@@ -36,12 +36,12 @@ const DetallesCapacitacion = () => {
 
   useEffect(() => {
     if (!id) {
-      setError("ID de capacitación no proporcionado.");
+      setError("ID de empresa gestora no proporcionado.");
       setLoading(false);
       return;
     }
 
-    fetch(`http://127.0.0.1:8000/api/capacitaciones/${id}/`, {
+    fetch(`http://127.0.0.1:8000/api/empresas/${id}/`, {
       headers: {
         "Content-Type": "application/json",
         Authorization: `Token ${token}`,
@@ -49,12 +49,12 @@ const DetallesCapacitacion = () => {
     })
       .then((response) => {
         if (!response.ok) {
-          throw new Error("Error al obtener los detalles de la capacitación.");
+          throw new Error("Error al obtener los detalles de la empresa gestora.");
         }
         return response.json();
       })
       .then((data) => {
-        setCapacitacion(data);
+        setEmpresa(data);
         setLoading(false);
       })
       .catch((err) => {
@@ -83,23 +83,22 @@ const DetallesCapacitacion = () => {
     );
   }
 
-  if (!capacitacion) {
+  if (!empresa) {
     return (
       <ThemeProvider theme={theme}>
         <Typography variant="h6" color="error" align="center">
-          Capacitación no encontrada
+          Empresa Gestora no encontrada
         </Typography>
       </ThemeProvider>
     );
   }
 
-  // Se arma un arreglo con los detalles a mostrar.
-  // Ajusta los nombres de los campos según lo que retorne tu API.
+  // Armar un arreglo con los detalles a mostrar
   const detalles = [
-    { label: "Motivo", value: capacitacion.motivo },
-    { label: "Obra", value: capacitacion.obra_nombre },
-    { label: "Fecha", value: capacitacion.fecha },
-    { label: "Técnico", value: capacitacion.tecnico_nombre },
+    { label: "Nombre", value: empresa.nombre },
+    { label: "Ubicación", value: empresa.ubicacion },
+    { label: "Contacto", value: empresa.contacto },
+    { label: "Email", value: empresa.email },
   ];
 
   return (
@@ -107,10 +106,10 @@ const DetallesCapacitacion = () => {
       <Card sx={{ maxWidth: 800, margin: "0 auto", padding: 4 }}>
         <CardContent>
           <Typography variant="h3" align="center" sx={{ mb: 4 }}>
-            Detalles de la Capacitación
+            {empresa.nombre}
           </Typography>
-          <Divider sx={{ mb: 2 }} />
-          <Grid container spacing={2}>
+          <Divider sx={{ mb: 4 }} />
+          <Grid container spacing={3}>
             {detalles.map((item, index) => (
               <Grid item xs={12} sm={6} key={index}>
                 <Paper sx={{ padding: 2, backgroundColor: "#f4f4f4" }}>
@@ -122,20 +121,10 @@ const DetallesCapacitacion = () => {
               </Grid>
             ))}
           </Grid>
-          <Box sx={{ mt: 4 }}>
-            <Typography variant="h5" align="center" sx={{ mb: 2 }}>
-              Comentario
-            </Typography>
-            <Paper sx={{ padding: 2, backgroundColor: "#f4f4f4" }}>
-              <Typography variant="body2">
-                {capacitacion.comentario ? capacitacion.comentario : "Sin comentario"}
-              </Typography>
-            </Paper>
-          </Box>
         </CardContent>
       </Card>
     </ThemeProvider>
   );
 };
 
-export default DetallesCapacitacion;
+export default DetallesEmpresaGestora;

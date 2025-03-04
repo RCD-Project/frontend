@@ -1,11 +1,13 @@
-import React, { useState, useEffect } from "react";
-import { Container, TextField, Button, Grid, Typography, Stepper, Step, StepLabel, Paper } from "@mui/material";
+import React, { useState, useEffect, useContext } from "react";
+import { Container, TextField, Button, Grid, Typography, Stepper, Step, StepLabel, Paper, MenuItem, Box } from "@mui/material";
 import { LocalizationProvider, DatePicker } from "@mui/x-date-pickers";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { useNavigate, useLocation } from "react-router-dom";
 import { createTheme, ThemeProvider } from '@mui/material/styles';
+import { AuthContext } from "../pages/context/AuthContext";
+import dayjs from "dayjs";
 
-const steps = ["Información General", "Detalles del Vehículo", "Contacto"];
+const steps = ["Información General", "Detalles del Transporte"];
 
 const EditarTransportista = () => {
   const [activeStep, setActiveStep] = useState(0);
@@ -15,16 +17,28 @@ const EditarTransportista = () => {
     email: "",
     tipoVehiculo: "",
     tipoMaterial: "",
+    fecha_ingreso: null,
   });
-
+  const [errors, setErrors] = useState({});
+  const [errorMessage, setErrorMessage] = useState("");
+  
   const navigate = useNavigate();
   const location = useLocation();
   const queryParams = new URLSearchParams(location.search);
   const id = queryParams.get("id");
 
+  // Obtenemos el token del contexto de autenticación
+  const { token } = useContext(AuthContext);
+
+  // Cargar los datos actuales del transportista
   useEffect(() => {
     if (id) {
-      fetch(`http://localhost:8000/api/transportistas/${id}/`)
+      fetch(`http://localhost:8000/api/transportistas/${id}/`, {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Token ${token}`,
+        },
+      })
         .then((response) => {
           if (!response.ok) {
             throw new Error("Error al obtener los datos del transportista");
@@ -33,17 +47,23 @@ const EditarTransportista = () => {
         })
         .then((data) => {
           setFormData({
-            nombre: data.nombre,
-            contacto: data.contacto,
-            email: data.email,
-            tipoVehiculo: data.tipoVehiculo,
-            tipoMaterial: data.tipoMaterial,
+            nombre: data.nombre || "",
+            contacto: data.contacto || "",
+            email: data.email || "",
+            // Asegúrate de que los nombres de campo coincidan con los del serializer de la API
+            tipoVehiculo: data.tipo_vehiculo || "",
+            tipoMaterial: data.tipo_material || "",
+            fecha_ingreso: data.fecha_ingreso ? dayjs(data.fecha_ingreso) : null,
           });
         })
-        .catch((error) => console.error("Error:", error));
+        .catch((error) => {
+          console.error("Error:", error);
+          setErrorMessage("No se pudo cargar la información del transportista.");
+        });
     }
-  }, [id]);
+  }, [id, token]);
 
+  // Validación de los campos
   const validate = () => {
     let newErrors = {};
 
@@ -62,11 +82,14 @@ const EditarTransportista = () => {
     if (!formData.tipoMaterial) {
       newErrors.tipoMaterial = "Debe seleccionar un tipo de material.";
     }
+    if (!formData.fecha_ingreso) {
+      newErrors.fecha_ingreso = "La fecha de ingreso es obligatoria.";
+    }
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
-  
+
   const handleNext = () => {
     setActiveStep((prevStep) => prevStep + 1);
   };
@@ -79,17 +102,29 @@ const EditarTransportista = () => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
+  const handleDateChange = (newValue) => {
+    setFormData({ ...formData, fecha_ingreso: newValue });
+  };
+
   const handleSubmit = async (event) => {
     event.preventDefault();
-    try {
-      const payload = {
-        ...formData,
-      };
+    if (!validate()) return;
 
+    const payload = {
+      nombre: formData.nombre,
+      contacto: formData.contacto,
+      email: formData.email,
+      tipo_vehiculo: formData.tipoVehiculo,
+      tipo_material: formData.tipoMaterial,
+      fecha_ingreso: formData.fecha_ingreso ? formData.fecha_ingreso.toISOString().split("T")[0] : null,
+    };
+
+    try {
       const response = await fetch(`http://localhost:8000/api/transportistas/${id}/actualizar/`, {
-        method: 'PATCH',
+        method: "PATCH",
         headers: {
           "Content-Type": "application/json",
+          Authorization: `Token ${token}`,
         },
         body: JSON.stringify(payload),
       });
@@ -100,9 +135,11 @@ const EditarTransportista = () => {
         navigate("/transportistas");
       } else {
         console.error("Error al actualizar el transportista. Código de error:", response.status);
+        setErrorMessage("Error al actualizar el transportista.");
       }
     } catch (error) {
       console.error("Error en la petición:", error);
+      setErrorMessage("Ocurrió un error. Intenta nuevamente.");
     }
   };
 
@@ -118,9 +155,15 @@ const EditarTransportista = () => {
     <ThemeProvider theme={theme}>
       <Container maxWidth="md">
         <Paper elevation={3} sx={{ padding: 6, marginTop: 6, borderRadius: 3 }}>
-        <Typography variant="h3" gutterBottom sx={{ textAlign: 'center' }}>
-          Editar Transportista
-        </Typography>
+          <Typography variant="h3" gutterBottom sx={{ textAlign: 'center' }}>
+            Editar Transportista
+          </Typography>
+
+          {errorMessage && (
+            <Typography variant="body1" color="error" align="center" sx={{ mb: 3 }}>
+              {errorMessage}
+            </Typography>
+          )}
 
           <Stepper activeStep={activeStep} alternativeLabel>
             {steps.map((label, index) => (
@@ -129,6 +172,7 @@ const EditarTransportista = () => {
               </Step>
             ))}
           </Stepper>
+
           <form onSubmit={handleSubmit}>
             <Grid container spacing={3}>
               {activeStep === 0 && (
@@ -141,6 +185,8 @@ const EditarTransportista = () => {
                       value={formData.nombre}
                       onChange={handleChange}
                       required
+                      error={!!errors.nombre}
+                      helperText={errors.nombre}
                     />
                   </Grid>
                   <Grid item xs={12}>
@@ -151,20 +197,26 @@ const EditarTransportista = () => {
                       value={formData.contacto}
                       onChange={handleChange}
                       required
+                      error={!!errors.contacto}
+                      helperText={errors.contacto}
                     />
                   </Grid>
                   <Grid item xs={12}>
                     <TextField
                       label="Email"
+                      type="email"
                       fullWidth
                       name="email"
                       value={formData.email}
                       onChange={handleChange}
                       required
+                      error={!!errors.email}
+                      helperText={errors.email}
                     />
                   </Grid>
                 </>
               )}
+
               {activeStep === 1 && (
                 <>
                   <Grid item xs={12}>
@@ -175,39 +227,68 @@ const EditarTransportista = () => {
                       value={formData.tipoVehiculo}
                       onChange={handleChange}
                       required
+                      error={!!errors.tipoVehiculo}
+                      helperText={errors.tipoVehiculo}
                     />
                   </Grid>
                   <Grid item xs={12}>
                     <TextField
+                      select
                       label="Tipo de Material"
                       fullWidth
                       name="tipoMaterial"
                       value={formData.tipoMaterial}
                       onChange={handleChange}
                       required
-                    />
+                      error={!!errors.tipoMaterial}
+                      helperText={errors.tipoMaterial}
+                    >
+                      <MenuItem value="escombro_limpio">Escombro Limpio</MenuItem>
+                      <MenuItem value="plastico">Plástico</MenuItem>
+                      <MenuItem value="papel_carton">Papel y Cartón</MenuItem>
+                      <MenuItem value="metales">Metales</MenuItem>
+                      <MenuItem value="madera">Madera</MenuItem>
+                      <MenuItem value="mezclados">Mezclados</MenuItem>
+                      <MenuItem value="peligrosos">Peligrosos</MenuItem>
+                    </TextField>
                   </Grid>
                 </>
               )}
+
               {activeStep === 2 && (
-                <>
-                  <Grid item xs={12}>
-                    <LocalizationProvider dateAdapter={AdapterDayjs}>
-                      <DatePicker
-                        label="Fecha de Ingreso"
-                        value={formData.fecha_ingreso || null}
-                        onChange={handleDateChange}
-                        renderInput={(params) => <TextField {...params} fullWidth required />}
-                      />
-                    </LocalizationProvider>
-                  </Grid>
-                </>
+                <Grid item xs={12}>
+                  <LocalizationProvider dateAdapter={AdapterDayjs}>
+                    <DatePicker
+                      label="Fecha de Ingreso"
+                      value={formData.fecha_ingreso || null}
+                      onChange={handleDateChange}
+                      renderInput={(params) => (
+                        <TextField {...params} fullWidth required error={!!errors.fecha_ingreso} helperText={errors.fecha_ingreso} />
+                      )}
+                    />
+                  </LocalizationProvider>
+                </Grid>
               )}
             </Grid>
-            <Grid container spacing={3} justifyContent="space-between" sx={{ marginTop: 3 }}>
-              {activeStep !== 0 && (<Button onClick={handleBack} size="large">Atrás</Button>)}
-              {activeStep < steps.length - 1 && (<Button onClick={handleNext} size="large">Siguiente</Button>)}
-              {activeStep === steps.length - 1 && (<Button type="submit" variant="contained" color="primary" size="large">Guardar Cambios</Button>)}
+
+            <Grid container spacing={2} justifyContent="space-between" sx={{ marginTop: 3 }}>
+              {activeStep !== 0 && (
+                <Grid item xs={6}>
+                  <Button onClick={handleBack} size="large">Atrás</Button>
+                </Grid>
+              )}
+              {activeStep < steps.length - 1 && (
+                <Grid item xs={6} sx={{ textAlign: 'right' }}>
+                  <Button onClick={handleNext} size="large">Siguiente</Button>
+                </Grid>
+              )}
+              {activeStep === steps.length - 1 && (
+                <Grid item xs={6} sx={{ textAlign: 'right' }}>
+                  <Button type="submit" variant="contained" color="primary" size="large">
+                    Finalizar
+                  </Button>
+                </Grid>
+              )}
             </Grid>
           </form>
         </Paper>

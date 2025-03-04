@@ -1,10 +1,11 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { AuthContext } from './context/AuthContext'
+import { AuthContext } from './context/AuthContext';
 import Tabla from '../components/Table';
-import { IconButton, Menu, MenuItem, Button, Tabs, Tab, Box, Typography} from '@mui/material';
+import { IconButton, Menu, MenuItem, Button, Tabs, Tab, Box, Typography } from '@mui/material';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
 import VisibilityIcon from '@mui/icons-material/Visibility';
+import EditIcon from '@mui/icons-material/Edit';
 import ToggleOnIcon from '@mui/icons-material/ToggleOn';
 import ToggleOffIcon from '@mui/icons-material/ToggleOff';
 import AddIcon from '@mui/icons-material/Add';
@@ -184,6 +185,14 @@ const Transportistas = () => {
           }}
         >
           <VisibilityIcon /> Ver detalles
+        </MenuItem>
+        <MenuItem
+          onClick={() => {
+            handleMenuClose();
+            navigate(`/editartransportista?id=${selectedTransportista?.id}`);
+          }}
+        >
+          <EditIcon /> Editar
         </MenuItem>
         <MenuItem
           onClick={() => {

@@ -1,10 +1,11 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import { Container, TextField, Button, Grid, Typography, Stepper, Step, StepLabel, Paper, Alert } from "@mui/material";
 import { LocalizationProvider, DatePicker } from "@mui/x-date-pickers";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import dayjs from "dayjs";
 import { useNavigate, useLocation } from "react-router-dom";
 import { createTheme, ThemeProvider } from '@mui/material/styles';
+import { AuthContext } from "../pages/context/AuthContext";  // Asegúrate de que la ruta sea correcta
 
 const steps = ['Información General', 'Detalles de la Obra', 'Equipo Responsable'];
 
@@ -31,19 +32,28 @@ const EditarObra = () => {
     imagen: null,
     pedido: '',
   });
-
-  const navigate = useNavigate();
-  const location = useLocation();
   const [errors, setErrors] = useState({});
   const [errorMessage, setErrorMessage] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
-    const queryParams = new URLSearchParams(location.search);
+  const [isLoading, setIsLoading] = useState(false);
+
+  const navigate = useNavigate();
+  const location = useLocation();
+  const queryParams = new URLSearchParams(location.search);
   const id = queryParams.get("id");
+
+  // Obtener el token desde el contexto de autenticación
+  const { token } = useContext(AuthContext);
 
   // Cargamos los datos actuales de la obra para editar
   useEffect(() => {
     if (id) {
-      fetch(`http://127.0.0.1:8000/api/obras/${id}/`)
+      fetch(`http://127.0.0.1:8000/api/obras/${id}/`, {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Token ${token}`,
+        },
+      })
         .then(response => {
           if (!response.ok) {
             throw new Error("Error al obtener datos de la obra");
@@ -79,7 +89,7 @@ const EditarObra = () => {
           setErrorMessage("No se pudo cargar la información de la obra.");
         });
     }
-  }, [id]);
+  }, [id, token]);
 
   const validateStep = (step) => {
     let newErrors = {};
@@ -101,8 +111,6 @@ const EditarObra = () => {
     return Object.keys(newErrors).length === 0;
   };
 
-
-
   const handleNext = () => {
     if (validateStep(activeStep)) {
       setActiveStep((prevStep) => prevStep + 1);
@@ -123,6 +131,7 @@ const EditarObra = () => {
 
     const obraData = {
       ...formData,
+      // Convertir fecha a formato ISO (solo la parte de la fecha)
       inicioObra: formData.inicioObra 
         ? formData.inicioObra.toISOString().split("T")[0] 
         : null,
@@ -133,7 +142,10 @@ const EditarObra = () => {
     try {
       const response = await fetch(`http://127.0.0.1:8000/api/obras/${id}/actualizar/`, {
         method: "PATCH",
-        headers: { "Content-Type": "application/json" },
+        headers: { 
+          "Content-Type": "application/json",
+          Authorization: `Token ${token}`,
+        },
         body: JSON.stringify(obraData),
       });
 
@@ -146,6 +158,8 @@ const EditarObra = () => {
         throw new Error("Error en la validación del servidor");
       }
 
+      // Si la actualización es exitosa, se puede establecer un mensaje o redirigir
+      setSuccessMessage("Obra actualizada con éxito.");
       navigate("/listadeobras", { state: { successMessage: "Obra actualizada con éxito." } });
 
     } catch (err) {
@@ -168,20 +182,20 @@ const EditarObra = () => {
     <ThemeProvider theme={theme}>
       <Container maxWidth="md">
         <Paper elevation={3} sx={{ padding: 6, marginTop: 6, borderRadius: 3 }}>
-        <Typography variant="h3" gutterBottom sx={{ textAlign: 'center' }}>
-          Editar Obra
-        </Typography>
+          <Typography variant="h3" gutterBottom sx={{ textAlign: 'center' }}>
+            Editar Obra
+          </Typography>
 
-        {errorMessage && (
-        <Alert severity="error" sx={{ mb: 3 }}>
-          {errorMessage}
-        </Alert>
-      )}
-      {successMessage && (
-        <Alert severity="success" sx={{ mb: 3 }}>
-          {successMessage}
-        </Alert>
-      )}
+          {errorMessage && (
+            <Alert severity="error" sx={{ mb: 3 }}>
+              {errorMessage}
+            </Alert>
+          )}
+          {successMessage && (
+            <Alert severity="success" sx={{ mb: 3 }}>
+              {successMessage}
+            </Alert>
+          )}
 
           <Stepper activeStep={activeStep} alternativeLabel>
             {steps.map((label, index) => (
@@ -191,239 +205,239 @@ const EditarObra = () => {
             ))}
           </Stepper>
           <form onSubmit={handleSubmit}>
-          <Grid container spacing={3}>
-            {activeStep === 0 && (
-              <>
-                <Grid item xs={12}>
-                  <TextField
-                    label="Nombre de la Obra"
-                    fullWidth
-                    name="nombreObra"
-                    value={formData.nombreObra}
-                    onChange={handleChange}
-                    error={!!errors.nombreObra}
-                    helperText={errors.nombreObra}
-                    required
-                  />
-                </Grid>
-                <Grid item xs={6}>
-                  <TextField
-                    label="Localidad"
-                    fullWidth
-                    name="localidad"
-                    value={formData.localidad}
-                    onChange={handleChange}
-                    error={!!errors.localidad}
-                    helperText={errors.localidad}
-                    required
-                  />
-                </Grid>
-                <Grid item xs={6}>
-                  <TextField
-                    label="Barrio"
-                    fullWidth
-                    name="barrio"
-                    value={formData.barrio}
-                    onChange={handleChange}
-                    error={!!errors.barrio}
-                    helperText={errors.barrio}
-                    required
-                  />
-                </Grid>
-                <Grid item xs={12}>
-                  <TextField
-                    label="Dirección"
-                    fullWidth
-                    name="direccion"
-                    value={formData.direccion}
-                    onChange={handleChange}
-                    error={!!errors.direccion}
-                    helperText={errors.direccion}
-                    required
-                  />
-                </Grid>
-                <Grid item xs={12}>
-                  <TextField
-                    label="Cantidad de Visitas al Mes"
-                    fullWidth
-                    name="visitasMes"
-                    type="number"
-                    value={formData.visitasMes}
-                    onChange={handleChange}
-                    error={!!errors.visitasMes}
-                    helperText={errors.visitasMes}
-                    required
-                  />
-                </Grid>
-              </>
-            )}
-
-            {activeStep === 1 && (
-              <>
-                <Grid item xs={6}>
-                  <LocalizationProvider dateAdapter={AdapterDayjs}>
-                    <DatePicker
-                      label="Inicio de Obra"
-                      value={formData.inicioObra}
-                      onChange={handleDateChange}
-                      renderInput={(params) => (
-                        <TextField 
-                          {...params} 
-                          fullWidth 
-                          error={!!errors.inicioObra}
-                          helperText={errors.inicioObra}
-                          required 
-                        />
-                      )}
+            <Grid container spacing={3}>
+              {activeStep === 0 && (
+                <>
+                  <Grid item xs={12}>
+                    <TextField
+                      label="Nombre de la Obra"
+                      fullWidth
+                      name="nombreObra"
+                      value={formData.nombreObra}
+                      onChange={handleChange}
+                      error={!!errors.nombreObra}
+                      helperText={errors.nombreObra}
+                      required
                     />
-                  </LocalizationProvider>
-                </Grid>
-                <Grid item xs={6}>
-                  <TextField
-                    label="Duración de Obra"
-                    fullWidth
-                    name="duracionObra"
-                    value={formData.duracionObra}
-                    onChange={handleChange}
-                    error={!!errors.duracionObra}
-                    helperText={errors.duracionObra}
-                    required
-                  />
-                </Grid>
-                <Grid item xs={12}>
-                  <TextField
-                    label="Etapa de Obra"
-                    fullWidth
-                    name="etapaObra"
-                    value={formData.etapaObra}
-                    onChange={handleChange}
-                    error={!!errors.etapaObra}
-                    helperText={errors.etapaObra}
-                    required
-                  />
-                </Grid>
-              </>
-            )}
+                  </Grid>
+                  <Grid item xs={6}>
+                    <TextField
+                      label="Localidad"
+                      fullWidth
+                      name="localidad"
+                      value={formData.localidad}
+                      onChange={handleChange}
+                      error={!!errors.localidad}
+                      helperText={errors.localidad}
+                      required
+                    />
+                  </Grid>
+                  <Grid item xs={6}>
+                    <TextField
+                      label="Barrio"
+                      fullWidth
+                      name="barrio"
+                      value={formData.barrio}
+                      onChange={handleChange}
+                      error={!!errors.barrio}
+                      helperText={errors.barrio}
+                      required
+                    />
+                  </Grid>
+                  <Grid item xs={12}>
+                    <TextField
+                      label="Dirección"
+                      fullWidth
+                      name="direccion"
+                      value={formData.direccion}
+                      onChange={handleChange}
+                      error={!!errors.direccion}
+                      helperText={errors.direccion}
+                      required
+                    />
+                  </Grid>
+                  <Grid item xs={12}>
+                    <TextField
+                      label="Cantidad de Visitas al Mes"
+                      fullWidth
+                      name="visitasMes"
+                      type="number"
+                      value={formData.visitasMes}
+                      onChange={handleChange}
+                      error={!!errors.visitasMes}
+                      helperText={errors.visitasMes}
+                      required
+                    />
+                  </Grid>
+                </>
+              )}
 
-            {activeStep === 2 && (
-              <>
-                <Grid item xs={12}>
-                  <TextField
-                    label="Jefe de Obra"
-                    fullWidth
-                    name="jefeObra"
-                    value={formData.jefeObra}
-                    onChange={handleChange}
-                    error={!!errors.jefeObra}
-                    helperText={errors.jefeObra}
-                    required
-                  />
-                </Grid>
-                <Grid item xs={6}>
-                  <TextField
-                    label="Email del Jefe"
-                    fullWidth
-                    name="emailJefe"
-                    type="email"
-                    value={formData.emailJefe}
-                    onChange={handleChange}
-                    error={!!errors.emailJefe}
-                    helperText={errors.emailJefe}
-                    required
-                  />
-                </Grid>
-                <Grid item xs={6}>
-                  <TextField
-                    label="Teléfono del Jefe"
-                    fullWidth
-                    name="telefonoJefe"
-                    type="tel"
-                    value={formData.telefonoJefe}
-                    onChange={handleChange}
-                    error={!!errors.telefonoJefe}
-                    helperText={errors.telefonoJefe}
-                    required
-                  />
-                </Grid>
-                <Grid item xs={12}>
-                  <TextField
-                    label="Capataz"
-                    fullWidth
-                    name="capataz"
-                    value={formData.capataz}
-                    onChange={handleChange}
-                    error={!!errors.capataz}
-                    helperText={errors.capataz}
-                    required
-                  />
-                </Grid>
-                <Grid item xs={6}>
-                  <TextField
-                    label="Email del Capataz"
-                    fullWidth
-                    name="emailCapataz"
-                    type="email"
-                    value={formData.emailCapataz}
-                    onChange={handleChange}
-                    error={!!errors.emailCapataz}
-                    helperText={errors.emailCapataz}
-                    required
-                  />
-                </Grid>
-                <Grid item xs={6}>
-                  <TextField
-                    label="Teléfono del Capataz"
-                    fullWidth
-                    name="telefonoCapataz"
-                    type="tel"
-                    value={formData.telefonoCapataz}
-                    onChange={handleChange}
-                    error={!!errors.telefonoCapataz}
-                    helperText={errors.telefonoCapataz}
-                    required
-                  />
-                </Grid>
-                <Grid item xs={12}>
-                  <TextField
-                    label="Encargado"
-                    fullWidth
-                    name="encargado"
-                    value={formData.encargado}
-                    onChange={handleChange}
-                    error={!!errors.encargado}
-                    helperText={errors.encargado}
-                    required
-                  />
-                </Grid>
-                <Grid item xs={6}>
-                  <TextField
-                    label="Email del Encargado"
-                    fullWidth
-                    name="emailEncargado"
-                    type="email"
-                    value={formData.emailEncargado}
-                    onChange={handleChange}
-                    error={!!errors.emailEncargado}
-                    helperText={errors.emailEncargado}
-                    required
-                  />
-                </Grid>
-                <Grid item xs={6}>
-                  <TextField
-                    label="Teléfono del Encargado"
-                    fullWidth
-                    name="telefonoEncargado"
-                    type="tel"
-                    value={formData.telefonoEncargado}
-                    onChange={handleChange}
-                    error={!!errors.telefonoEncargado}
-                    helperText={errors.telefonoEncargado}
-                    required
-                  />
-                </Grid>
-              </>
-            )}
-          </Grid>
+              {activeStep === 1 && (
+                <>
+                  <Grid item xs={6}>
+                    <LocalizationProvider dateAdapter={AdapterDayjs}>
+                      <DatePicker
+                        label="Inicio de Obra"
+                        value={formData.inicioObra}
+                        onChange={handleDateChange}
+                        renderInput={(params) => (
+                          <TextField 
+                            {...params} 
+                            fullWidth 
+                            error={!!errors.inicioObra}
+                            helperText={errors.inicioObra}
+                            required 
+                          />
+                        )}
+                      />
+                    </LocalizationProvider>
+                  </Grid>
+                  <Grid item xs={6}>
+                    <TextField
+                      label="Duración de Obra"
+                      fullWidth
+                      name="duracionObra"
+                      value={formData.duracionObra}
+                      onChange={handleChange}
+                      error={!!errors.duracionObra}
+                      helperText={errors.duracionObra}
+                      required
+                    />
+                  </Grid>
+                  <Grid item xs={12}>
+                    <TextField
+                      label="Etapa de Obra"
+                      fullWidth
+                      name="etapaObra"
+                      value={formData.etapaObra}
+                      onChange={handleChange}
+                      error={!!errors.etapaObra}
+                      helperText={errors.etapaObra}
+                      required
+                    />
+                  </Grid>
+                </>
+              )}
+
+              {activeStep === 2 && (
+                <>
+                  <Grid item xs={12}>
+                    <TextField
+                      label="Jefe de Obra"
+                      fullWidth
+                      name="jefeObra"
+                      value={formData.jefeObra}
+                      onChange={handleChange}
+                      error={!!errors.jefeObra}
+                      helperText={errors.jefeObra}
+                      required
+                    />
+                  </Grid>
+                  <Grid item xs={6}>
+                    <TextField
+                      label="Email del Jefe"
+                      fullWidth
+                      name="emailJefe"
+                      type="email"
+                      value={formData.emailJefe}
+                      onChange={handleChange}
+                      error={!!errors.emailJefe}
+                      helperText={errors.emailJefe}
+                      required
+                    />
+                  </Grid>
+                  <Grid item xs={6}>
+                    <TextField
+                      label="Teléfono del Jefe"
+                      fullWidth
+                      name="telefonoJefe"
+                      type="tel"
+                      value={formData.telefonoJefe}
+                      onChange={handleChange}
+                      error={!!errors.telefonoJefe}
+                      helperText={errors.telefonoJefe}
+                      required
+                    />
+                  </Grid>
+                  <Grid item xs={12}>
+                    <TextField
+                      label="Capataz"
+                      fullWidth
+                      name="capataz"
+                      value={formData.capataz}
+                      onChange={handleChange}
+                      error={!!errors.capataz}
+                      helperText={errors.capataz}
+                      required
+                    />
+                  </Grid>
+                  <Grid item xs={6}>
+                    <TextField
+                      label="Email del Capataz"
+                      fullWidth
+                      name="emailCapataz"
+                      type="email"
+                      value={formData.emailCapataz}
+                      onChange={handleChange}
+                      error={!!errors.emailCapataz}
+                      helperText={errors.emailCapataz}
+                      required
+                    />
+                  </Grid>
+                  <Grid item xs={6}>
+                    <TextField
+                      label="Teléfono del Capataz"
+                      fullWidth
+                      name="telefonoCapataz"
+                      type="tel"
+                      value={formData.telefonoCapataz}
+                      onChange={handleChange}
+                      error={!!errors.telefonoCapataz}
+                      helperText={errors.telefonoCapataz}
+                      required
+                    />
+                  </Grid>
+                  <Grid item xs={12}>
+                    <TextField
+                      label="Encargado"
+                      fullWidth
+                      name="encargado"
+                      value={formData.encargado}
+                      onChange={handleChange}
+                      error={!!errors.encargado}
+                      helperText={errors.encargado}
+                      required
+                    />
+                  </Grid>
+                  <Grid item xs={6}>
+                    <TextField
+                      label="Email del Encargado"
+                      fullWidth
+                      name="emailEncargado"
+                      type="email"
+                      value={formData.emailEncargado}
+                      onChange={handleChange}
+                      error={!!errors.emailEncargado}
+                      helperText={errors.emailEncargado}
+                      required
+                    />
+                  </Grid>
+                  <Grid item xs={6}>
+                    <TextField
+                      label="Teléfono del Encargado"
+                      fullWidth
+                      name="telefonoEncargado"
+                      type="tel"
+                      value={formData.telefonoEncargado}
+                      onChange={handleChange}
+                      error={!!errors.telefonoEncargado}
+                      helperText={errors.telefonoEncargado}
+                      required
+                    />
+                  </Grid>
+                </>
+              )}
+            </Grid>
 
             <Grid container spacing={2} sx={{ mt: 2 }}>
               {activeStep !== 0 && (
