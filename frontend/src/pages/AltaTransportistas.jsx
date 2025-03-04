@@ -27,50 +27,59 @@ const AltaTransportistas = () => {
     tipoVehiculo: '',
     tipoMaterial: '',
   });
-  const [errorMessage, setErrorMessage] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [errors, setErrors] = useState({});
+  const [errorMessage, setErrorMessage] = useState(null);
+  const [successMessage, setSuccessMessage] = useState(null);
 
   const { token } = useContext(AuthContext);
   const navigate = useNavigate();
 
-  const validate = () => {
+  const validateStep = () => {
     let newErrors = {};
-
-    if (!formData.nombre.trim()) {
-      newErrors.nombre = "El nombre es obligatorio.";
+    if (activeStep === 0) {
+      if (!formData.nombre.trim()) {
+        newErrors.nombre = "El nombre es obligatorio.";
+      }
+      if (!/^\d{9}$/.test(formData.contacto)) {
+        newErrors.contacto = "El contacto debe tener exactamente 9 dígitos numéricos.";
+      }
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
+        newErrors.email = "Correo electrónico inválido.";
+      }
+    } else if (activeStep === 1) {
+      if (!formData.tipoVehiculo.trim()) {
+        newErrors.tipoVehiculo = "El tipo de vehículo es obligatorio.";
+      }
+      if (!formData.tipoMaterial) {
+        newErrors.tipoMaterial = "Debe seleccionar un tipo de material.";
+      }
     }
-    if (!/^\d{9}$/.test(formData.contacto)) {
-      newErrors.contacto = "El contacto debe tener exactamente 9 dígitos numéricos.";
-    }
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
-      newErrors.email = "Correo electrónico inválido.";
-    }
-    if (!formData.tipoVehiculo.trim()) {
-      newErrors.tipoVehiculo = "El tipo de vehículo es obligatorio.";
-    }
-    if (!formData.tipoMaterial) {
-      newErrors.tipoMaterial = "Debe seleccionar un tipo de material.";
-    }
-
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
+
   const handleNext = () => {
-    setActiveStep((prevStep) => prevStep + 1);
-    setErrorMessage('');
+    if (validateStep()) {
+      setActiveStep((prevStep) => prevStep + 1);
+    }
   };
 
   const handleBack = () => {
     setActiveStep((prevStep) => prevStep - 1);
-    setErrorMessage('');
   };
 
   const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
-    if (e.target.name === 'email') {
-      setErrorMessage('');
-    }
+    const { name, value } = e.target;
+    setFormData({ ...formData, [name]: value });
+
+    setErrors((prevErrors) => ({
+      ...prevErrors,
+      [name]: "",
+    }));
   };
+
 
   const handleSubmit = async (event) => {
     event.preventDefault();
@@ -83,12 +92,19 @@ const AltaTransportistas = () => {
       estado: 'activo', 
     };
   
-  
+    if (!validate()) {
+      setLoading(false);
+      return;
+    }
+
+    if (!token) {
+      setErrorMessage('No estás autenticado. Por favor, inicia sesión.');
+      setLoading(false);
+      return;
+    }
+
     try {
-      if (!token) {
-        throw new Error('Token no disponible, redirigiendo a login');
-      }
-  
+      
       const response = await fetch('http://127.0.0.1:8000/api/transportistas/registro/', {
         method: 'POST',
         headers: {
@@ -100,16 +116,18 @@ const AltaTransportistas = () => {
   
       if (!response.ok) {
         const errorData = await response.json();
-        const mensaje = errorData.email ? errorData.email[0] : response.statusText;
-        throw new Error(mensaje);
+        throw new Error(errorData.message || 'Error al registrar la empresa gestora');
       }
+
+      setSuccessMessage("Empresa gestora registrada con éxito.");
+      setTimeout(() => {
+        navigate('/empresasgestoras');
+      }, 2000);
   
-      const data = await response.json();
-      console.log('Transportista creado:', data);
-      navigate('/transportistas'); 
-    } catch (error) {
-      console.error('Error al crear el transportista:', error);
+      } catch (error) {
       setErrorMessage(error.message);
+    } finally {
+      setLoading(false);
     }
   };
   
@@ -140,117 +158,83 @@ const AltaTransportistas = () => {
             Alta Transportista
           </Typography>
 
-            <Stepper activeStep={activeStep} alternativeLabel sx={{ mb: 4 }}>
-              {steps.map((label, index) => (
-                <Step key={index}>
-                  <StepLabel>{label}</StepLabel>
-                </Step>
-              ))}
-            </Stepper>
+          {errorMessage && (
+              <Alert severity="error" sx={{ mb: 2 }}>
+                {errorMessage}
+              </Alert>
+            )}
+            {successMessage && (
+              <Alert severity="success" sx={{ mb: 2 }}>
+                {successMessage}
+              </Alert>
+            )}
+
 
             <form onSubmit={handleSubmit}>
-              <Grid container spacing={3}>
-                {activeStep === 0 && (
-                  <>
-                    <Grid item xs={12}>
-                      <TextField
-                        label="Nombre"
-                        fullWidth
-                        name="nombre"
-                        value={formData.nombre}
-                        onChange={handleChange}
-                        required
-                      />
-                    </Grid>
-                    <Grid item xs={12}>
-                      <TextField
-                        label="Contacto"
-                        fullWidth
-                        name="contacto"
-                        value={formData.contacto}
-                        onChange={handleChange}
-                        required
-                      />
-                    </Grid>
-                    <Grid item xs={12}>
-                      <TextField
-                        label="Email"
-                        type="email"
-                        fullWidth
-                        name="email"
-                        value={formData.email}
-                        onChange={handleChange}
-                        required
-                      />
-                    </Grid>
-                  </>
-                )}
-
-                {activeStep === 1 && (
-                  <>
-                    <Grid item xs={12}>
-                      <TextField
-                        label="Tipo de Vehículo"
-                        fullWidth
-                        name="tipoVehiculo"
-                        value={formData.tipoVehiculo}
-                        onChange={handleChange}
-                        required
-                      />
-                    </Grid>
-                    <Grid item xs={12}>
-                      <TextField
-                        select
-                        label="Tipo de Material"
-                        fullWidth
-                        name="tipoMaterial"
-                        value={formData.tipoMaterial}
-                        onChange={handleChange}
-                        required
-                      >
-                        <MenuItem value="escombro_limpio">Escombro Limpio</MenuItem>
-                        <MenuItem value="plastico">Plástico</MenuItem>
-                        <MenuItem value="papel_carton">Papel y Cartón</MenuItem>
-                        <MenuItem value="metales">Metales</MenuItem>
-                        <MenuItem value="madera">Madera</MenuItem>
-                        <MenuItem value="mezclados">Mezclados</MenuItem>
-                        <MenuItem value="peligrosos">Peligrosos</MenuItem>
-                      </TextField>
-                    </Grid>
-                  </>
-                )}
+            <Grid container spacing={3}>
+                <Grid item xs={12}>
+                  <TextField
+                    label="Nombre"
+                    fullWidth
+                    name="nombre"
+                    value={formData.nombre}
+                    onChange={handleChange}
+                    required
+                    error={!!errors.nombre}
+                    helperText={errors.nombre}
+                  />
+                </Grid>
+                <Grid item xs={12}>
+                  <TextField
+                    label="Ubicación"
+                    fullWidth
+                    name="ubicacion"
+                    value={formData.ubicacion}
+                    onChange={handleChange}
+                    required
+                    error={!!errors.ubicacion}
+                    helperText={errors.ubicacion}
+                  />
+                </Grid>
+                <Grid item xs={12}>
+                  <TextField
+                    label="Contacto"
+                    fullWidth
+                    name="contacto"
+                    value={formData.contacto}
+                    onChange={handleChange}
+                    required
+                    error={!!errors.contacto}
+                    helperText={errors.contacto}
+                  />
+                </Grid>
+                <Grid item xs={12}>
+                  <TextField
+                    label="Email"
+                    type="email"
+                    fullWidth
+                    name="email"
+                    value={formData.email}
+                    onChange={handleChange}
+                    required
+                    error={!!errors.email}
+                    helperText={errors.email}
+                  />
+                </Grid>
               </Grid>
-              {errorMessage && (
-                <Typography variant="body2" color="error" sx={{ mt: 2 }}>
-                  {errorMessage}
-                </Typography>
-              )}
-              <Grid container spacing={2} sx={{ mt: 4 }}>
-                {activeStep !== 0 && (
-                  <Grid item xs={6}>
-                    <Button onClick={handleBack}>Atrás</Button>
-                  </Grid>
-                )}
 
-                {activeStep === 0 && (
-                  <Grid item xs={12} sx={{ textAlign: 'right' }}>
-                    <Button onClick={handleNext}>Siguiente</Button>
+              <Grid container spacing={2} sx={{ mt: 4 }} justifyContent="flex-end">
+                <Grid item>
+                  <Button 
+                    type="submit" 
+                    variant="contained" 
+                    color="primary" 
+                    disabled={loading}
+                    startIcon={loading && <CircularProgress size={20} color="inherit" />}
+                  >
+                    {loading ? 'Registrando...' : 'Finalizar'}
+                  </Button>
                   </Grid>
-                )}
-
-                {activeStep !== 0 && activeStep < steps.length - 1 && (
-                  <Grid item xs={6} sx={{ textAlign: 'right' }}>
-                    <Button onClick={handleNext}>Siguiente</Button>
-                  </Grid>
-                )}
-
-                {activeStep === steps.length - 1 && (
-                  <Grid item xs={6} sx={{ textAlign: 'right' }}>
-                    <Button type="submit" variant="contained" color="primary">
-                      Finalizar
-                    </Button>
-                  </Grid>
-                )}
               </Grid>
             </form>
           </Paper>

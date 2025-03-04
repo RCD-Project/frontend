@@ -8,6 +8,10 @@ import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import AddIcon from '@mui/icons-material/Add';
 import { AuthContext } from '../pages/context/AuthContext';
+import dayjs from 'dayjs';
+import 'dayjs/locale/es';
+
+dayjs.locale('es');
 
 const ListaDeCoordinaciones = () => {
   const [coordinaciones, setCoordinaciones] = useState([]);
@@ -31,6 +35,7 @@ const ListaDeCoordinaciones = () => {
         return res.json();
       })
       .then((data) => {
+
         setCoordinaciones(data);
       })
       .catch((err) =>
@@ -53,20 +58,40 @@ const ListaDeCoordinaciones = () => {
 
   const columnasCoordinaciones = [
     {
-      field: 'obra',
-      headerName: 'Obra',
+      field: "obra",
+      headerName: "Obra",
       flex: 1,
       renderCell: (params) => {
-        if (params.row.obra && typeof params.row.obra === 'object') {
+        if (params.row.obra && typeof params.row.obra === "object") {
           return params.row.obra.nombre_obra || params.row.obra.nombre || "Sin nombre";
         }
         return params.row.obra || "Sin nombre";
       },
     },
     { field: 'tipo_material', headerName: 'Tipo de Material', flex: 1 },
-    { field: 'transportista', headerName: 'Transportista', flex: 1 },
-    { field: 'fecha_solicitud', headerName: 'Fecha de Solicitud', flex: 1 },
-    { field: 'fecha_retiro', headerName: 'Fecha de Retiro', flex: 1 },
+    {
+      field: "transportista",
+      headerName: "Transportista",
+      flex: 1,
+      renderCell: (params) => {
+        if (params.row.transportista && typeof params.row.transportista === "object") {
+          return params.row.transportista.nombre || "Sin nombre";
+        }
+        return params.row.transportista || "Sin nombre";
+      },
+    },
+    {
+      field: 'fecha_solicitud',
+      headerName: 'Fecha de Solicitud',
+      flex: 1,
+      renderCell: (params) => params.row.fecha_solicitud ? dayjs(params.row.fecha_solicitud).format('DD/MM/YYYY') : "-",
+    },
+    {
+      field: 'fecha_retiro',
+      headerName: 'Fecha de Retiro',
+      flex: 1,
+      renderCell: (params) => params.row.fecha_retiro ? dayjs(params.row.fecha_retiro).format('DD/MM/YYYY') : "-",
+    },
     {
       field: 'acciones',
       headerName: 'Acciones',

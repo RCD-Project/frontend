@@ -64,35 +64,47 @@ const EditarTransportista = () => {
   }, [id, token]);
 
   // Validación de los campos
-  const validate = () => {
+  const validate = (step) => {
     let newErrors = {};
-
-    if (!formData.nombre.trim()) {
-      newErrors.nombre = "El nombre es obligatorio.";
+  
+    if (step === 0) {
+      if (!formData.nombre.trim()) {
+        newErrors.nombre = "El nombre es obligatorio.";
+      }
+      if (!/^\d{9}$/.test(formData.contacto)) {
+        newErrors.contacto = "El contacto debe tener exactamente 9 dígitos numéricos.";
+      }
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
+        newErrors.email = "Correo electrónico inválido.";
+      }
     }
-    if (!/^\d{9}$/.test(formData.contacto)) {
-      newErrors.contacto = "El contacto debe tener exactamente 9 dígitos numéricos.";
+  
+    if (step === 1) {
+      if (!formData.tipoVehiculo.trim()) {
+        newErrors.tipoVehiculo = "El tipo de vehículo es obligatorio.";
+      }
+      if (!formData.tipoMaterial) {
+        newErrors.tipoMaterial = "Debe seleccionar un tipo de material.";
+      }
     }
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
-      newErrors.email = "Correo electrónico inválido.";
+  
+    if (step === 2) {
+      if (!formData.fecha_ingreso) {
+        newErrors.fecha_ingreso = "La fecha de ingreso es obligatoria.";
+      }
     }
-    if (!formData.tipoVehiculo.trim()) {
-      newErrors.tipoVehiculo = "El tipo de vehículo es obligatorio.";
-    }
-    if (!formData.tipoMaterial) {
-      newErrors.tipoMaterial = "Debe seleccionar un tipo de material.";
-    }
-    if (!formData.fecha_ingreso) {
-      newErrors.fecha_ingreso = "La fecha de ingreso es obligatoria.";
-    }
-
+  
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
   const handleNext = () => {
+    if (!validate()) {
+      return;
+    }
     setActiveStep((prevStep) => prevStep + 1);
   };
+  
 
   const handleBack = () => {
     setActiveStep((prevStep) => prevStep - 1);
@@ -130,15 +142,11 @@ const EditarTransportista = () => {
       });
 
       if (response.ok) {
-        const data = await response.json();
-        console.log("Transportista actualizado:", data);
-        navigate("/transportistas");
+        navigate("/transportistas", { state: { successMessage: "Transportista actualizado con éxito." } });
       } else {
-        console.error("Error al actualizar el transportista. Código de error:", response.status);
         setErrorMessage("Error al actualizar el transportista.");
       }
     } catch (error) {
-      console.error("Error en la petición:", error);
       setErrorMessage("Ocurrió un error. Intenta nuevamente.");
     }
   };
@@ -174,102 +182,109 @@ const EditarTransportista = () => {
           </Stepper>
 
           <form onSubmit={handleSubmit}>
-            <Grid container spacing={3}>
-              {activeStep === 0 && (
-                <>
-                  <Grid item xs={12}>
-                    <TextField
-                      label="Nombre"
-                      fullWidth
-                      name="nombre"
-                      value={formData.nombre}
-                      onChange={handleChange}
-                      required
-                      error={!!errors.nombre}
-                      helperText={errors.nombre}
-                    />
-                  </Grid>
-                  <Grid item xs={12}>
-                    <TextField
-                      label="Contacto"
-                      fullWidth
-                      name="contacto"
-                      value={formData.contacto}
-                      onChange={handleChange}
-                      required
-                      error={!!errors.contacto}
-                      helperText={errors.contacto}
-                    />
-                  </Grid>
-                  <Grid item xs={12}>
-                    <TextField
-                      label="Email"
-                      type="email"
-                      fullWidth
-                      name="email"
-                      value={formData.email}
-                      onChange={handleChange}
-                      required
-                      error={!!errors.email}
-                      helperText={errors.email}
-                    />
-                  </Grid>
-                </>
-              )}
-
-              {activeStep === 1 && (
-                <>
-                  <Grid item xs={12}>
-                    <TextField
-                      label="Tipo de Vehículo"
-                      fullWidth
-                      name="tipoVehiculo"
-                      value={formData.tipoVehiculo}
-                      onChange={handleChange}
-                      required
-                      error={!!errors.tipoVehiculo}
-                      helperText={errors.tipoVehiculo}
-                    />
-                  </Grid>
-                  <Grid item xs={12}>
-                    <TextField
-                      select
-                      label="Tipo de Material"
-                      fullWidth
-                      name="tipoMaterial"
-                      value={formData.tipoMaterial}
-                      onChange={handleChange}
-                      required
-                      error={!!errors.tipoMaterial}
-                      helperText={errors.tipoMaterial}
-                    >
-                      <MenuItem value="escombro_limpio">Escombro Limpio</MenuItem>
-                      <MenuItem value="plastico">Plástico</MenuItem>
-                      <MenuItem value="papel_carton">Papel y Cartón</MenuItem>
-                      <MenuItem value="metales">Metales</MenuItem>
-                      <MenuItem value="madera">Madera</MenuItem>
-                      <MenuItem value="mezclados">Mezclados</MenuItem>
-                      <MenuItem value="peligrosos">Peligrosos</MenuItem>
-                    </TextField>
-                  </Grid>
-                </>
-              )}
-
-              {activeStep === 2 && (
+          <Grid container spacing={3}>
+            {activeStep === 0 && (
+              <>
                 <Grid item xs={12}>
-                  <LocalizationProvider dateAdapter={AdapterDayjs}>
-                    <DatePicker
-                      label="Fecha de Ingreso"
-                      value={formData.fecha_ingreso || null}
-                      onChange={handleDateChange}
-                      renderInput={(params) => (
-                        <TextField {...params} fullWidth required error={!!errors.fecha_ingreso} helperText={errors.fecha_ingreso} />
-                      )}
-                    />
-                  </LocalizationProvider>
+                  <TextField
+                    label="Nombre"
+                    fullWidth
+                    name="nombre"
+                    value={formData.nombre}
+                    onChange={handleChange}
+                    required
+                    error={!!errors.nombre}
+                    helperText={errors.nombre}
+                  />
                 </Grid>
-              )}
-            </Grid>
+                <Grid item xs={12}>
+                  <TextField
+                    label="Contacto Telefónico"
+                    fullWidth
+                    name="contacto"
+                    value={formData.contacto}
+                    onChange={handleChange}
+                    required
+                    error={!!errors.contacto}
+                    helperText={errors.contacto}
+                  />
+                </Grid>
+                <Grid item xs={12}>
+                  <TextField
+                    label="Email"
+                    type="email"
+                    fullWidth
+                    name="email"
+                    value={formData.email}
+                    onChange={handleChange}
+                    required
+                    error={!!errors.email}
+                    helperText={errors.email}
+                  />
+                </Grid>
+              </>
+            )}
+
+            {activeStep === 1 && (
+              <>
+                <Grid item xs={12}>
+                  <TextField
+                    label="Tipo de Vehículo"
+                    fullWidth
+                    name="tipoVehiculo"
+                    value={formData.tipoVehiculo}
+                    onChange={handleChange}
+                    required
+                    error={!!errors.tipoVehiculo}
+                    helperText={errors.tipoVehiculo}
+                  />
+                </Grid>
+                <Grid item xs={12}>
+                  <TextField
+                    select
+                    label="Tipo de Material"
+                    fullWidth
+                    name="tipoMaterial"
+                    value={formData.tipoMaterial}
+                    onChange={handleChange}
+                    required
+                    error={!!errors.tipoMaterial}
+                    helperText={errors.tipoMaterial}
+                  >
+                    <MenuItem value="escombro_limpio">Escombro Limpio</MenuItem>
+                    <MenuItem value="plastico">Plástico</MenuItem>
+                    <MenuItem value="papel_carton">Papel y Cartón</MenuItem>
+                    <MenuItem value="metales">Metales</MenuItem>
+                    <MenuItem value="madera">Madera</MenuItem>
+                    <MenuItem value="mezclados">Mezclados</MenuItem>
+                    <MenuItem value="peligrosos">Peligrosos</MenuItem>
+                  </TextField>
+                </Grid>
+              </>
+            )}
+
+            {activeStep === 2 && (
+              <Grid item xs={12}>
+                <LocalizationProvider dateAdapter={AdapterDayjs}>
+                  <DatePicker
+                    label="Fecha de Ingreso"
+                    value={formData.fecha_ingreso || null}
+                    onChange={handleDateChange}
+                    renderInput={(params) => (
+                      <TextField
+                        {...params}
+                        fullWidth
+                        required
+                        error={!!errors.fecha_ingreso}
+                        helperText={errors.fecha_ingreso}
+                      />
+                    )}
+                  />
+                </LocalizationProvider>
+              </Grid>
+            )}
+          </Grid>
+
 
             <Grid container spacing={2} justifyContent="space-between" sx={{ marginTop: 3 }}>
               {activeStep !== 0 && (
@@ -278,9 +293,11 @@ const EditarTransportista = () => {
                 </Grid>
               )}
               {activeStep < steps.length - 1 && (
-                <Grid item xs={6} sx={{ textAlign: 'right' }}>
+                <Grid container justifyContent="flex-end" sx={{ mt: 2 }}>
+                <Grid item>
                   <Button onClick={handleNext} size="large">Siguiente</Button>
                 </Grid>
+              </Grid>
               )}
               {activeStep === steps.length - 1 && (
                 <Grid item xs={6} sx={{ textAlign: 'right' }}>

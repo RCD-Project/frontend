@@ -45,9 +45,10 @@ const AltaObra = () => {
   });
   const [errors, setErrors] = useState({});
   const [isLoading, setIsLoading] = useState(false);
+  const [successMessage, setSuccessMessage] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
-  // Si deseas mostrar un mensaje de éxito en este componente, podrías definirlo así:
-  // const [successMessage, setSuccessMessage] = useState("");
+
+
 
   const navigate = useNavigate();
 
@@ -100,6 +101,8 @@ const AltaObra = () => {
     event.preventDefault();
     setIsLoading(true);
     setErrorMessage("");
+    if (!validateStep(2)) return;
+
 
     const obraData = {
       cliente: 1,
@@ -205,14 +208,12 @@ const AltaObra = () => {
                 {errorMessage}
               </Alert>
             )}
-            {/* Si deseas mostrar el mensaje de éxito en este componente, descomenta este bloque y asegúrate de definir successMessage en el estado */}
-            {/*
+            
             {successMessage && (
               <Alert severity="success" sx={{ mb: 3 }}>
                 {successMessage}
               </Alert>
             )}
-            */}
 
             <Stepper activeStep={activeStep} alternativeLabel sx={{ mb: 4 }}>
               {steps.map((label, index) => (
@@ -235,7 +236,6 @@ const AltaObra = () => {
                         onChange={handleChange}
                         error={!!errors.nombreObra}
                         helperText={errors.nombreObra}
-                        required
                       />
                     </Grid>
                     <Grid item xs={6}>
@@ -247,7 +247,6 @@ const AltaObra = () => {
                         onChange={handleChange}
                         error={!!errors.localidad}
                         helperText={errors.localidad}
-                        required
                       />
                     </Grid>
                     <Grid item xs={6}>
@@ -259,7 +258,6 @@ const AltaObra = () => {
                         onChange={handleChange}
                         error={!!errors.barrio}
                         helperText={errors.barrio}
-                        required
                       />
                     </Grid>
                     <Grid item xs={12}>
@@ -271,7 +269,6 @@ const AltaObra = () => {
                         onChange={handleChange}
                         error={!!errors.direccion}
                         helperText={errors.direccion}
-                        required
                       />
                     </Grid>
                     <Grid item xs={12}>
@@ -284,7 +281,6 @@ const AltaObra = () => {
                         onChange={handleChange}
                         error={!!errors.visitasMes}
                         helperText={errors.visitasMes}
-                        required
                       />
                     </Grid>
                   </>
@@ -303,7 +299,6 @@ const AltaObra = () => {
                               fullWidth
                               error={!!errors.inicioObra}
                               helperText={errors.inicioObra}
-                              required
                             />
                           )}
                         />
@@ -318,7 +313,6 @@ const AltaObra = () => {
                         onChange={handleChange}
                         error={!!errors.duracionObra}
                         helperText={errors.duracionObra}
-                        required
                       />
                     </Grid>
                     <Grid item xs={12}>
@@ -330,7 +324,6 @@ const AltaObra = () => {
                         onChange={handleChange}
                         error={!!errors.etapaObra}
                         helperText={errors.etapaObra}
-                        required
                       />
                     </Grid>
                   </>
@@ -346,7 +339,6 @@ const AltaObra = () => {
                         onChange={handleChange}
                         error={!!errors.jefeObra}
                         helperText={errors.jefeObra}
-                        required
                       />
                     </Grid>
                     <Grid item xs={6}>
@@ -359,7 +351,6 @@ const AltaObra = () => {
                         onChange={handleChange}
                         error={!!errors.emailJefe}
                         helperText={errors.emailJefe}
-                        required
                       />
                     </Grid>
                     <Grid item xs={6}>
@@ -372,7 +363,6 @@ const AltaObra = () => {
                         onChange={handleChange}
                         error={!!errors.telefonoJefe}
                         helperText={errors.telefonoJefe}
-                        required
                       />
                     </Grid>
                     <Grid item xs={12}>
@@ -384,7 +374,6 @@ const AltaObra = () => {
                         onChange={handleChange}
                         error={!!errors.capataz}
                         helperText={errors.capataz}
-                        required
                       />
                     </Grid>
                     <Grid item xs={6}>
@@ -397,7 +386,6 @@ const AltaObra = () => {
                         onChange={handleChange}
                         error={!!errors.emailCapataz}
                         helperText={errors.emailCapataz}
-                        required
                       />
                     </Grid>
                     <Grid item xs={6}>
@@ -410,7 +398,6 @@ const AltaObra = () => {
                         onChange={handleChange}
                         error={!!errors.telefonoCapataz}
                         helperText={errors.telefonoCapataz}
-                        required
                       />
                     </Grid>
                     <Grid item xs={12}>
@@ -422,7 +409,6 @@ const AltaObra = () => {
                         onChange={handleChange}
                         error={!!errors.encargado}
                         helperText={errors.encargado}
-                        required
                       />
                     </Grid>
                     <Grid item xs={6}>
@@ -435,7 +421,6 @@ const AltaObra = () => {
                         onChange={handleChange}
                         error={!!errors.emailEncargado}
                         helperText={errors.emailEncargado}
-                        required
                       />
                     </Grid>
                     <Grid item xs={6}>
@@ -448,7 +433,6 @@ const AltaObra = () => {
                         onChange={handleChange}
                         error={!!errors.telefonoEncargado}
                         helperText={errors.telefonoEncargado}
-                        required
                       />
                     </Grid>
                   </>
@@ -461,24 +445,24 @@ const AltaObra = () => {
                     <Button onClick={handleBack}>Atrás</Button>
                   </Grid>
                 )}
-                {activeStep < steps.length - 1 && (
-                  <Grid item xs={6} sx={{ textAlign: 'right' }}>
-                    <Button onClick={handleNext}>Siguiente</Button>
-                  </Grid>
-                )}
-                {activeStep === steps.length - 1 && (
-                  <Grid item xs={6} sx={{ textAlign: 'right' }}>
-                    <Button
-                      type="submit"
-                      variant="contained"
-                      color="primary"
-                      disabled={isLoading}
-                      startIcon={isLoading && <CircularProgress size={20} color="inherit" />}
-                    >
-                      {isLoading ? "Procesando..." : "Finalizar"}
-                    </Button>
-                  </Grid>
-                )}
+                <Grid item xs={12}>
+                  <Box display="flex" justifyContent="flex-end">
+                    {activeStep < steps.length - 1 && (
+                      <Button onClick={handleNext}>Siguiente</Button>
+                    )}
+                    {activeStep === steps.length - 1 && (
+                      <Button
+                        type="submit"
+                        variant="contained"
+                        color="primary"
+                        disabled={isLoading}
+                        startIcon={isLoading && <CircularProgress size={20} color="inherit" />}
+                      >
+                        {isLoading ? "Procesando..." : "Finalizar"}
+                      </Button>
+                    )}
+                  </Box>
+                </Grid>
               </Grid>
             </form>
           </Paper>

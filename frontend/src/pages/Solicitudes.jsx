@@ -303,7 +303,7 @@ const Solicitudes = () => {
 
       <Box sx={{
         "& .MuiTab-root": { color: "#000000" },
-        "& .Mui-selected": { backgroundColor: "#abbf9d", color: "#ffffff" },
+        "& .Mui-selected": { backgroundColor: "#abbf9d", color: "#fff" },
         "& .MuiTabs-indicator": { backgroundColor: "#abbf9d" },
       }}>
         <Tabs value={value} onChange={handleChangeTab} aria-label="Solicitudes">

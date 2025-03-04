@@ -9,6 +9,7 @@ import {
   Alert,
   MenuItem,
   Box,
+  CircularProgress, // ✅ Importado para mostrar carga
 } from "@mui/material";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
 import { useNavigate } from "react-router-dom";
@@ -30,10 +31,13 @@ const AltaUsuario = () => {
     password: "",
     rol: "",
   });
+  const [errors, setErrors] = useState({}); // ✅ Estado para errores
   const [successMessage, setSuccessMessage] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
 
+  // ✅ Función de validación mejorada
   const validate = () => {
     let newErrors = {};
 
@@ -53,36 +57,44 @@ const AltaUsuario = () => {
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
-  
+
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
   const handleSubmit = async (event) => {
     event.preventDefault();
-    console.log("Enviando formulario:", formData);
+
+    if (!validate()) return; // ✅ Validación antes de enviar
+
+    setIsLoading(true); // ✅ Activamos la carga
 
     try {
       const response = await fetch("http://127.0.0.1:8000/api/usuarios/crear-usuario/", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "Authorization": `Token ${token}`,
+          Authorization: `Token ${token}`,
         },
         body: JSON.stringify(formData),
       });
+
       if (!response.ok) {
         const errorText = await response.text();
         console.error("Respuesta de error:", errorText);
         throw new Error(errorText);
       }
+
       const data = await response.json();
       console.log("Usuario registrado:", data);
       setSuccessMessage("Usuario registrado con éxito.");
       navigate("/", { state: { successMessage: "Usuario registrado con éxito." } });
+
     } catch (err) {
       console.error("Error al registrar el usuario:", err);
       setErrorMessage("Error al registrar el usuario: " + err.message);
+    } finally {
+      setIsLoading(false); // ✅ Desactivar carga al finalizar
     }
   };
 
@@ -99,7 +111,7 @@ const AltaUsuario = () => {
       >
         <Box sx={{ width: "100%" }}>
           <Paper elevation={3} sx={{ padding: 6, borderRadius: 3 }}>
-          <Typography variant="h3" gutterBottom sx={{ textAlign: 'center' }}>
+            <Typography variant="h3" gutterBottom sx={{ textAlign: "center" }}>
               Alta Usuario
             </Typography>
 
@@ -119,12 +131,13 @@ const AltaUsuario = () => {
               <Grid container spacing={4}>
                 <Grid item xs={12}>
                   <TextField
-                    label="Nombre"
+                    label="Nombre de Usuario"
                     name="username"
                     value={formData.username}
                     onChange={handleChange}
                     fullWidth
-                    required
+                    error={!!errors.username} 
+                    helperText={errors.username}
                   />
                 </Grid>
                 <Grid item xs={12}>
@@ -135,7 +148,8 @@ const AltaUsuario = () => {
                     value={formData.email}
                     onChange={handleChange}
                     fullWidth
-                    required
+                    error={!!errors.email}
+                    helperText={errors.email}
                   />
                 </Grid>
                 <Grid item xs={12}>
@@ -146,7 +160,8 @@ const AltaUsuario = () => {
                     value={formData.password}
                     onChange={handleChange}
                     fullWidth
-                    required
+                    error={!!errors.password}
+                    helperText={errors.password}
                   />
                 </Grid>
                 <Grid item xs={12}>
@@ -157,21 +172,21 @@ const AltaUsuario = () => {
                     value={formData.rol}
                     onChange={handleChange}
                     fullWidth
-                    required
+                    error={!!errors.rol}
+                    helperText={errors.rol}
                   >
                     <MenuItem value="tecnico">Técnico</MenuItem>
                     <MenuItem value="coordinador">Coordinador</MenuItem>
-                    <MenuItem value="coordinadorlogistico">
-                      Coordinador Logístico
-                    </MenuItem>
+                    <MenuItem value="coordinadorlogistico">Coordinador Logístico</MenuItem>
                     <MenuItem value="supervisor">Supervisor</MenuItem>
                   </TextField>
                 </Grid>
               </Grid>
+
               <Grid container spacing={2} sx={{ mt: 4 }}>
                 <Grid item xs={12} sx={{ textAlign: "right" }}>
-                  <Button type="submit" variant="contained" color="primary">
-                    Registrar
+                  <Button type="submit" variant="contained" color="primary" disabled={isLoading}>
+                    {isLoading ? <CircularProgress size={20} /> : "Registrar"}
                   </Button>
                 </Grid>
               </Grid>
