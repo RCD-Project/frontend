@@ -61,28 +61,27 @@ const Imagenes = () => {
             onClick={() => handleAgregarImagenes(params.row.id)}
             sx={{
               backgroundColor: "#abbf9d",
-              color: "white",
               "&:hover": {
-                backgroundColor: "#abbf9d",
+                backgroundColor: "#d1e063",
               },
             }}
           >
-            Agregar imagenes
+            Agregar imágenes
           </Button>
           <Button
             variant="contained"
             onClick={() => handleVerImagenes(params.row.id)}
             sx={{
-              backgroundColor: "#2D2E80",
-              color: "white",
+              backgroundColor: "#abbf9d",
               "&:hover": {
-                backgroundColor: "#2D2E80",
+                backgroundColor: "#d1e063",
               },
             }}
           >
-            Ver imagenes
+            Ver imágenes
           </Button>
         </Box>
+
       ),
     },
   ];

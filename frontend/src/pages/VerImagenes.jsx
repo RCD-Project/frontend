@@ -8,10 +8,14 @@ import {
   Card, 
   CardMedia, 
   CardContent, 
-  Grid, 
+  Grid,
+  Dialog,
+  DialogContent,
   MenuItem, 
-  TextField 
+  TextField,
+  IconButton
 } from "@mui/material";
+import CloseIcon from "@mui/icons-material/Close";
 import { useLocation } from "react-router-dom";
 import dayjs from "dayjs";
 import { AuthContext } from "../pages/context/AuthContext";
@@ -21,6 +25,9 @@ const VerImagenesObra = () => {
   const [obra, setObra] = useState(null);
   const [errorMessage, setErrorMessage] = useState("");
   const [loading, setLoading] = useState(true);
+
+  const [selectedImage, setSelectedImage] = useState(null);
+
   
   // Estado para filtrar
   const [filter, setFilter] = useState("todos"); // "todos", "hoy", "ultimo_mes", "ultimos_3_meses", "por_mes"
@@ -134,6 +141,15 @@ const VerImagenesObra = () => {
     { value: "11", label: "Diciembre" },
   ];
 
+  const handleOpenImage = (imageUrl) => {
+    setSelectedImage(imageUrl);
+  };
+
+  // Función para cerrar la ventana emergente
+  const handleCloseImage = () => {
+    setSelectedImage(null);
+  };
+
   if (loading) {
     return (
       <Box sx={{ display: "flex", justifyContent: "center", my: 4 }}>
@@ -214,6 +230,8 @@ const VerImagenesObra = () => {
                         : `http://127.0.0.1:8000${img.imagen}`
                     }
                     alt="Imagen de obra"
+                    sx={{ cursor: "pointer" }}
+    onClick={() => handleOpenImage(img.imagen.startsWith("http") ? img.imagen : `http://127.0.0.1:8000${img.imagen}`)} 
                   />
                   <CardContent>
                     <Typography variant="body1">
@@ -230,6 +248,44 @@ const VerImagenesObra = () => {
             ))}
           </Grid>
         )}
+        <Dialog 
+          open={Boolean(selectedImage)} 
+          onClose={handleCloseImage} 
+          maxWidth="md"
+          PaperProps={{ style: { backgroundColor: "transparent", boxShadow: "none" } }} // 🔹 Quita el fondo blanco y sombras
+        >
+          <DialogContent 
+            sx={{ 
+              position: "relative", 
+              display: "flex", 
+              justifyContent: "center", 
+              padding: 0, 
+              backgroundColor: "transparent" // 🔹 Elimina bordes blancos
+            }}
+          >
+            {/* Botón de cerrar */}
+            <IconButton
+              onClick={handleCloseImage}
+              sx={{
+                position: "absolute",
+                top: 8,
+                right: 8,
+                backgroundColor: "rgba(0,0,0,0.5)",
+                color: "white",
+                "&:hover": { backgroundColor: "rgba(0,0,0,0.8)" }
+              }}
+            >
+              <CloseIcon />
+            </IconButton>
+
+            {/* Imagen ampliada sin bordes */}
+            <img 
+              src={selectedImage} 
+              alt="Imagen ampliada" 
+              style={{ maxWidth: "100%", maxHeight: "90vh", borderRadius: "8px" }} 
+            />
+          </DialogContent>
+        </Dialog>
       </Box>
     </Container>
   );
