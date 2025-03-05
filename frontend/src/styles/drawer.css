@@ -12,20 +12,17 @@
   flex-direction: column;
   justify-content: space-between;
   padding: 10px 0;
-  overflow-x: hidden !important; 
+  overflow: auto !important; /* Permite scroll vertical y horizontal */
   transition: width 0.2s ease-in-out;
   white-space: nowrap;
 }
-
-
 
 .drawer-menu {
   list-style: none;
   padding: 0;
   margin: 0;
   flex-grow: 1;
-  overflow-y: auto;
-  overflow-x: hidden;
+  overflow: auto; /* Permite scroll en ambos ejes */
   scrollbar-width: none;
   -ms-overflow-style: none;
 }
@@ -54,7 +51,12 @@
   padding: 10px 15px;
   border-bottom: 1px solid #ffffff;
   transition: background-color 0.3s, color 0.3s;
-  white-space: nowrap; 
+  white-space: nowrap;
+  /* Si deseas que el contenido pueda hacer scroll horizontal, podrías quitar estos valores:
+  overflow: hidden;
+  text-overflow: ellipsis;
+  */
+  /* De lo contrario, si solo quieres que el contenedor se pueda desplazar, puedes dejarlos. */
   overflow: hidden;
   text-overflow: ellipsis;
 }
@@ -128,4 +130,34 @@
 
 .logout-button:hover .logout-link {
   color: #ffffff !important;
+}
+
+/* Media Query para dispositivos móviles */
+@media (max-width: 768px) {
+  .drawer {
+    width: 100%;
+    height: 100%;
+    position: fixed;
+    top: var(--header-height, 70px);
+    left: 0;
+    max-width: none;
+    padding: 10px 0;
+    box-shadow: none;
+    transform: translateX(-100%); /* Oculto por defecto */
+    transition: transform 0.3s ease-in-out;
+  }
+
+  /* Cuando se active la clase "open", se desliza a la vista */
+  .drawer.open {
+    transform: translateX(0);
+  }
+
+  /* Opcionales: ajustar tamaños para mejorar usabilidad */
+  .drawer-item {
+    height: 60px;
+  }
+  .drawer-link {
+    font-size: 1rem;
+    padding: 10px 15px;
+  }
 }

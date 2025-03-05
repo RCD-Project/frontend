@@ -44,44 +44,91 @@ const Drawer = () => {
     logout();
   };
 
-  return (
-    <motion.nav
-      className={`drawer ${isOpen ? "open" : ""}`}
-      initial={{ width: "60px" }}
-      animate={{ width: isOpen ? "220px" : "60px" }}
-      transition={{ duration: 0.3 }}
-      style={{ overflowX: "hidden", maxWidth: "100vw" }} 
-      onMouseEnter={() => setIsOpen(true)}
-      onMouseLeave={() => setIsOpen(false)}
-    >
-      <ul className="drawer-menu">
-        {filteredMenuItems.map((item, index) => (
-          <motion.li
-            key={index}
-            className="drawer-item"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.1, delay: isOpen ? 0.15 : 0 }}
-          >
-            <Link to={item.path} className="drawer-link">
-              <div className="drawer-icon">{item.icon}</div>
-              <motion.span className="drawer-text" animate={{ opacity: isOpen ? 1 : 0 }}>
-                {item.label}
-              </motion.span>
-            </Link>
-          </motion.li>
-        ))}
-      </ul>
+  // Función para alternar el menú en dispositivos móviles
+  const toggleDrawer = () => {
+    setIsOpen(!isOpen);
+  };
 
-      <div className="logout-button">
-        <Link to="/" className="logout-link" onClick={handleLogout}>
-          <div className="drawer-icon">
-            <LogOut size={24} />
-          </div>
-          <span className="drawer-text">Cerrar sesión</span>
-        </Link>
-      </div>
-    </motion.nav>
+  // Función para cerrar el Drawer y volver a la posición inicial
+  const closeDrawer = () => {
+    setIsOpen(false);
+  };
+
+  return (
+    <>
+      {/* Botón para mostrar/ocultar el Drawer en móviles */}
+      <button 
+        className="drawer-toggle"
+        onClick={toggleDrawer}
+        style={{
+          position: "fixed",
+          top: "80px", // Ajusta según la altura de tu header
+          left: "10px",
+          zIndex: 110,
+          background: "transparent",
+          border: "none",
+          cursor: "pointer"
+        }}
+      >
+        ☰
+      </button>
+
+      <motion.nav
+        className={`drawer ${isOpen ? "open" : ""}`}
+        initial={{ width: "60px" }}
+        animate={{ width: isOpen ? "220px" : "60px" }}
+        transition={{ duration: 0.3 }}
+        style={{ overflowX: "hidden", maxWidth: "100vw" }}
+        onMouseEnter={() => window.innerWidth > 768 && setIsOpen(true)}
+        onMouseLeave={() => window.innerWidth > 768 && setIsOpen(false)}
+      >
+        {/* Botón para cerrar el Drawer (visible en móviles cuando esté abierto) */}
+        {window.innerWidth <= 768 && isOpen && (
+          <button
+            className="close-drawer-button"
+            onClick={closeDrawer}
+            style={{
+              alignSelf: "flex-end",
+              margin: "10px",
+              background: "transparent",
+              border: "none",
+              cursor: "pointer",
+              fontSize: "1.5rem"
+            }}
+          >
+            ×
+          </button>
+        )}
+
+        <ul className="drawer-menu">
+          {filteredMenuItems.map((item, index) => (
+            <motion.li
+              key={index}
+              className="drawer-item"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.1, delay: isOpen ? 0.15 : 0 }}
+            >
+              <Link to={item.path} className="drawer-link">
+                <div className="drawer-icon">{item.icon}</div>
+                <motion.span className="drawer-text" animate={{ opacity: isOpen ? 1 : 0 }}>
+                  {item.label}
+                </motion.span>
+              </Link>
+            </motion.li>
+          ))}
+        </ul>
+
+        <div className="logout-button">
+          <Link to="/" className="logout-link" onClick={handleLogout}>
+            <div className="drawer-icon">
+              <LogOut size={24} />
+            </div>
+            <span className="drawer-text">Cerrar sesión</span>
+          </Link>
+        </div>
+      </motion.nav>
+    </>
   );
 };
 

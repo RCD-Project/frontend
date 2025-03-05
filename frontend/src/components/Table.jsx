@@ -11,27 +11,29 @@ const Tabla = ({ datos = [], columnas = [], filtroClave, filtroPlaceholder }) =>
   );
 
   return (
-    <div className="table-container">
-      <TextField
-        fullWidth
-        label={`Filtrar por ${filtroPlaceholder}`}
-        variant="outlined"
-        value={filtro}
-        onChange={(e) => setFiltro(e.target.value)}
-        className="search-input"
-      />
-      <div style={{ height: 500, width: '100%' }}>
-        <DataGrid
-          rows={datosFiltrados}
-          columns={columnas}
-          autoHeight={false}
-          disableColumnMenu
-          disableSelectionOnClick
-          pageSizeOptions={[]}
-          paginationMode="client"
-          hideFooter
-          scrollbarSize={10}
+    <div style={{ display: 'flex', justifyContent: 'center' }}>
+      <div className="table-container">
+        <TextField
+          fullWidth
+          label={`Filtrar por ${filtroPlaceholder}`}
+          variant="outlined"
+          value={filtro}
+          onChange={(e) => setFiltro(e.target.value)}
+          className="search-input"
         />
+        <div style={{ height: 500, width: '100%' }}>
+          <DataGrid
+            rows={datosFiltrados}
+            columns={columnas}
+            autoHeight={false}
+            disableColumnMenu
+            disableSelectionOnClick
+            pageSizeOptions={[]}
+            paginationMode="client"
+            hideFooter
+            scrollbarSize={10}
+          />
+        </div>
       </div>
     </div>
   );

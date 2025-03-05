@@ -20,7 +20,6 @@
   overflow-x: hidden; 
 }
 
-
 .header-container {
   display: flex;
   align-items: center;
@@ -63,4 +62,15 @@
 .header-back-button svg {
   color: #fff;
   font-size: 30px; /* Ajusta el tamaño de la flecha */
+}
+
+/* Media Query para dispositivos móviles */
+@media (max-width: 768px) {
+  .site-header {
+    padding: 10px;
+  }
+  .site-title {
+    font-size: 1.8rem;
+    padding: 0 10px;
+  }
 }
