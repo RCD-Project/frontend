@@ -12,36 +12,32 @@ import {
 } from "@mui/material";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
 import { AuthContext } from "../pages/context/AuthContext";
+import dayjs from "dayjs";
 
-const DetallesObra = () => {
-  // Obtener el token desde el contexto
+const DetallesCoordinacion = () => {
   const { token } = useContext(AuthContext);
-
-  // Se obtiene el id de la obra desde la query string
   const location = useLocation();
   const queryParams = new URLSearchParams(location.search);
   const id = queryParams.get("id");
 
-  const [obra, setObra] = useState(null);
+  const [coordinacion, setCoordinacion] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
   const theme = createTheme({
     palette: {
-      primary: {
-        main: "#a8c948",
-      },
+      primary: { main: "#a8c948" },
     },
   });
 
   useEffect(() => {
     if (!id) {
-      setError("ID de obra no proporcionado.");
+      setError("ID de coordinación no proporcionado.");
       setLoading(false);
       return;
     }
 
-    fetch(`http://127.0.0.1:8000/api/obras/${id}/`, {
+    fetch(`http://127.0.0.1:8000/api/coordinacionretiro/${id}/`, {
       headers: {
         "Content-Type": "application/json",
         Authorization: `Token ${token}`,
@@ -49,12 +45,12 @@ const DetallesObra = () => {
     })
       .then((response) => {
         if (!response.ok) {
-          throw new Error("Error al obtener los detalles de la obra.");
+          throw new Error("Error al obtener los detalles de la coordinación.");
         }
         return response.json();
       })
       .then((data) => {
-        setObra(data);
+        setCoordinacion(data);
         setLoading(false);
       })
       .catch((err) => {
@@ -83,43 +79,40 @@ const DetallesObra = () => {
     );
   }
 
-  if (!obra) {
+  if (!coordinacion) {
     return (
       <ThemeProvider theme={theme}>
         <Typography variant="h6" color="error" align="center">
-          Obra no encontrada
+          Coordinación no encontrada
         </Typography>
       </ThemeProvider>
     );
   }
 
-  // Agregamos el detalle del cliente. 
-  // Si "obra.cliente" es un objeto anidado, usamos obra.cliente.nombre;
-  // de lo contrario, mostramos el id o "N/A".
-  const clienteDetalle =
-    typeof obra.cliente === "object" && obra.cliente.nombre
-      ? obra.cliente.nombre
-      : obra.cliente || "N/A";
-
+  // Se arma un arreglo con los detalles a mostrar. 
+  // Formateamos las fechas con dayjs en el formato "DD/MM/YYYY".
   const detalles = [
-    { label: "Nombre de la Obra", value: obra.nombre_obra },
-    { label: "Cliente", value: clienteDetalle },
-    { label: "Localidad", value: obra.localidad },
-    { label: "Barrio", value: obra.barrio },
-    { label: "Dirección", value: obra.direccion },
-    { label: "Visitas por Mes", value: obra.cant_visitas_mes },
-    { label: "Inicio de la Obra", value: obra.inicio_obra },
-    { label: "Duración de la Obra", value: obra.duracion_obra },
-    { label: "Etapa de la Obra", value: obra.etapa_obra },
-    { label: "Jefe de Obra", value: obra.nombre_jefe_obra },
-    { label: "Email del Jefe", value: obra.mail_jefe_obra },
-    { label: "Teléfono del Jefe", value: obra.telefono_jefe_obra },
-    { label: "Capataz", value: obra.nombre_capataz },
-    { label: "Email del Capataz", value: obra.mail_capataz },
-    { label: "Teléfono del Capataz", value: obra.telefono_capataz },
-    { label: "Encargado", value: obra.nombre_encargado_supervisor },
-    { label: "Email del Encargado", value: obra.mail_encargado_supervisor },
-    { label: "Teléfono del Encargado", value: obra.telefono_encargado_supervisor },
+    { label: "Obra", value: coordinacion.nombre_obra },
+    { label: "Tipo de Material", value: coordinacion.tipo_material },
+    {
+      label: "Fecha de Solicitud",
+      value: coordinacion.fecha_solicitud
+        ? dayjs(coordinacion.fecha_solicitud).format("DD/MM/YYYY")
+        : "No disponible",
+    },
+    {
+      label: "Fecha de Retiro",
+      value: coordinacion.fecha_retiro
+        ? dayjs(coordinacion.fecha_retiro).format("DD/MM/YYYY")
+        : "No disponible",
+    },
+    { label: "Pesaje", value: coordinacion.pesaje },
+    { label: "Transportista", value: coordinacion.transportista_nombre },
+    { label: "Descripción", value: coordinacion.descripcion },
+    { label: "Observaciones", value: coordinacion.observaciones },
+    { label: "Estado", value: coordinacion.estado },
+    { label: "Comentarios", value: coordinacion.comentarios },
+    { label: "Empresa de Tratamiento", value: coordinacion.empresa_gestora_nombre },
   ];
 
   return (
@@ -127,38 +120,27 @@ const DetallesObra = () => {
       <Card sx={{ maxWidth: 800, margin: "0 auto", padding: 4 }}>
         <CardContent>
           <Typography variant="h3" align="center" sx={{ mb: 4 }}>
-            {obra.nombre_obra}
+            Detalles de la Coordinación
           </Typography>
-          <Divider sx={{ mb: 4 }} />
-          <Grid container spacing={3}>
+          <Divider sx={{ mb: 2 }} />
+          <Grid container spacing={2}>
             {detalles.map((item, index) => (
               <Grid item xs={12} sm={6} key={index}>
                 <Paper sx={{ padding: 2, backgroundColor: "#f4f4f4" }}>
                   <Typography variant="body1" sx={{ fontWeight: "bold" }}>
                     {item.label}
                   </Typography>
-                  <Typography variant="body2">{item.value}</Typography>
+                  <Typography variant="body2">
+                    {item.value ? item.value : "No disponible"}
+                  </Typography>
                 </Paper>
               </Grid>
             ))}
           </Grid>
-          {obra.imagenes && (
-            <Box sx={{ textAlign: "center", mt: 4 }}>
-              <img
-                src={obra.imagenes}
-                alt={obra.nombre_obra}
-                style={{
-                  maxWidth: "100%",
-                  height: "auto",
-                  borderRadius: "8px",
-                }}
-              />
-            </Box>
-          )}
         </CardContent>
       </Card>
     </ThemeProvider>
   );
 };
 
-export default DetallesObra;
+export default DetallesCoordinacion;

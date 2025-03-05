@@ -1,13 +1,52 @@
 import React, { useState, useEffect, useContext } from "react";
-import { Container, TextField, Button, Grid, Typography, Stepper, Step, StepLabel, Paper, Alert } from "@mui/material";
+import {
+  Container,
+  TextField,
+  Button,
+  Grid,
+  Typography,
+  Stepper,
+  Step,
+  StepLabel,
+  Paper,
+  Alert,
+  Box,
+} from "@mui/material";
 import { LocalizationProvider, DatePicker } from "@mui/x-date-pickers";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import dayjs from "dayjs";
 import { useNavigate, useLocation } from "react-router-dom";
-import { createTheme, ThemeProvider } from '@mui/material/styles';
-import { AuthContext } from "../pages/context/AuthContext";  // Asegúrate de que la ruta sea correcta
+import { createTheme, ThemeProvider } from "@mui/material/styles";
+import { AuthContext } from "../pages/context/AuthContext";  // Ajusta la ruta según corresponda
 
 const steps = ['Información General', 'Detalles de la Obra', 'Equipo Responsable'];
+
+// Función que mapea las claves del objeto formData (camelCase) a los nombres que espera el backend (snake_case)
+const mapFormDataToPayload = (data) => {
+  return {
+    nombre_obra: data.nombreObra,
+    localidad: data.localidad,
+    barrio: data.barrio,
+    direccion: data.direccion,
+    cant_visitas_mes: data.visitasMes,
+    inicio_obra: data.inicioObra 
+      ? data.inicioObra.toISOString().split("T")[0] 
+      : null,
+    duracion_obra: data.duracionObra,
+    etapa_obra: data.etapaObra,
+    nombre_jefe_obra: data.jefeObra,
+    mail_jefe_obra: data.emailJefe,
+    telefono_jefe_obra: data.telefonoJefe,
+    nombre_capataz: data.capataz,
+    mail_capataz: data.emailCapataz,
+    telefono_capataz: data.telefonoCapataz,
+    nombre_encargado_supervisor: data.encargado,
+    mail_encargado_supervisor: data.emailEncargado,
+    telefono_encargado_supervisor: data.telefonoEncargado,
+    imagenes: data.imagen,  // Si usas archivos, asegúrate de tratarlo de forma adecuada
+    pedido: data.pedido,
+  };
+};
 
 const EditarObra = () => {
   const [activeStep, setActiveStep] = useState(0);
@@ -45,7 +84,7 @@ const EditarObra = () => {
   // Obtener el token desde el contexto de autenticación
   const { token } = useContext(AuthContext);
 
-  // Cargamos los datos actuales de la obra para editar
+  // Cargar datos actuales de la obra para editar
   useEffect(() => {
     if (id) {
       fetch(`http://127.0.0.1:8000/api/obras/${id}/`, {
@@ -61,7 +100,7 @@ const EditarObra = () => {
           return response.json();
         })
         .then(data => {
-          // Convertimos los nombres de propiedad (suponiendo que el backend utiliza snake_case)
+          // Mapear las propiedades recibidas a los nombres del estado (camelCase)
           setFormData({
             nombreObra: data.nombre_obra || '',
             localidad: data.localidad || '',
@@ -113,7 +152,7 @@ const EditarObra = () => {
 
   const handleNext = () => {
     if (validateStep(activeStep)) {
-      setActiveStep((prevStep) => prevStep + 1);
+      setActiveStep(prevStep => prevStep + 1);
     }
   };
   const handleBack = () => setActiveStep(prev => prev - 1);
@@ -129,13 +168,8 @@ const EditarObra = () => {
     if (!validateStep(activeStep)) return;
     setIsLoading(true);
 
-    const obraData = {
-      ...formData,
-      // Convertir fecha a formato ISO (solo la parte de la fecha)
-      inicioObra: formData.inicioObra 
-        ? formData.inicioObra.toISOString().split("T")[0] 
-        : null,
-    };
+    // Mapear los datos del formulario al formato que espera el backend
+    const obraData = mapFormDataToPayload(formData);
 
     console.log("Enviando formulario:", obraData);
 
@@ -153,12 +187,12 @@ const EditarObra = () => {
         const errorText = await response.json();
         console.error("Respuesta de error:", errorText);
         let newErrors = {};
-        if (errorText.emailJefe) newErrors.emailJefe = "El email ya está registrado.";
+        if (errorText.mail_jefe_obra) newErrors.emailJefe = "El email ya está registrado.";
         setErrors(newErrors);
         throw new Error("Error en la validación del servidor");
       }
 
-      // Si la actualización es exitosa, se puede establecer un mensaje o redirigir
+      // Si la actualización es exitosa, se establece un mensaje y se redirige
       setSuccessMessage("Obra actualizada con éxito.");
       navigate("/listadeobras", { state: { successMessage: "Obra actualizada con éxito." } });
 

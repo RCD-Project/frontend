@@ -58,39 +58,35 @@ const ListaDeCoordinaciones = () => {
 
   const columnasCoordinaciones = [
     {
-      field: "obra",
+      field: "nombre_obra",
       headerName: "Obra",
       flex: 1,
-      renderCell: (params) => {
-        if (params.row.obra && typeof params.row.obra === "object") {
-          return params.row.obra.nombre_obra || params.row.obra.nombre || "Sin nombre";
-        }
-        return params.row.obra || "Sin nombre";
-      },
+      renderCell: (params) => params.row.nombre_obra || "Sin nombre",
     },
     { field: 'tipo_material', headerName: 'Tipo de Material', flex: 1 },
     {
-      field: "transportista",
+      field: "transportista_nombre",
       headerName: "Transportista",
       flex: 1,
-      renderCell: (params) => {
-        if (params.row.transportista && typeof params.row.transportista === "object") {
-          return params.row.transportista.nombre || "Sin nombre";
-        }
-        return params.row.transportista || "Sin nombre";
-      },
+      renderCell: (params) => params.row.transportista_nombre || "Sin nombre",
     },
     {
       field: 'fecha_solicitud',
       headerName: 'Fecha de Solicitud',
       flex: 1,
-      renderCell: (params) => params.row.fecha_solicitud ? dayjs(params.row.fecha_solicitud).format('DD/MM/YYYY') : "-",
+      renderCell: (params) =>
+        params.row.fecha_solicitud
+          ? dayjs(params.row.fecha_solicitud).format('DD/MM/YYYY')
+          : "-",
     },
     {
       field: 'fecha_retiro',
       headerName: 'Fecha de Retiro',
       flex: 1,
-      renderCell: (params) => params.row.fecha_retiro ? dayjs(params.row.fecha_retiro).format('DD/MM/YYYY') : "-",
+      renderCell: (params) =>
+        params.row.fecha_retiro
+          ? dayjs(params.row.fecha_retiro).format('DD/MM/YYYY')
+          : "-",
     },
     {
       field: 'acciones',
@@ -107,6 +103,8 @@ const ListaDeCoordinaciones = () => {
       ),
     },
   ];
+  
+  
 
   return (
     <div>

@@ -13,6 +13,7 @@ import {
   Box,
   IconButton,
   MenuItem,
+  CircularProgress,
 } from "@mui/material";
 import { LocalizationProvider, DatePicker } from "@mui/x-date-pickers";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
@@ -28,7 +29,6 @@ import {
   FileText,
 } from "lucide-react";
 import { AuthContext } from "../pages/context/AuthContext";
-import { CircularProgress } from "@mui/material";
 import dayjs from "dayjs";
 
 const steps = ["Información General", "Detalles de Material", "Fecha"];
@@ -58,7 +58,6 @@ const AltaPuntoLimpio = () => {
   const [errorMessage, setErrorMessage] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
-
   // Cargar las obras aprobadas
   useEffect(() => {
     if (!token) return;
@@ -71,13 +70,14 @@ const AltaPuntoLimpio = () => {
       },
     })
       .then((res) => {
-        if (!res.ok) {
-          throw new Error(`Error HTTP: ${res.status}`);
-        }
+        if (!res.ok) throw new Error(`Error HTTP: ${res.status}`);
         return res.json();
       })
       .then((data) => setObras(data))
-      .catch((err) => console.error("Error al cargar las obras:", err));
+      .catch((err) => {
+        console.error("Error al cargar las obras:", err);
+        setErrorMessage("Error al cargar las obras.");
+      });
   }, [token]);
 
   // Cargar la lista de transportistas
@@ -92,30 +92,37 @@ const AltaPuntoLimpio = () => {
       },
     })
       .then((res) => {
-        if (!res.ok) {
-          throw new Error(`Error HTTP: ${res.status}`);
-        }
+        if (!res.ok) throw new Error(`Error HTTP: ${res.status}`);
         return res.json();
       })
       .then((data) => setTransportistas(data))
-      .catch((err) => console.error("Error al cargar transportistas:", err));
+      .catch((err) => {
+        console.error("Error al cargar transportistas:", err);
+        setErrorMessage("Error al cargar transportistas.");
+      });
   }, [token]);
 
-  // Validación básica de campos obligatorios
+  // Función de validación por pasos
   const validateStep = (step) => {
     let newErrors = {};
-    
     if (step === 0) {
       if (!formData.obra) newErrors.obra = "Debe seleccionar una obra.";
-      if (!formData.ubicacion.trim()) newErrors.ubicacion = "La ubicación es obligatoria.";
+      if (!formData.ubicacion.trim())
+        newErrors.ubicacion = "La ubicación es obligatoria.";
       if (!formData.cantidad || isNaN(formData.cantidad) || formData.cantidad <= 0) {
         newErrors.cantidad = "Debe ingresar una cantidad válida.";
       }
-      if (!formData.metros_cuadrados || isNaN(formData.metros_cuadrados) || formData.metros_cuadrados <= 0) {
-        newErrors.metros_cuadrados = "Debe ingresar un valor válido en metros cuadrados.";
+      if (
+        !formData.metros_cuadrados ||
+        isNaN(formData.metros_cuadrados) ||
+        formData.metros_cuadrados <= 0
+      ) {
+        newErrors.metros_cuadrados =
+          "Debe ingresar un valor válido en metros cuadrados.";
       }
     } else if (step === 1) {
-      if (!formData.tipo_contenedor.trim()) newErrors.tipo_contenedor = "El tipo de contenedor es obligatorio.";
+      if (!formData.tipo_contenedor.trim())
+        newErrors.tipo_contenedor = "El tipo de contenedor es obligatorio.";
     } else if (step === 2) {
       if (!formData.fecha_ingreso) {
         newErrors.fecha_ingreso = "La fecha de ingreso es obligatoria.";
@@ -123,20 +130,20 @@ const AltaPuntoLimpio = () => {
         newErrors.fecha_ingreso = "La fecha de ingreso no es válida.";
       }
     }
-  
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
-  
-  
 
   const handleNext = () => {
-    if (validateStep(activeStep)) setActiveStep((prev) => prev + 1);
+    if (validateStep(activeStep)) {
+      setActiveStep((prev) => prev + 1);
+      setErrorMessage("");
+    }
   };
-  
 
   const handleBack = () => {
-    setActiveStep((prevStep) => prevStep - 1);
+    setActiveStep((prev) => prev - 1);
+    setErrorMessage("");
   };
 
   const handleChange = (e) => {
@@ -147,7 +154,6 @@ const AltaPuntoLimpio = () => {
     setFormData({ ...formData, fecha_ingreso: newValue });
   };
 
-  // Actualiza la cantidad ingresada para cada tipo de material
   const handleMaterialQuantityChange = (materialType, quantity) => {
     setFormData((prevState) => ({
       ...prevState,
@@ -158,18 +164,59 @@ const AltaPuntoLimpio = () => {
     }));
   };
 
-  // Función para crear primero el Punto Limpio y luego los Materiales
+  // Función para procesar la validación de datos antes de ejecutar cualquier API
+  const canExecuteApi = () => {
+    // Validar que los datos del formulario sean correctos
+    if (!validateStep(0) || !validateStep(1) || !validateStep(2)) return false;
+
+    // Calcular el arreglo de materiales
+    const materialesArray = Object.entries(formData.materiales)
+      .filter(([type, qty]) => parseInt(qty) > 0)
+      .map(([type, qty]) => {
+        const transporte = transportistas.find(
+          (t) =>
+            t.tipo_material === type &&
+            t.estado.toLowerCase() === "activo"
+        );
+        if (!transporte) {
+          return null;
+        }
+        return {
+          tipo_material: type,
+          cantidad: parseInt(qty),
+          transportista: transporte.id,
+          descripcion: "Sin descripción",
+          proteccion: "Sin protección",
+          tipo_contenedor: formData.tipo_contenedor,
+          estado_del_contenedor: "No especificado",
+          ventilacion: type === "peligrosos" ? "necesario" : "",
+          obra: formData.obra,
+          // Se asignará el id del Punto Limpio luego de su creación
+        };
+      });
+
+    // Si el arreglo está vacío o contiene algún elemento null, no se ejecuta la API
+    if (materialesArray.length === 0 || materialesArray.some((item) => item === null)) {
+      setErrorMessage("Debe asignarse al menos un material con transportista válido.");
+      return false;
+    }
+    return true;
+  };
+
+  // Función para crear el Punto Limpio y luego sus Materiales
   const handleSubmit = async (event) => {
     event.preventDefault();
-  
+
     if (!token) {
       setErrorMessage("No estás autenticado. Por favor, inicia sesión.");
       return;
     }
-    if (!validateStep(2)) return;
+    // Verificamos todos los datos antes de ejecutar cualquier llamada a la API
+    if (!canExecuteApi()) return;
 
-    setIsLoading(true); // Indica que la solicitud está en curso
-  
+    setIsLoading(true);
+    setErrorMessage("");
+
     // Extraer y preparar datos para el Punto Limpio
     const { materiales, ...puntoData } = formData;
     const dataPuntoLimpio = {
@@ -178,7 +225,7 @@ const AltaPuntoLimpio = () => {
         ? dayjs(formData.fecha_ingreso).format("YYYY-MM-DD")
         : null,
     };
-  
+
     try {
       // Crear el Punto Limpio
       const responsePunto = await fetch(
@@ -192,27 +239,23 @@ const AltaPuntoLimpio = () => {
           body: JSON.stringify(dataPuntoLimpio),
         }
       );
-  
+
       if (!responsePunto.ok) {
         const errorText = await responsePunto.text();
         throw new Error(errorText);
       }
-  
+
       const puntoDataResponse = await responsePunto.json();
-  
-      // Preparar el arreglo de materiales
-      const materialesArray = Object.entries(materiales)
+
+      // Preparar el arreglo de materiales ya que ahora contamos con el id del Punto Limpio
+      const materialesArray = Object.entries(formData.materiales)
         .filter(([type, qty]) => parseInt(qty) > 0)
         .map(([type, qty]) => {
           const transporte = transportistas.find(
-            (t) => t.tipo_material === type && t.estado.toLowerCase() === "activo"
+            (t) =>
+              t.tipo_material === type &&
+              t.estado.toLowerCase() === "activo"
           );
-  
-          if (!transporte) {
-            console.error(`No se encontró transportista activo para el tipo: ${type}`);
-            return null;
-          }
-  
           return {
             tipo_material: type,
             cantidad: parseInt(qty),
@@ -225,14 +268,8 @@ const AltaPuntoLimpio = () => {
             obra: formData.obra,
             punto_limpio: puntoDataResponse.id,
           };
-        })
-        .filter((item) => item !== null);
-  
-      if (materialesArray.length === 0) {
-        setErrorMessage("Debe asignarse al menos un material con transportista válido.");
-        return;
-      }
-  
+        });
+
       // Crear cada material de forma individual
       for (const material of materialesArray) {
         const responseMaterial = await fetch(
@@ -246,19 +283,18 @@ const AltaPuntoLimpio = () => {
             body: JSON.stringify(material),
           }
         );
-  
+
         if (!responseMaterial.ok) {
           const errorText = await responseMaterial.text();
           throw new Error(errorText);
         }
       }
-  
+
       setSuccessMessage("Punto Limpio registrado con éxito.");
       setErrorMessage("");
       navigate("/puntolimpio", {
         state: { successMessage: "Punto Limpio registrado con éxito." },
       });
-  
     } catch (err) {
       console.error("Error al dar de alta el Punto Limpio:", err);
       setErrorMessage("Ocurrió un error al registrar el Punto Limpio. Intenta nuevamente.");
@@ -266,9 +302,15 @@ const AltaPuntoLimpio = () => {
       setIsLoading(false);
     }
   };
-  
 
-  // Definición de los tipos de material disponibles
+  const theme = createTheme({
+    palette: {
+      primary: {
+        main: "#a8c948",
+      },
+    },
+  });
+
   const materialTypes = [
     { value: "escombro_limpio", label: "Escombro Limpio", icon: <Recycle /> },
     { value: "plastico", label: "Plástico", icon: <CupSoda /> },
@@ -278,9 +320,6 @@ const AltaPuntoLimpio = () => {
     { value: "mezclados", label: "Mezclados", icon: <TrendingUpDown /> },
     { value: "peligrosos", label: "Peligrosos", icon: <TriangleAlert /> },
   ];
-
-  const theme = createTheme({ palette: { primary: { main: "#a8c948" } } });
-
 
   return (
     <ThemeProvider theme={theme}>
@@ -303,18 +342,23 @@ const AltaPuntoLimpio = () => {
           }}
         >
           <Paper elevation={3} sx={{ padding: 6, borderRadius: 3 }}>
-            <Typography
-              variant="h3"
-              align="center"
-              gutterBottom
-              sx={{ mb: 4 }}
-            >
+            <Typography variant="h3" align="center" gutterBottom sx={{ mb: 4 }}>
               Alta Punto Limpio
             </Typography>
 
+            {Object.keys(errors).length > 0 && (
+              <Alert severity="error" sx={{ mb: 2 }}>
+                {Object.values(errors).map((err, index) => (
+                  <div key={index}>{err}</div>
+                ))}
+              </Alert>
+            )}
+            {errorMessage && (
+              <Alert severity="error" sx={{ mb: 2 }}>
+                {errorMessage}
+              </Alert>
+            )}
             {successMessage && <Alert severity="success">{successMessage}</Alert>}
-
-
 
             <Stepper activeStep={activeStep} alternativeLabel sx={{ mb: 4 }}>
               {steps.map((label, index) => (
@@ -325,7 +369,7 @@ const AltaPuntoLimpio = () => {
             </Stepper>
 
             <form onSubmit={handleSubmit}>
-            <Grid container spacing={3}>
+              <Grid container spacing={3}>
                 {activeStep === 0 && (
                   <>
                     <Grid item xs={12}>
@@ -336,6 +380,7 @@ const AltaPuntoLimpio = () => {
                         name="obra"
                         value={formData.obra}
                         onChange={handleChange}
+                        required
                         error={!!errors.obra}
                         helperText={errors.obra}
                       >
@@ -353,6 +398,7 @@ const AltaPuntoLimpio = () => {
                         name="ubicacion"
                         value={formData.ubicacion}
                         onChange={handleChange}
+                        required
                         error={!!errors.ubicacion}
                         helperText={errors.ubicacion}
                       />
@@ -365,6 +411,7 @@ const AltaPuntoLimpio = () => {
                         type="number"
                         value={formData.cantidad}
                         onChange={handleChange}
+                        required
                         error={!!errors.cantidad}
                         helperText={errors.cantidad}
                       />
@@ -377,25 +424,60 @@ const AltaPuntoLimpio = () => {
                         type="number"
                         value={formData.metros_cuadrados}
                         onChange={handleChange}
+                        required
                         error={!!errors.metros_cuadrados}
                         helperText={errors.metros_cuadrados}
                       />
                     </Grid>
                   </>
                 )}
+
                 {activeStep === 1 && (
-                  <Grid item xs={12}>
-                    <TextField
-                      label="Tipo de Contenedor"
-                      fullWidth
-                      name="tipo_contenedor"
-                      value={formData.tipo_contenedor}
-                      onChange={handleChange}
-                      error={!!errors.tipo_contenedor}
-                      helperText={errors.tipo_contenedor}
-                    />
-                  </Grid>
+                  <>
+                    <Grid item xs={12}>
+                      <TextField
+                        label="Tipo de Contenedor"
+                        fullWidth
+                        name="tipo_contenedor"
+                        value={formData.tipo_contenedor}
+                        onChange={handleChange}
+                        required
+                        error={!!errors.tipo_contenedor}
+                        helperText={errors.tipo_contenedor}
+                      />
+                    </Grid>
+                    <Grid item xs={12}>
+                      <Typography variant="h6" gutterBottom>
+                        Materiales y Cantidades
+                      </Typography>
+                      <Grid container spacing={2}>
+                        {materialTypes.map((material) => (
+                          <Grid item xs={12} sm={6} key={material.value}>
+                            <Box display="flex" alignItems="center">
+                              <IconButton>{material.icon}</IconButton>
+                              <Typography sx={{ marginLeft: 1 }}>
+                                {material.label}
+                              </Typography>
+                            </Box>
+                            <TextField
+                              label="Cantidad"
+                              type="number"
+                              value={formData.materiales[material.value] || ""}
+                              onChange={(e) =>
+                                handleMaterialQuantityChange(
+                                  material.value,
+                                  e.target.value
+                                )
+                              }
+                              fullWidth
+                            />
+                          </Grid>
+                        ))}
+                      </Grid>
+                    </Grid>
+                  </>
                 )}
+
                 {activeStep === 2 && (
                   <Grid item xs={12}>
                     <LocalizationProvider dateAdapter={AdapterDayjs}>
@@ -407,6 +489,7 @@ const AltaPuntoLimpio = () => {
                           <TextField
                             {...params}
                             fullWidth
+                            required
                             error={!!errors.fecha_ingreso}
                             helperText={errors.fecha_ingreso}
                           />
@@ -423,19 +506,19 @@ const AltaPuntoLimpio = () => {
                     <Button onClick={handleBack}>Atrás</Button>
                   </Grid>
                 )}
-                {activeStep === 0 && (
-                  <Grid item xs={12} sx={{ textAlign: "right" }}>
-                    <Button onClick={handleNext}>Siguiente</Button>
-                  </Grid>
-                )}
-                {activeStep !== 0 && activeStep < steps.length - 1 && (
+                {activeStep < steps.length - 1 && (
                   <Grid item xs={6} sx={{ textAlign: "right" }}>
                     <Button onClick={handleNext}>Siguiente</Button>
                   </Grid>
                 )}
                 {activeStep === steps.length - 1 && (
-                  <Grid item xs={6} sx={{ textAlign: "right" }}>
-                    <Button type="submit" variant="contained" disabled={isLoading}>
+                  <Grid item xs={12} sx={{ textAlign: "right" }}>
+                    <Button
+                      type="submit"
+                      variant="contained"
+                      color="primary"
+                      disabled={isLoading}
+                    >
                       {isLoading ? <CircularProgress size={20} /> : "Finalizar"}
                     </Button>
                   </Grid>

@@ -99,8 +99,8 @@ const Capacitaciones = () => {
       <Tabla
         datos={capacitaciones}
         columnas={columnasCapacitaciones}
-        filtroClave="motivo"
-        filtroPlaceholder="Buscar capacitación"
+        filtroClave="obra_nombre"
+        filtroPlaceholder="Obra"
       />
 
       <Menu

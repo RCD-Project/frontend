@@ -14,11 +14,13 @@ import {
   MapPinCheck,
   LogOut,
   UserPlus,
+  Camera
 } from "lucide-react";
 import "../styles/drawer.css";
 import { AuthContext } from "../pages/context/AuthContext";
 
 const menuItems = [
+  { path: "/altausuario", label: "Alta Usuario", icon: <UserPlus size={24} />, roles: ["superadmin"] },
   { path: "/clientes", label: "Clientes", icon: <Users size={24} />, roles: ["superadmin", "coordinador", "coordinadorlogistico"] },
   { path: "/listadeobras", label: "Obras", icon: <Hammer size={24} />, roles: ["superadmin", "cliente"] },
   { path: "/solicitudes", label: "Solicitudes", icon: <ClipboardList size={24} />, roles: ["superadmin", "coordinador", "coordinadorlogistico"] },
@@ -27,9 +29,9 @@ const menuItems = [
   { path: "/empresasgestoras", label: "Empresa Gestora", icon: <Factory size={24} />, roles: ["superadmin", "coordinadorlogistico"] },
   { path: "/capacitaciones", label: "Capacitaciones", icon: <GraduationCap size={24} />, roles: ["superadmin", "tecnico"] },
   { path: "/informes", label: "Informes", icon: <FileText size={24} />, roles: ["superadmin", "coordinadorlogistico", "coordinador"] },
+  { path: "/imagenes", label: "Imagenes", icon: <Camera size={24} />, roles: ["superadmin", "tecnico"] },
   { path: "/obraslist", label: "Formularios", icon: <ClipboardPenLine size={24} />, roles: ["superadmin", "tecnico"] },
   { path: "/puntolimpio", label: "Puntos Limpios", icon: <MapPinCheck size={24} />, roles: ["superadmin", "cliente"] },
-  { path: "/altausuario", label: "Alta Usuario", icon: <UserPlus size={24} />, roles: ["superadmin"] },
 ];
 
 const Drawer = () => {

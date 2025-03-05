@@ -2,7 +2,16 @@ import React, { useState, useEffect, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { AuthContext } from './context/AuthContext';
 import Tabla from '../components/Table';
-import { IconButton, Menu, MenuItem, Button, Tabs, Tab, Box, Typography } from '@mui/material';
+import { 
+  IconButton, 
+  Menu, 
+  MenuItem, 
+  Button, 
+  Tabs, 
+  Tab, 
+  Box, 
+  Typography 
+} from '@mui/material';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import EditIcon from '@mui/icons-material/Edit';
@@ -120,11 +129,13 @@ const Transportistas = () => {
           value={value}
           onChange={handleChangeTab}
           aria-label="Transportistas"
-          textColor="primary"
-          indicatorColor="primary"
+          textColor="inherit"
+          indicatorColor="inherit"
           sx={{
-            '& .MuiTab-root': {
-              color: '#000',
+            '& .MuiTab-root': { 
+              color: 'black',
+              transition: 'background-color 0.3s ease',
+              '&:active': { backgroundColor: '#abbf9d' },
             },
             '& .Mui-selected': {
               backgroundColor: '#abbf9d',

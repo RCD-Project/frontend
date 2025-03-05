@@ -122,7 +122,9 @@ const AltaCapacitaciones = () => {
     const payload = {
       ...formData,
       fecha: formData.fecha ? formData.fecha.format('YYYY-MM-DD') : null,
+      obra: formData.obra ? parseInt(formData.obra, 10) : null,
     };
+    
 
     fetch('http://localhost:8000/api/capacitaciones/registro/', {
       method: 'POST',

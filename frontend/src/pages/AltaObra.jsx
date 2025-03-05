@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import {
   Container,
   TextField,
@@ -12,17 +12,35 @@ import {
   Box,
   Alert,
   CircularProgress,
+  MenuItem,
+  Select,
+  FormControl,
+  InputLabel,
 } from '@mui/material';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
 import { useNavigate } from 'react-router-dom';
 import { LocalizationProvider, DatePicker } from '@mui/x-date-pickers';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
+import { AuthContext } from './context/AuthContext';
 
 const steps = ['Información General', 'Detalles de la Obra', 'Equipo Responsable'];
 
 const AltaObra = () => {
-  const [activeStep, setActiveStep] = useState(0);
+  const { token, user } = useContext(AuthContext);
+  const navigate = useNavigate();
+
+  // Estado para almacenar la lista de clientes aprobados.
+  const [clientesOptions, setClientesOptions] = useState([]);
+  // Estado para el cliente seleccionado.
+  const [selectedCliente, setSelectedCliente] = useState("");
+  // Estado para bloquear el dropdown (si se encontró el cliente por email)
+  const [disableDropdown, setDisableDropdown] = useState(false);
+
+  // En caso de que el usuario sea cliente, usamos su id de inmediato.
+  const initialCliente = user && user.rol === 'cliente' ? String(user.id) : "";
+
   const [formData, setFormData] = useState({
+    cliente: initialCliente,
     nombreObra: '',
     localidad: '',
     barrio: '',
@@ -43,19 +61,56 @@ const AltaObra = () => {
     imagen: null,
     pedido: '',
   });
+
+  const [activeStep, setActiveStep] = useState(0);
   const [errors, setErrors] = useState({});
   const [isLoading, setIsLoading] = useState(false);
   const [successMessage, setSuccessMessage] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
 
+  // Al cargar, obtenemos la lista de clientes aprobados y preseleccionamos:
+  useEffect(() => {
+    if (token) {
+      fetch('http://127.0.0.1:8000/api/clientes/aprobados/', {
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Token ${token}`,
+        },
+      })
+        .then((res) => res.json())
+        .then((data) => {
+          console.log("Datos de clientes:", data);
+          setClientesOptions(data);
+          // Buscamos el cliente cuyo email coincida (ya sea de client.email o client.usuario.email)
+          const clientMatch = data.find((client) => {
+            const email = (client.email || (client.usuario && client.usuario.email))?.trim().toLowerCase();
+            return email === user.email.trim().toLowerCase();
+          });
+          if (clientMatch) {
+            setSelectedCliente(String(clientMatch.id));
+            setDisableDropdown(true);
+          } else if (data.length > 0) {
+            // Si no se encuentra coincidencia, preseleccionamos el primer cliente.
+            setSelectedCliente(String(data[0].id));
+          }
+        })
+        .catch((error) => console.error("Error al obtener clientes:", error));
+    }
+  }, [token, user]);
 
-
-  const navigate = useNavigate();
+  // Sincronizamos el estado del cliente seleccionado en formData.
+  useEffect(() => {
+    setFormData((prev) => ({ ...prev, cliente: selectedCliente }));
+  }, [selectedCliente]);
 
   const validateStep = (step) => {
     let newErrors = {};
 
     if (step === 0) {
+      // Si el usuario no es cliente y no se ha seleccionado ninguno, es error.
+      if (!(user && user.rol === 'cliente') && !formData.cliente) {
+        newErrors.cliente = "Debes seleccionar un cliente.";
+      }
       if (!formData.nombreObra.trim()) newErrors.nombreObra = "El nombre de la obra es obligatorio.";
       if (!formData.localidad.trim()) newErrors.localidad = "La localidad es obligatoria.";
       if (!formData.barrio.trim()) newErrors.barrio = "El barrio es obligatorio.";
@@ -90,7 +145,7 @@ const AltaObra = () => {
   const handleBack = () => setActiveStep((prev) => prev - 1);
 
   const handleChange = (e) => {
-    setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
+    setSelectedCliente(e.target.value);
   };
 
   const handleDateChange = (newValue) => {
@@ -101,11 +156,21 @@ const AltaObra = () => {
     event.preventDefault();
     setIsLoading(true);
     setErrorMessage("");
-    if (!validateStep(2)) return;
+    if (!validateStep(2)) {
+      setIsLoading(false);
+      return;
+    }
 
+    // Convertimos el cliente a número
+    const clienteId = formData.cliente ? Number(formData.cliente) : null;
+    if (!clienteId) {
+      setErrorMessage("No se encontró un cliente válido.");
+      setIsLoading(false);
+      return;
+    }
 
     const obraData = {
-      cliente: 1,
+      cliente: clienteId,
       nombre_obra: formData.nombreObra,
       localidad: formData.localidad,
       barrio: formData.barrio,
@@ -128,10 +193,10 @@ const AltaObra = () => {
       pedido: formData.pedido || 'No especificado',
     };
 
-    console.log('Datos enviados:', obraData);
+    console.log("Enviando obraData:", obraData);
 
-    const token = localStorage.getItem('token');
-    if (!token) {
+    const tokenLocal = localStorage.getItem('token');
+    if (!tokenLocal) {
       console.error('Token no encontrado. El usuario debe iniciar sesión.');
       setErrorMessage('Por favor, inicie sesión para registrar la obra.');
       setIsLoading(false);
@@ -143,7 +208,7 @@ const AltaObra = () => {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Token ${token}`,
+        'Authorization': `Token ${tokenLocal}`,
       },
       body: JSON.stringify(obraData),
     })
@@ -157,10 +222,6 @@ const AltaObra = () => {
         return res.json();
       })
       .then((data) => {
-        console.log('Obra creada:', data);
-        // Si deseas manejar el mensaje de éxito en este componente, podrías actualizar el estado:
-        // setSuccessMessage(data.mensaje);
-        // En este ejemplo, navegamos a la lista de obras y pasamos el mensaje:
         navigate('/listadeobras', { state: { successMessage: data.mensaje } });
       })
       .catch((err) => {
@@ -198,7 +259,7 @@ const AltaObra = () => {
         }}
       >
         <Box sx={{ width: '100%' }}>
-          <Paper elevation={3} sx={{ padding: 6, borderRadius: 3 }}>
+          <Paper elevation={3} sx={{ padding: 6, marginTop: 6, borderRadius: 3 }}>
             <Typography variant="h3" gutterBottom sx={{ textAlign: 'center' }}>
               Registro de Obra
             </Typography>
@@ -208,7 +269,7 @@ const AltaObra = () => {
                 {errorMessage}
               </Alert>
             )}
-            
+
             {successMessage && (
               <Alert severity="success" sx={{ mb: 3 }}>
                 {successMessage}
@@ -228,12 +289,39 @@ const AltaObra = () => {
                 {activeStep === 0 && (
                   <>
                     <Grid item xs={12}>
+                      <FormControl fullWidth>
+                        <InputLabel id="cliente-label">Cliente</InputLabel>
+                        <Select
+                          labelId="cliente-label"
+                          label="Cliente"
+                          name="cliente"
+                          value={selectedCliente}
+                          onChange={handleChange}
+                          disabled={disableDropdown}
+                        >
+                          {clientesOptions.length > 0 ? (
+                            clientesOptions.map((client) => (
+                              <MenuItem key={client.id} value={String(client.id)}>
+                                {client.nombre}
+                              </MenuItem>
+                            ))
+                          ) : (
+                            <MenuItem value="">
+                              {user.email ? "No se encontró cliente registrado" : "Usuario no autenticado"}
+                            </MenuItem>
+                          )}
+                        </Select>
+                      </FormControl>
+                    </Grid>
+                    <Grid item xs={12}>
                       <TextField
                         label="Nombre de la Obra"
                         fullWidth
                         name="nombreObra"
                         value={formData.nombreObra}
-                        onChange={handleChange}
+                        onChange={(e) =>
+                          setFormData((prev) => ({ ...prev, nombreObra: e.target.value }))
+                        }
                         error={!!errors.nombreObra}
                         helperText={errors.nombreObra}
                       />
@@ -244,7 +332,9 @@ const AltaObra = () => {
                         fullWidth
                         name="localidad"
                         value={formData.localidad}
-                        onChange={handleChange}
+                        onChange={(e) =>
+                          setFormData((prev) => ({ ...prev, localidad: e.target.value }))
+                        }
                         error={!!errors.localidad}
                         helperText={errors.localidad}
                       />
@@ -255,7 +345,9 @@ const AltaObra = () => {
                         fullWidth
                         name="barrio"
                         value={formData.barrio}
-                        onChange={handleChange}
+                        onChange={(e) =>
+                          setFormData((prev) => ({ ...prev, barrio: e.target.value }))
+                        }
                         error={!!errors.barrio}
                         helperText={errors.barrio}
                       />
@@ -266,7 +358,9 @@ const AltaObra = () => {
                         fullWidth
                         name="direccion"
                         value={formData.direccion}
-                        onChange={handleChange}
+                        onChange={(e) =>
+                          setFormData((prev) => ({ ...prev, direccion: e.target.value }))
+                        }
                         error={!!errors.direccion}
                         helperText={errors.direccion}
                       />
@@ -278,13 +372,16 @@ const AltaObra = () => {
                         name="visitasMes"
                         type="number"
                         value={formData.visitasMes}
-                        onChange={handleChange}
+                        onChange={(e) =>
+                          setFormData((prev) => ({ ...prev, visitasMes: e.target.value }))
+                        }
                         error={!!errors.visitasMes}
                         helperText={errors.visitasMes}
                       />
                     </Grid>
                   </>
                 )}
+
                 {activeStep === 1 && (
                   <>
                     <Grid item xs={6}>
@@ -310,7 +407,9 @@ const AltaObra = () => {
                         fullWidth
                         name="duracionObra"
                         value={formData.duracionObra}
-                        onChange={handleChange}
+                        onChange={(e) =>
+                          setFormData((prev) => ({ ...prev, duracionObra: e.target.value }))
+                        }
                         error={!!errors.duracionObra}
                         helperText={errors.duracionObra}
                       />
@@ -321,13 +420,16 @@ const AltaObra = () => {
                         fullWidth
                         name="etapaObra"
                         value={formData.etapaObra}
-                        onChange={handleChange}
+                        onChange={(e) =>
+                          setFormData((prev) => ({ ...prev, etapaObra: e.target.value }))
+                        }
                         error={!!errors.etapaObra}
                         helperText={errors.etapaObra}
                       />
                     </Grid>
                   </>
                 )}
+
                 {activeStep === 2 && (
                   <>
                     <Grid item xs={12}>
@@ -336,7 +438,9 @@ const AltaObra = () => {
                         fullWidth
                         name="jefeObra"
                         value={formData.jefeObra}
-                        onChange={handleChange}
+                        onChange={(e) =>
+                          setFormData((prev) => ({ ...prev, jefeObra: e.target.value }))
+                        }
                         error={!!errors.jefeObra}
                         helperText={errors.jefeObra}
                       />
@@ -348,7 +452,9 @@ const AltaObra = () => {
                         name="emailJefe"
                         type="email"
                         value={formData.emailJefe}
-                        onChange={handleChange}
+                        onChange={(e) =>
+                          setFormData((prev) => ({ ...prev, emailJefe: e.target.value }))
+                        }
                         error={!!errors.emailJefe}
                         helperText={errors.emailJefe}
                       />
@@ -360,7 +466,9 @@ const AltaObra = () => {
                         name="telefonoJefe"
                         type="tel"
                         value={formData.telefonoJefe}
-                        onChange={handleChange}
+                        onChange={(e) =>
+                          setFormData((prev) => ({ ...prev, telefonoJefe: e.target.value }))
+                        }
                         error={!!errors.telefonoJefe}
                         helperText={errors.telefonoJefe}
                       />
@@ -371,7 +479,9 @@ const AltaObra = () => {
                         fullWidth
                         name="capataz"
                         value={formData.capataz}
-                        onChange={handleChange}
+                        onChange={(e) =>
+                          setFormData((prev) => ({ ...prev, capataz: e.target.value }))
+                        }
                         error={!!errors.capataz}
                         helperText={errors.capataz}
                       />
@@ -383,7 +493,9 @@ const AltaObra = () => {
                         name="emailCapataz"
                         type="email"
                         value={formData.emailCapataz}
-                        onChange={handleChange}
+                        onChange={(e) =>
+                          setFormData((prev) => ({ ...prev, emailCapataz: e.target.value }))
+                        }
                         error={!!errors.emailCapataz}
                         helperText={errors.emailCapataz}
                       />
@@ -395,7 +507,9 @@ const AltaObra = () => {
                         name="telefonoCapataz"
                         type="tel"
                         value={formData.telefonoCapataz}
-                        onChange={handleChange}
+                        onChange={(e) =>
+                          setFormData((prev) => ({ ...prev, telefonoCapataz: e.target.value }))
+                        }
                         error={!!errors.telefonoCapataz}
                         helperText={errors.telefonoCapataz}
                       />
@@ -406,7 +520,9 @@ const AltaObra = () => {
                         fullWidth
                         name="encargado"
                         value={formData.encargado}
-                        onChange={handleChange}
+                        onChange={(e) =>
+                          setFormData((prev) => ({ ...prev, encargado: e.target.value }))
+                        }
                         error={!!errors.encargado}
                         helperText={errors.encargado}
                       />
@@ -418,7 +534,9 @@ const AltaObra = () => {
                         name="emailEncargado"
                         type="email"
                         value={formData.emailEncargado}
-                        onChange={handleChange}
+                        onChange={(e) =>
+                          setFormData((prev) => ({ ...prev, emailEncargado: e.target.value }))
+                        }
                         error={!!errors.emailEncargado}
                         helperText={errors.emailEncargado}
                       />
@@ -430,7 +548,9 @@ const AltaObra = () => {
                         name="telefonoEncargado"
                         type="tel"
                         value={formData.telefonoEncargado}
-                        onChange={handleChange}
+                        onChange={(e) =>
+                          setFormData((prev) => ({ ...prev, telefonoEncargado: e.target.value }))
+                        }
                         error={!!errors.telefonoEncargado}
                         helperText={errors.telefonoEncargado}
                       />

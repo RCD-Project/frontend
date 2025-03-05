@@ -1,5 +1,18 @@
 import React, { useState, useEffect } from "react";
-import { Container, TextField, Button, Grid, Typography, Stepper, Step, StepLabel, Paper, Alert } from "@mui/material";
+import {
+  Container,
+  TextField,
+  Button,
+  Grid,
+  Typography,
+  Stepper,
+  Step,
+  StepLabel,
+  Paper,
+  Alert,
+  Box,
+  CircularProgress
+} from "@mui/material";
 import { LocalizationProvider, DatePicker } from "@mui/x-date-pickers";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import dayjs from "dayjs";
@@ -29,7 +42,7 @@ const EditarCliente = () => {
   const [errors, setErrors] = useState({});
   const [errorMessage, setErrorMessage] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
-
+  const [isLoading, setIsLoading] = useState(false);
 
   // Se obtiene el token desde localStorage
   const token = localStorage.getItem("token");
@@ -110,8 +123,6 @@ const EditarCliente = () => {
     return Object.keys(newErrors).length === 0;
   };
   
-
-
   const handleNext = () => {
     if (validateStep(activeStep)) {
       setActiveStep((prevStep) => prevStep + 1);
@@ -162,7 +173,6 @@ const EditarCliente = () => {
       } else {
         const errorText = await response.json();
         setErrorMessage(errorText.detail || "Ocurrió un error al actualizar el cliente.");
-
       }
     } catch (error) {
       console.error("Error en la petición:", error);
@@ -181,9 +191,12 @@ const EditarCliente = () => {
     <ThemeProvider theme={theme}>
       <Container maxWidth="md">
         <Paper elevation={3} sx={{ padding: 6, marginTop: 6, borderRadius: 3 }}>
-          <Typography variant="h3" gutterBottom sx={{ textAlign: "center" }}>
-            Editar Cliente
-          </Typography>
+          {/* Título con margen inferior */}
+          <Box mb={3}>
+            <Typography variant="h3" align="center">
+              Editar Cliente
+            </Typography>
+          </Box>
 
           {errorMessage && (
             <Alert severity="error" sx={{ mb: 3 }}>
@@ -197,147 +210,154 @@ const EditarCliente = () => {
             </Alert>
           )}
 
-          <Stepper activeStep={activeStep} alternativeLabel>
-            {steps.map((label, index) => (
-              <Step key={index}>
-                <StepLabel>{label}</StepLabel>
-              </Step>
-            ))}
-          </Stepper>
-          <form onSubmit={handleSubmit}>
-            <Grid container spacing={3}>
-              {activeStep === 0 && (
-                <>
-                  <Grid item xs={12}>
-                    <TextField
-                      label="Nombre"
-                      fullWidth
-                      name="nombre"
-                      value={formData.nombre}
-                      onChange={handleChange}
-                      error={!!errors.nombre} // ✅ Muestra el campo en rojo si hay error
-                      helperText={errors.nombre} // ✅ Muestra el mensaje de error debajo del campo
-                    />
-                  </Grid>
-                  <Grid item xs={12}>
-                    <TextField
-                      label="Dirección"
-                      fullWidth
-                      name="direccion"
-                      value={formData.direccion}
-                      onChange={handleChange}
-                      error={!!errors.direccion}
-                      helperText={errors.direccion}
-                    />
-                  </Grid>
-                  <Grid item xs={12}>
-                    <TextField
-                      label="Contacto"
-                      fullWidth
-                      name="contacto"
-                      value={formData.contacto}
-                      onChange={handleChange}
-                      error={!!errors.contacto}
-                      helperText={errors.contacto}
-                    />
-                  </Grid>
-                </>
-              )}
+          {/* Stepper con margen inferior */}
+          <Box mb={3}>
+            <Stepper activeStep={activeStep} alternativeLabel>
+              {steps.map((label, index) => (
+                <Step key={index}>
+                  <StepLabel>{label}</StepLabel>
+                </Step>
+              ))}
+            </Stepper>
+          </Box>
 
-              {activeStep === 1 && (
-                <>
-                  <Grid item xs={12}>
-                    <TextField
-                      label="Razón Social"
-                      fullWidth
-                      name="razon_social"
-                      value={formData.razon_social}
-                      onChange={handleChange}
-                      error={!!errors.razon_social}
-                      helperText={errors.razon_social}
-                    />
-                  </Grid>
-                  <Grid item xs={12}>
-                    <TextField
-                      label="Dirección Fiscal"
-                      fullWidth
-                      name="direccion_fiscal"
-                      value={formData.direccion_fiscal}
-                      onChange={handleChange}
-                      error={!!errors.direccion_fiscal}
-                      helperText={errors.direccion_fiscal}
-                    />
-                  </Grid>
-                  <Grid item xs={12}>
-                    <TextField
-                      label="RUT"
-                      fullWidth
-                      name="rut"
-                      value={formData.rut}
-                      onChange={handleChange}
-                      error={!!errors.rut}
-                      helperText={errors.rut}
-                    />
-                  </Grid>
-                </>
-              )}
-
-              {activeStep === 2 && (
-                <>
-                  <Grid item xs={12}>
-                    <LocalizationProvider dateAdapter={AdapterDayjs}>
-                      <DatePicker
-                        label="Fecha de Ingreso"
-                        value={formData.fecha_ingreso || null}
-                        onChange={handleDateChange}
-                        renderInput={(params) => (
-                          <TextField
-                            {...params}
-                            fullWidth
-                            error={!!errors.fecha_ingreso}
-                            helperText={errors.fecha_ingreso}
-                          />
-                        )}
+          {/* Formulario con margen inferior */}
+          <Box mb={3}>
+            <form onSubmit={handleSubmit}>
+              <Grid container spacing={3}>
+                {activeStep === 0 && (
+                  <>
+                    <Grid item xs={12}>
+                      <TextField
+                        label="Nombre"
+                        fullWidth
+                        name="nombre"
+                        value={formData.nombre}
+                        onChange={handleChange}
+                        error={!!errors.nombre} 
+                        helperText={errors.nombre}
                       />
-                    </LocalizationProvider>
-                  </Grid>
-                  <Grid item xs={12}>
-                    <TextField
-                      label="Email"
-                      type="email"
-                      fullWidth
-                      name="email"
-                      value={formData.email}
-                      onChange={handleChange}
-                      error={!!errors.email}
-                      helperText={errors.email}
-                    />
-                  </Grid>
-                </>
-              )}
-            </Grid>
+                    </Grid>
+                    <Grid item xs={12}>
+                      <TextField
+                        label="Dirección"
+                        fullWidth
+                        name="direccion"
+                        value={formData.direccion}
+                        onChange={handleChange}
+                        error={!!errors.direccion}
+                        helperText={errors.direccion}
+                      />
+                    </Grid>
+                    <Grid item xs={12}>
+                      <TextField
+                        label="Contacto"
+                        fullWidth
+                        name="contacto"
+                        value={formData.contacto}
+                        onChange={handleChange}
+                        error={!!errors.contacto}
+                        helperText={errors.contacto}
+                      />
+                    </Grid>
+                  </>
+                )}
 
-            <Grid container spacing={3} justifyContent="space-between" sx={{ marginTop: 3 }}>
-              <Button 
-                onClick={handleBack} 
-                size="large" 
-                disabled={activeStep === 0}
-                sx={{ visibility: activeStep === 0 ? 'hidden' : 'visible' }}
-              >
-                Atrás
-              </Button>
-              {activeStep < steps.length - 1 && (
-                <Button onClick={handleNext} size="large">
-                  Siguiente
+                {activeStep === 1 && (
+                  <>
+                    <Grid item xs={12}>
+                      <TextField
+                        label="Razón Social"
+                        fullWidth
+                        name="razon_social"
+                        value={formData.razon_social}
+                        onChange={handleChange}
+                        error={!!errors.razon_social}
+                        helperText={errors.razon_social}
+                      />
+                    </Grid>
+                    <Grid item xs={12}>
+                      <TextField
+                        label="Dirección Fiscal"
+                        fullWidth
+                        name="direccion_fiscal"
+                        value={formData.direccion_fiscal}
+                        onChange={handleChange}
+                        error={!!errors.direccion_fiscal}
+                        helperText={errors.direccion_fiscal}
+                      />
+                    </Grid>
+                    <Grid item xs={12}>
+                      <TextField
+                        label="RUT"
+                        fullWidth
+                        name="rut"
+                        value={formData.rut}
+                        onChange={handleChange}
+                        error={!!errors.rut}
+                        helperText={errors.rut}
+                      />
+                    </Grid>
+                  </>
+                )}
+
+                {activeStep === 2 && (
+                  <>
+                    <Grid item xs={12}>
+                      <LocalizationProvider dateAdapter={AdapterDayjs}>
+                        <DatePicker
+                          label="Fecha de Ingreso"
+                          value={formData.fecha_ingreso || null}
+                          onChange={handleDateChange}
+                          renderInput={(params) => (
+                            <TextField
+                              {...params}
+                              fullWidth
+                              error={!!errors.fecha_ingreso}
+                              helperText={errors.fecha_ingreso}
+                            />
+                          )}
+                        />
+                      </LocalizationProvider>
+                    </Grid>
+                    <Grid item xs={12}>
+                      <TextField
+                        label="Email"
+                        type="email"
+                        fullWidth
+                        name="email"
+                        value={formData.email}
+                        onChange={handleChange}
+                        error={!!errors.email}
+                        helperText={errors.email}
+                      />
+                    </Grid>
+                  </>
+                )}
+              </Grid>
+
+              <Grid container spacing={3} justifyContent="space-between" sx={{ marginTop: 3 }}>
+                <Button 
+                  onClick={handleBack} 
+                  size="large" 
+                  disabled={activeStep === 0}
+                  sx={{ visibility: activeStep === 0 ? 'hidden' : 'visible' }}
+                >
+                  Atrás
                 </Button>
-              )}
-              {activeStep === steps.length - 1 && (
-                <Button type="submit" variant="contained" color="primary" size="large">
-                  Guardar Cambios
-                </Button>
-              )}
-            </Grid>
-          </form>
+                {activeStep < steps.length - 1 && (
+                  <Button onClick={handleNext} size="large">
+                    Siguiente
+                  </Button>
+                )}
+                {activeStep === steps.length - 1 && (
+                  <Button type="submit" variant="contained" color="primary" size="large">
+                    Guardar Cambios
+                  </Button>
+                )}
+              </Grid>
+            </form>
+          </Box>
         </Paper>
       </Container>
     </ThemeProvider>

@@ -1,8 +1,7 @@
 // Solicitudes.jsx
 import React, { useState, useEffect, useContext } from 'react';
 import Tabla from '../components/Table';
-import { Button, Tab, Tabs, Box, Alert, CircularProgress } from '@mui/material';
-import { Typography } from '@mui/material';
+import { Button, Tab, Tabs, Box, Alert, CircularProgress, Typography } from '@mui/material';
 import '../styles/Solicitudes.css';
 import { AuthContext } from '../pages/context/AuthContext';
 
@@ -78,7 +77,7 @@ const Solicitudes = () => {
           ...item,
           tipo: 'coordinacion',
           id: `coordinacion-${item.id}`,
-          nombre: item.obra ? (item.obra.nombre_obra || item.obra.nombre || 'Sin obra') : 'Sin obra',
+          nombre: item.nombre_obra ? (item.obra.nombre_obra || item.nombre_obra || 'Sin obra') : 'Sin obra',
           solicitante: "Coordinacion retiro",
           fecha: formatDate(item.fecha_solicitud),
         }));
@@ -195,13 +194,50 @@ const Solicitudes = () => {
   };
 
   const marcarComoTerminada = (id) => {
+    const solicitud = solicitudes.find((sol) => sol.id === id);
+    if (!solicitud) {
+      setErrorMessage("Solicitud no encontrada.");
+      return;
+    }
     setLoadingSolicitudId(id);
-    setSolicitudes(
-      solicitudes.map((sol) =>
-        sol.id === id ? { ...sol, estado: "terminado" } : sol
-      )
-    );
-    setLoadingSolicitudId(null);
+    let url = "";
+    if (solicitud.tipo === "cliente") {
+      const clientId = id.split('-')[1];
+      url = `http://127.0.0.1:8000/api/clientes/solicitudes/${clientId}/terminar/`;
+    } else if (solicitud.tipo === "obra") {
+      const obraId = id.split('-')[1];
+      url = `http://127.0.0.1:8000/api/obras/solicitudes/${obraId}/terminar/`;
+    } else if (solicitud.tipo === "coordinacion") {
+      const coordId = id.split('-')[1];
+      url = `http://127.0.0.1:8000/api/coordinacionretiro/${coordId}/terminar/`;
+    }
+    
+    fetch(url, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Token ${token}`,
+      },
+    })
+      .then((response) => {
+        if (response.ok) {
+          setSolicitudes(
+            solicitudes.map((sol) =>
+              sol.id === id ? { ...sol, estado: "terminado" } : sol
+            )
+          );
+          setErrorMessage('');
+        } else {
+          setErrorMessage("Ocurrió un error al marcar la solicitud como terminada. Por favor, inténtalo de nuevo.");
+        }
+      })
+      .catch((error) => {
+        console.error("Error en red:", error);
+        setErrorMessage("Error de red. Por favor, inténtalo de nuevo.");
+      })
+      .finally(() => {
+        setLoadingSolicitudId(null);
+      });
   };
 
   // Columnas para cada pestaña
@@ -215,28 +251,15 @@ const Solicitudes = () => {
       align: 'center',
       sortable: false,
       renderCell: (params) => (
-        <div
-          style={{
-            display: 'flex',
-            justifyContent: 'center',
-            alignItems: 'center',
-            gap: '8px',
-          }}
-        >
+        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '8px' }}>
           {loadingSolicitudId === params.row.id ? (
             <CircularProgress size={24} />
           ) : (
             <>
-              <Button
-                onClick={() => aceptarSolicitud(params.row.id)}
-                style={{ color: '#a8c948' }}
-              >
+              <Button onClick={() => aceptarSolicitud(params.row.id)} style={{ color: '#a8c948' }}>
                 Aceptar
               </Button>
-              <Button
-                onClick={() => rechazarSolicitud(params.row.id)}
-                style={{ color: '#f44336' }}
-              >
+              <Button onClick={() => rechazarSolicitud(params.row.id)} style={{ color: '#f44336' }}>
                 Rechazar
               </Button>
             </>
@@ -257,20 +280,11 @@ const Solicitudes = () => {
       align: 'center',
       sortable: false,
       renderCell: (params) => (
-        <div
-          style={{
-            display: 'flex',
-            justifyContent: 'center',
-            alignItems: 'center',
-          }}
-        >
+        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
           {loadingSolicitudId === params.row.id ? (
             <CircularProgress size={24} />
           ) : (
-            <Button
-              onClick={() => marcarComoTerminada(params.row.id)}
-              style={{ color: '#1976d2' }}
-            >
+            <Button onClick={() => marcarComoTerminada(params.row.id)} style={{ color: '#abbf9d' }}>
               Marcar como Terminado
             </Button>
           )}
@@ -301,16 +315,26 @@ const Solicitudes = () => {
         </Alert>
       )}
 
-      <Box sx={{
-        "& .MuiTab-root": { color: "#000000" },
-        "& .Mui-selected": { backgroundColor: "#abbf9d", color: "#fff" },
-        "& .MuiTabs-indicator": { backgroundColor: "#abbf9d" },
-      }}>
-        <Tabs value={value} onChange={handleChangeTab} aria-label="Solicitudes">
-          <Tab label="Pendientes" />
-          <Tab label="Aceptadas" />
-          <Tab label="Terminadas" />
-        </Tabs>
+<Box
+  sx={{
+    "& .MuiTab-root": {
+      color: "black", // Color para los tabs no seleccionados
+      transition: "background-color 0.3s ease",
+      "&:active": { backgroundColor: "#abbf9d" },
+    },
+    "& .Mui-selected": {
+      backgroundColor: "#abbf9d",
+      color: "white",
+    },
+    "& .MuiTabs-indicator": { backgroundColor: "#abbf9d" },
+  }}
+>
+  <Tabs value={value} onChange={handleChangeTab} aria-label="Solicitudes">
+    <Tab label="Pendientes" />
+    <Tab label="Aceptadas" />
+    <Tab label="Terminadas" />
+  </Tabs>
+</Box>
 
         {value === 0 && (
           <div>
@@ -352,7 +376,6 @@ const Solicitudes = () => {
             />
           </div>
         )}
-      </Box>
     </div>
   );
 };

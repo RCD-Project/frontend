@@ -42,6 +42,11 @@ import Error403 from "./403error";
 import Formularios from "./pages/Formularios";
 import DetallesFormulario from "./pages/DetallesFormulario";
 import DetallesEmpresaGestora from './pages/DetalleEmpresas';
+import DetallesCoordinacion from "./pages/DetallesCoordinacion";
+import EditarCoordinacion from "./pages/EditarCoordinacion";
+import Imagenes from "./pages/Imagenes";
+import AltaImagenes from "./pages/AltaImagenes";
+import VerImagenesObra from "./pages/VerImagenes";
 
 import "./styles/App.css";
 
@@ -140,6 +145,56 @@ const AppContent = () => {
                   allowedRoles={["superadmin", "supervisor", "cliente"]}
                 >
                   <Coordinaciones />
+                </RoleBasedRoute>
+              }
+            />
+            <Route
+              path="/detallescoordinacion"
+              element={
+                <RoleBasedRoute
+                  allowedRoles={["superadmin", "supervisor", "cliente"]}
+                >
+                  <DetallesCoordinacion />
+                </RoleBasedRoute>
+              }
+            />
+            <Route
+              path="/imagenes"
+              element={
+                <RoleBasedRoute
+                  allowedRoles={["superadmin", "tecnico"]}
+                >
+                  <Imagenes />
+                </RoleBasedRoute>
+              }
+            />
+            <Route
+              path="/verimagenes"
+              element={
+                <RoleBasedRoute
+                  allowedRoles={["superadmin", "tecnico"]}
+                >
+                  <VerImagenesObra />
+                </RoleBasedRoute>
+              }
+            />
+            <Route
+              path="/altaimagenes"
+              element={
+                <RoleBasedRoute
+                  allowedRoles={["superadmin", "tecnico"]}
+                >
+                  <AltaImagenes />
+                </RoleBasedRoute>
+              }
+            />
+            <Route
+              path="/editarcoordinacion"
+              element={
+                <RoleBasedRoute
+                  allowedRoles={["superadmin", "supervisor", "cliente"]}
+                >
+                  <EditarCoordinacion />
                 </RoleBasedRoute>
               }
             />
