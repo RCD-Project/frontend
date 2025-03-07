@@ -1,11 +1,11 @@
 import React, { useState, useEffect, useContext } from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { AuthProvider, AuthContext } from "./pages/context/AuthContext";
+import { SolicitudesProvider } from "./pages/context/SolicitudContext";
 
 import Header from "./components/Header";
 import Drawer from "./components/Drawer";
 import Body from "./components/body";
-// import RoleSelector from "./components/RolSelector";
 
 import Clientes from "./pages/Clientes";
 import AltaCliente from "./pages/AltaClientes";
@@ -41,12 +41,16 @@ import Landing from "./pages/Landing";
 import Error403 from "./403error";
 import Formularios from "./pages/Formularios";
 import DetallesFormulario from "./pages/DetallesFormulario";
-import DetallesEmpresaGestora from './pages/DetalleEmpresas';
+import DetallesEmpresaGestora from "./pages/DetalleEmpresas";
 import DetallesCoordinacion from "./pages/DetallesCoordinacion";
 import EditarCoordinacion from "./pages/EditarCoordinacion";
 import Imagenes from "./pages/Imagenes";
 import AltaImagenes from "./pages/AltaImagenes";
 import VerImagenesObra from "./pages/VerImagenes";
+import EditarUsuario from "./pages/EditarUsuario";
+import ListarUsuarios from "./pages/ListarUsuarios";
+import ListaMezclados from "./pages/ListadoMezclados";
+import RegistrarMezclado from "./pages/AltaMezclado";
 
 import "./styles/App.css";
 
@@ -54,8 +58,8 @@ const AppContent = () => {
   const [headerOpacity, setHeaderOpacity] = useState(1);
   const [drawerWidth, setDrawerWidth] = useState("60px");
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
-  const { token: authToken, login, logout } = useContext(AuthContext);
-  const isLoggedIn = Boolean(authToken);
+  const { token, login, logout, user, role } = useContext(AuthContext);
+  const isLoggedIn = Boolean(token);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -63,10 +67,7 @@ const AppContent = () => {
       let newOpacity = 1 - scrollTop / 200;
       if (newOpacity < 0.5) newOpacity = 0.5;
       setHeaderOpacity(newOpacity);
-      document.documentElement.style.setProperty(
-        "--header-fade-opacity",
-        newOpacity
-      );
+      document.documentElement.style.setProperty("--header-fade-opacity", newOpacity);
     };
 
     window.addEventListener("scroll", handleScroll);
@@ -83,15 +84,6 @@ const AppContent = () => {
     }
   };
 
-  // Función para simular login/logout usando AuthContext
-  const toggleAuth = () => {
-    if (isLoggedIn) {
-      logout();
-    } else {
-      login({ name: "Test User" }, "test");
-    }
-  };
-
   useEffect(() => {
     if (isLoggedIn) {
       setIsDrawerOpen(true);
@@ -100,376 +92,367 @@ const AppContent = () => {
     }
   }, [isLoggedIn]);
 
-  return (
-    <div className="app-container">
-      <Header opacity={headerOpacity} isLoggedIn={isLoggedIn} />
-      {isLoggedIn && (
-        <Drawer
-          isOpen={isDrawerOpen}
-          onMouseEnter={() => handleDrawerHover(true)}
-          onMouseLeave={() => handleDrawerHover(false)}
-        />
-      )}
-      <main
-        className="body-content"
-        style={{
-          marginLeft: isLoggedIn ? "60px" : 0,
-          transition: "margin-left 0.3s ease",
-          marginTop: "70px",
-        }}
-      >
-        <Body>
-          <Routes>
-            <Route
-              path="/"
-              element={isLoggedIn ? <ListaDeObras /> : <Landing />}
-            />
-            <Route
-              path="/clientes"
-              element={
-                <RoleBasedRoute
-                  allowedRoles={[
-                    "superadmin",
-                    "coordinador",
-                    "coordinadorlogistico",
-                  ]}
-                >
-                  <Clientes />
-                </RoleBasedRoute>
-              }
-            />
-            <Route
-              path="/altacoordinaciones"
-              element={
-                <RoleBasedRoute
-                  allowedRoles={["superadmin", "supervisor", "cliente"]}
-                >
-                  <Coordinaciones />
-                </RoleBasedRoute>
-              }
-            />
-            <Route
-              path="/detallescoordinacion"
-              element={
-                <RoleBasedRoute
-                  allowedRoles={["superadmin", "supervisor", "cliente"]}
-                >
-                  <DetallesCoordinacion />
-                </RoleBasedRoute>
-              }
-            />
-            <Route
-              path="/imagenes"
-              element={
-                <RoleBasedRoute
-                  allowedRoles={["superadmin", "tecnico"]}
-                >
-                  <Imagenes />
-                </RoleBasedRoute>
-              }
-            />
-            <Route
-              path="/verimagenes"
-              element={
-                <RoleBasedRoute
-                  allowedRoles={["superadmin", "tecnico"]}
-                >
-                  <VerImagenesObra />
-                </RoleBasedRoute>
-              }
-            />
-            <Route
-              path="/altaimagenes"
-              element={
-                <RoleBasedRoute
-                  allowedRoles={["superadmin", "tecnico"]}
-                >
-                  <AltaImagenes />
-                </RoleBasedRoute>
-              }
-            />
-            <Route
-              path="/editarcoordinacion"
-              element={
-                <RoleBasedRoute
-                  allowedRoles={["superadmin", "supervisor", "cliente"]}
-                >
-                  <EditarCoordinacion />
-                </RoleBasedRoute>
-              }
-            />
-            <Route
-              path="/detalleempresa"
-              element={
-                <RoleBasedRoute
-                  allowedRoles={["superadmin", "coordinador", "cliente"]}
-                >
-                  <DetallesEmpresaGestora />
-                </RoleBasedRoute>
-              }
-            />
-            <Route
-              path="/coordinaciones"
-              element={
-                <RoleBasedRoute
-                  allowedRoles={["superadmin", "supervisor", "cliente"]}
-                >
-                  <ListaDeCoordinaciones />
-                </RoleBasedRoute>
-              }
-            />
-            <Route
-              path="/transportistas"
-              element={
-                <RoleBasedRoute
-                  allowedRoles={["superadmin", "coordinadorlogistico"]}
-                >
-                  <Transportistas />
-                </RoleBasedRoute>
-              }
-            />
-            <Route
-              path="/empresasgestoras"
-              element={
-                <RoleBasedRoute
-                  allowedRoles={["superadmin", "coordinadorlogistico"]}
-                >
-                  <EmpresasGestoras />
-                </RoleBasedRoute>
-              }
-            />
-            <Route path="/altacliente" element={<AltaCliente />} />
-            <Route
-              path="/altausuario"
-              element={
-                <RoleBasedRoute allowedRoles={["superadmin"]}>
-                  <AltaUsuario />
-                </RoleBasedRoute>
-              }
-            />
-            <Route
-              path="/detallescliente"
-              element={isLoggedIn ? <DetallesCliente /> : <Landing />}
-            />
-            <Route
-              path="/editarcliente"
-              element={
-                <RoleBasedRoute allowedRoles={["cliente", "superadmin"]}>
-                  <EditarCliente />
-                </RoleBasedRoute>
-              }
-            />
-            <Route
-              path="/listadeobras"
-              element={
-                <RoleBasedRoute allowedRoles={["cliente", "superadmin"]}>
-                  <ListaDeObras />
-                </RoleBasedRoute>
-              }
-            />
-            <Route path="/informes" element={<Informes />} />
-            <Route
-              path="/informes"
-              element={
-                <RoleBasedRoute
-                  allowedRoles={[
-                    "coordinadorlogistico",
-                    "superadmin",
-                    "coordinador",
-                  ]}
-                >
-                  <Informes />
-                </RoleBasedRoute>
-              }
-            />
-            {/* Nueva ruta para DetallesFormulario */}
-            <Route
-              path="/formularios/detalle/:pk"
-              element={
-                <RoleBasedRoute allowedRoles={["tecnico", "superadmin"]}>
-                  <DetallesFormulario />
-                </RoleBasedRoute>
-              }
-            />
+  // Retorna el componente principal según el valor de "role" obtenido del AuthContext
+  const getMainComponent = () => {
+    if (!isLoggedIn) return <Landing />;
+    switch (role) {
+      case "superadmin":
+      case "cliente":
+        return <ListaDeObras />;
+      case "coordinadorlogistico":
+      case "coordinador":
+        return <Clientes />;
+      case "tecnico":
+        return <Capacitaciones />;
+      case "supervisor":
+        return <ListaDeCoordinaciones />;
+      default:
+        return <Landing />;
+    }
+  };
 
-            <Route path="/unauthorized" element={<Error403 />} />
-            <Route
-              path="/solicitudes"
-              element={
-                <RoleBasedRoute
-                  allowedRoles={[
-                    "superadmin",
-                    "coordinador",
-                    "coordinadorlogistico",
-                  ]}
-                >
-                  <Solicitudes />
-                </RoleBasedRoute>
-              }
-            />
-            <Route
-              path="/capacitaciones"
-              element={
-                <RoleBasedRoute
-                  allowedRoles={[
-                    "cliente",
-                    "superadmin",
-                    "tecnico",
-                    "coordinador",
-                  ]}
-                >
-                  <Capacitaciones />
-                </RoleBasedRoute>
-              }
-            />
-            <Route
-              path="/obraslist"
-              element={
-                <RoleBasedRoute allowedRoles={["tecnico", "superadmin"]}>
-                  <ObrasList />
-                </RoleBasedRoute>
-              }
-            />
-            <Route
-              path="/puntolimpio"
-              element={
-                <RoleBasedRoute allowedRoles={["cliente", "superadmin"]}>
-                  <PuntoLimpio />
-                </RoleBasedRoute>
-              }
-            />
-            <Route
-              path="/altaobra"
-              element={
-                <RoleBasedRoute allowedRoles={["cliente", "superadmin"]}>
-                  <AltaObra />
-                </RoleBasedRoute>
-              }
-            />
-            <Route
-              path="/detallesobra"
-              element={
-                <RoleBasedRoute allowedRoles={["cliente", "superadmin"]}>
-                  <DetallesObra />
-                </RoleBasedRoute>
-              }
-            />
-            <Route
-              path="/editarobra"
-              element={
-                <RoleBasedRoute
-                  allowedRoles={["cliente", "superadmin", "supervisor"]}
-                >
-                  <EditarObra />
-                </RoleBasedRoute>
-              }
-            />
-            <Route
-              path="/altapuntolimpio"
-              element={
-                <RoleBasedRoute allowedRoles={["cliente", "superadmin"]}>
-                  <AltaPuntoLimpio />
-                </RoleBasedRoute>
-              }
-            />
-            <Route
-              path="/detallespuntolimpio"
-              element={
-                <RoleBasedRoute allowedRoles={["cliente", "superadmin"]}>
-                  <DetallesPuntoLimpio />
-                </RoleBasedRoute>
-              }
-            />
-            <Route
-              path="/editarpuntolimpio"
-              element={
-                <RoleBasedRoute allowedRoles={["cliente", "superadmin"]}>
-                  <EditarPuntoLimpio />
-                </RoleBasedRoute>
-              }
-            />
-            <Route path="/login" element={<LoginForm />} />
-            <Route
-              path="/detalletransportista"
-              element={<DetallesTransportista />}
-            />
-            <Route
-              path="/detallestransportista"
-              element={
-                <RoleBasedRoute
-                  allowedRoles={["coordinadorlogistico", "superadmin"]}
-                >
-                  <DetallesTransportista />
-                </RoleBasedRoute>
-              }
-            />
-            <Route
-              path="/editartransportista"
-              element={
-                <RoleBasedRoute
-                  allowedRoles={["coordinadorlogistico", "superadmin"]}
-                >
-                  <EditarTransportista />
-                </RoleBasedRoute>
-              }
-            />
-            <Route
-              path="/altatransportistas"
-              element={
-                <RoleBasedRoute
-                  allowedRoles={["coordinadorlogistico", "superadmin"]}
-                >
-                  <AltaTransportistas />
-                </RoleBasedRoute>
-              }
-            />
-            <Route path="/altaempresas" element={<AltaEmpresas />} />
-            <Route
-              path="/altaempresas"
-              element={
-                <RoleBasedRoute allowedRoles={["cliente", "superadmin"]}>
-                  <AltaEmpresas />
-                </RoleBasedRoute>
-              }
-            />
-            <Route
-              path="/editarempresasgestoras"
-              element={
-                <RoleBasedRoute
-                  allowedRoles={["coordinadorlogistico", "superadmin"]}
-                >
-                  <EditarEmpresasGestoras />
-                </RoleBasedRoute>
-              }
-            />
-            <Route
-              path="/altacapacitaciones"
-              element={
-                <RoleBasedRoute allowedRoles={["tecnico", "superadmin"]}>
-                  <AltaCapacitaciones />
-                </RoleBasedRoute>
-              }
-            />
-            <Route
-              path="/detallescapacitaciones"
-              element={
-                <RoleBasedRoute allowedRoles={["tecnico", "superadmin"]}>
-                  <DetallesCapacitaciones />
-                </RoleBasedRoute>
-              }
-            />
-            <Route
-              path="/Formularios"
-              element={
-                <RoleBasedRoute allowedRoles={["tecnico", "superadmin"]}>
-                  <Formularios />
-                </RoleBasedRoute>
-              }
-            />
-          </Routes>
-        </Body>
-      </main>
-    </div>
+  return (
+    // Envolvemos el contenido de la aplicación con SolicitudesProvider para tener estado global de solicitudes
+    <SolicitudesProvider token={token}>
+      <div className="app-container">
+        <Header opacity={headerOpacity} isLoggedIn={isLoggedIn} />
+        {isLoggedIn && (
+          <Drawer
+            isOpen={isDrawerOpen}
+            onMouseEnter={() => handleDrawerHover(true)}
+            onMouseLeave={() => handleDrawerHover(false)}
+          />
+        )}
+        <main
+          className="body-content"
+          style={{
+            marginLeft: isLoggedIn ? "60px" : 0,
+            transition: "margin-left 0.3s ease",
+            marginTop: "70px",
+          }}
+        >
+          <Body>
+            <Routes>
+              {/* Ruta principal dinámica según el rol */}
+              <Route path="/" element={getMainComponent()} />
+
+              <Route
+                path="/clientes"
+                element={
+                  <RoleBasedRoute allowedRoles={["superadmin", "coordinador", "coordinadorlogistico"]}>
+                    <Clientes />
+                  </RoleBasedRoute>
+                }
+              />
+              <Route
+                path="/altacoordinaciones"
+                element={
+                  <RoleBasedRoute allowedRoles={["superadmin", "supervisor", "cliente"]}>
+                    <Coordinaciones />
+                  </RoleBasedRoute>
+                }
+              />
+              <Route
+                path="/detallescoordinacion"
+                element={
+                  <RoleBasedRoute allowedRoles={["superadmin", "supervisor", "cliente", "coordinadorlogistico"]}>
+                    <DetallesCoordinacion />
+                  </RoleBasedRoute>
+                }
+              />
+              <Route
+                path="/imagenes"
+                element={
+                  <RoleBasedRoute allowedRoles={["superadmin", "tecnico"]}>
+                    <Imagenes />
+                  </RoleBasedRoute>
+                }
+              />
+              <Route
+                path="/editarusuario/:email"
+                element={
+                  <RoleBasedRoute allowedRoles={["superadmin"]}>
+                    <EditarUsuario />
+                  </RoleBasedRoute>
+                }
+              />
+
+              <Route
+                path="/listarusuarios"
+                element={
+                  <RoleBasedRoute allowedRoles={["superadmin"]}>
+                    <ListarUsuarios />
+                  </RoleBasedRoute>
+                }
+              />
+              <Route
+                path="/verimagenes"
+                element={
+                  <RoleBasedRoute allowedRoles={["superadmin", "tecnico"]}>
+                    <VerImagenesObra />
+                  </RoleBasedRoute>
+                }
+              />
+              <Route
+                path="/altaimagenes"
+                element={
+                  <RoleBasedRoute allowedRoles={["superadmin", "tecnico"]}>
+                    <AltaImagenes />
+                  </RoleBasedRoute>
+                }
+              />
+              <Route
+                path="/editarcoordinacion"
+                element={
+                  <RoleBasedRoute allowedRoles={["superadmin", "supervisor", "cliente"]}>
+                    <EditarCoordinacion />
+                  </RoleBasedRoute>
+                }
+              />
+              <Route
+                path="/detalleempresa"
+                element={
+                  <RoleBasedRoute allowedRoles={["superadmin", "coordinadorlogistico", "cliente"]}>
+                    <DetallesEmpresaGestora />
+                  </RoleBasedRoute>
+                }
+              />
+              <Route
+                path="/coordinaciones"
+                element={
+                  <RoleBasedRoute allowedRoles={["superadmin", "supervisor", "cliente", "coordinadorlogistico", "tecnico"]}>
+                    <ListaDeCoordinaciones />
+                  </RoleBasedRoute>
+                }
+              />
+              <Route
+                path="/transportistas"
+                element={
+                  <RoleBasedRoute allowedRoles={["superadmin", "coordinadorlogistico"]}>
+                    <Transportistas />
+                  </RoleBasedRoute>
+                }
+              />
+              <Route
+                path="/empresasgestoras"
+                element={
+                  <RoleBasedRoute allowedRoles={["superadmin", "coordinadorlogistico"]}>
+                    <EmpresasGestoras />
+                  </RoleBasedRoute>
+                }
+              />
+              <Route path="/altacliente" element={<AltaCliente />} />
+              <Route
+                path="/altausuario"
+                element={
+                  <RoleBasedRoute allowedRoles={["superadmin"]}>
+                    <AltaUsuario />
+                  </RoleBasedRoute>
+                }
+              />
+              <Route path="/detallescliente" element={isLoggedIn ? <DetallesCliente /> : <Landing />} />
+              <Route
+                path="/editarcliente"
+                element={
+                  <RoleBasedRoute allowedRoles={["cliente", "superadmin", "coordinadorlogistico", "coordinador"]}>
+                    <EditarCliente />
+                  </RoleBasedRoute>
+                }
+              />
+              <Route
+                path="/listadeobras"
+                element={
+                  <RoleBasedRoute allowedRoles={["cliente", "superadmin", "coordinadorlogistico"]}>
+                    <ListaDeObras />
+                  </RoleBasedRoute>
+                }
+              />
+              <Route path="/informes" element={<Informes />} />
+              <Route
+                path="/informes"
+                element={
+                  <RoleBasedRoute allowedRoles={["coordinadorlogistico", "superadmin", "coordinador"]}>
+                    <Informes />
+                  </RoleBasedRoute>
+                }
+              />
+              <Route
+                path="/formularios/detalle/:pk"
+                element={
+                  <RoleBasedRoute allowedRoles={["tecnico", "superadmin", "coordinador"]}>
+                    <DetallesFormulario />
+                  </RoleBasedRoute>
+                }
+              />
+              <Route path="/unauthorized" element={<Error403 />} />
+              <Route
+                path="/solicitudes"
+                element={
+                  <RoleBasedRoute allowedRoles={["superadmin", "coordinador", "coordinadorlogistico"]}>
+                    <Solicitudes />
+                  </RoleBasedRoute>
+                }
+              />
+              <Route
+                path="/capacitaciones"
+                element={
+                  <RoleBasedRoute allowedRoles={["cliente", "superadmin", "tecnico", "coordinador"]}>
+                    <Capacitaciones />
+                  </RoleBasedRoute>
+                }
+              />
+              <Route
+                path="/obraslist"
+                element={
+                  <RoleBasedRoute allowedRoles={["tecnico", "superadmin"]}>
+                    <ObrasList />
+                  </RoleBasedRoute>
+                }
+              />
+              <Route
+                path="/puntolimpio"
+                element={
+                  <RoleBasedRoute allowedRoles={["superadmin", 'coordinador', 'coordinadorlogistico']}>
+                    <PuntoLimpio />
+                  </RoleBasedRoute>
+                }
+              />
+              <Route
+                path="/altaobra"
+                element={
+                  <RoleBasedRoute allowedRoles={["cliente", "superadmin"]}>
+                    <AltaObra />
+                  </RoleBasedRoute>
+                }
+              />
+              <Route
+                path="/detallesobra"
+                element={
+                  <RoleBasedRoute allowedRoles={["cliente", "superadmin", "coordinadorlogistico"]}>
+                    <DetallesObra />
+                  </RoleBasedRoute>
+                }
+              />
+              <Route
+                path="/listamezclados"
+                element={
+                  <RoleBasedRoute allowedRoles={["cliente", "superadmin", "coordinadorlogistico", 'coordinador']}>
+                    <ListaMezclados />
+                  </RoleBasedRoute>
+                }
+              />
+              <Route
+                path="/altamezclados"
+                element={
+                  <RoleBasedRoute allowedRoles={["cliente", "superadmin", "coordinadorlogistico", 'coordinador']}>
+                    <RegistrarMezclado />
+                  </RoleBasedRoute>
+                }
+              />
+              <Route
+                path="/editarobra"
+                element={
+                  <RoleBasedRoute allowedRoles={["cliente", "superadmin", "supervisor"]}>
+                    <EditarObra />
+                  </RoleBasedRoute>
+                }
+              />
+              <Route
+                path="/altapuntolimpio"
+                element={
+                  <RoleBasedRoute allowedRoles={["superadmin", 'coordinador', 'coordinadorlogistico']}>
+                    <AltaPuntoLimpio />
+                  </RoleBasedRoute>
+                }
+              />
+              <Route
+                path="/detallespuntolimpio"
+                element={
+                  <RoleBasedRoute allowedRoles={["coordinador", "coordinadorlogistico", "superadmin"]}>
+                    <DetallesPuntoLimpio />
+                  </RoleBasedRoute>
+                }
+              />
+              <Route
+                path="/editarpuntolimpio"
+                element={
+                  <RoleBasedRoute allowedRoles={["coordinador", "coordinadorlogistico", "superadmin"]}>
+                    <EditarPuntoLimpio />
+                  </RoleBasedRoute>
+                }
+              />
+              <Route path="/login" element={<LoginForm />} />
+              <Route path="/detalletransportista" element={<DetallesTransportista />} />
+              <Route
+                path="/detallestransportista"
+                element={
+                  <RoleBasedRoute allowedRoles={["coordinadorlogistico", "superadmin"]}>
+                    <DetallesTransportista />
+                  </RoleBasedRoute>
+                }
+              />
+              <Route
+                path="/editartransportista"
+                element={
+                  <RoleBasedRoute allowedRoles={["coordinadorlogistico", "superadmin"]}>
+                    <EditarTransportista />
+                  </RoleBasedRoute>
+                }
+              />
+              <Route
+                path="/altatransportistas"
+                element={
+                  <RoleBasedRoute allowedRoles={["coordinadorlogistico", "superadmin"]}>
+                    <AltaTransportistas />
+                  </RoleBasedRoute>
+                }
+              />
+              <Route path="/altaempresas" element={<AltaEmpresas />} />
+              <Route
+                path="/altaempresas"
+                element={
+                  <RoleBasedRoute allowedRoles={["cliente", "superadmin"]}>
+                    <AltaEmpresas />
+                  </RoleBasedRoute>
+                }
+              />
+              <Route
+                path="/editarempresasgestoras"
+                element={
+                  <RoleBasedRoute allowedRoles={["coordinadorlogistico", "superadmin"]}>
+                    <EditarEmpresasGestoras />
+                  </RoleBasedRoute>
+                }
+              />
+              <Route
+                path="/altacapacitaciones"
+                element={
+                  <RoleBasedRoute allowedRoles={["tecnico", "superadmin"]}>
+                    <AltaCapacitaciones />
+                  </RoleBasedRoute>
+                }
+              />
+              <Route
+                path="/detallescapacitaciones"
+                element={
+                  <RoleBasedRoute allowedRoles={["tecnico", "superadmin"]}>
+                    <DetallesCapacitaciones />
+                  </RoleBasedRoute>
+                }
+              />
+              <Route
+                path="/Formularios"
+                element={
+                  <RoleBasedRoute allowedRoles={["tecnico", "superadmin"]}>
+                    <Formularios />
+                  </RoleBasedRoute>
+                }
+              />
+            </Routes>
+          </Body>
+        </main>
+      </div>
+    </SolicitudesProvider>
   );
 };
 

@@ -11,6 +11,7 @@ import {
   FormControlLabel,
   TextField,
   Paper,
+  useMediaQuery,
 } from "@mui/material";
 import { useFormStore } from "../context/FormContext";
 
@@ -67,10 +68,8 @@ const Page13 = () => {
     updateData(pageIndex, { ...formData, puntoAcopio: event.target.value });
   };
 
-  // Función para manejar el cambio en la grilla:
   const handleGridChange = (rowIndex, colIndex) => {
-    const newGrid = [...formData.puntoAcopioGrid]; // Copia para evitar mutaciones directas
-    // Asigna el valor seleccionado, en lugar del índice
+    const newGrid = [...formData.puntoAcopioGrid];
     newGrid[rowIndex] = gridColumnTitles[colIndex];
     updateData(pageIndex, { ...formData, puntoAcopioGrid: newGrid });
   };
@@ -81,12 +80,9 @@ const Page13 = () => {
       : [...formData.puntoAcopioOpciones, option];
 
     let newData = { ...formData, puntoAcopioOpciones: newOpciones };
-
-    // Si "Otro" fue deseleccionado, limpiamos su valor
     if (!newOpciones.includes("Otro")) {
       newData.puntoAcopioOtro = "";
     }
-
     updateData(pageIndex, newData);
   };
 
@@ -106,6 +102,8 @@ const Page13 = () => {
     });
   };
 
+  const isMobile = useMediaQuery("(max-width:768px)");
+
   return (
     <Box sx={{ width: "90%", margin: "auto", mt: 4 }}>
       <Typography variant="h6" sx={{ mb: 1 }}>
@@ -113,9 +111,8 @@ const Page13 = () => {
       </Typography>
       <Typography variant="body1" sx={{ mb: 3 }}>
         Espacio accesible, con tanques de contención para los peligrosos, con
-        bandeja antiderrame, bajo techo, accesibles y con ventilación.
-        Separación de productos químicos / residuos con pinturas / residuos de
-        hidrocarburos.
+        bandeja antiderrame, bajo techo, accesibles y con ventilación. Separación
+        de productos químicos / residuos con pinturas / residuos de hidrocarburos.
       </Typography>
 
       <FormControl fullWidth sx={{ mb: 3 }}>
@@ -131,35 +128,49 @@ const Page13 = () => {
           <Typography variant="h6" sx={{ mb: 2 }}>
             Seleccione una opción en cada fila:
           </Typography>
-          <Paper elevation={3} sx={{ p: 2 }}>
-            <Grid container spacing={1}>
-              <Grid container item>
-                <Grid
-                  item
-                  xs={3}
-                  sx={{ fontWeight: "bold", textAlign: "center", p: 1 }}
-                >
-                  -
-                </Grid>
-                {gridColumnTitles.map((title, index) => (
-                  <Grid
-                    item
-                    xs={1.5}
-                    key={index}
-                    sx={{
-                      textAlign: "center",
-                      borderBottom: "1px solid gray",
-                      p: 1,
-                      fontSize: "0.85rem",
-                      fontWeight: "bold",
-                    }}
-                  >
-                    {title}
-                  </Grid>
-                ))}
-              </Grid>
+          {isMobile ? (
+            <Box sx={{ mb: 2 }}>
               {gridRowLabels.map((row, rowIndex) => (
-                <Grid container item key={rowIndex} alignItems="center">
+                <Box
+                  key={rowIndex}
+                  sx={{
+                    border: "1px solid gray",
+                    borderRadius: 1,
+                    p: 1,
+                    mb: 1,
+                  }}
+                >
+                  <Typography
+                    variant="subtitle1"
+                    sx={{ fontWeight: "bold", mb: 1 }}
+                  >
+                    {row}
+                  </Typography>
+                  <Box sx={{ display: "flex", flexDirection: "row", gap: 1 }}>
+                    {gridColumnTitles.map((title, colIndex) => (
+                      <FormControlLabel
+                        key={colIndex}
+                        control={
+                          <Checkbox
+                            checked={
+                              formData.puntoAcopioGrid[rowIndex] === title
+                            }
+                            onChange={() =>
+                              handleGridChange(rowIndex, colIndex)
+                            }
+                          />
+                        }
+                        label={title}
+                      />
+                    ))}
+                  </Box>
+                </Box>
+              ))}
+            </Box>
+          ) : (
+            <Paper elevation={3} sx={{ p: 2 }}>
+              <Grid container spacing={1}>
+                <Grid container item>
                   <Grid
                     item
                     xs={3}
@@ -167,29 +178,68 @@ const Page13 = () => {
                       fontWeight: "bold",
                       textAlign: "center",
                       p: 1,
-                      borderRight: "1px solid gray",
                     }}
                   >
-                    {row}
+                    -
                   </Grid>
-                  {gridColumnTitles.map((title, colIndex) => (
+                  {gridColumnTitles.map((title, index) => (
                     <Grid
                       item
                       xs={1.5}
-                      key={colIndex}
-                      sx={{ textAlign: "center", p: 1 }}
+                      key={index}
+                      sx={{
+                        textAlign: "center",
+                        borderBottom: "1px solid gray",
+                        p: 1,
+                        fontSize: "0.85rem",
+                        fontWeight: "bold",
+                      }}
                     >
-                      <Checkbox
-                        // Compara el valor almacenado con el título de la columna
-                        checked={formData.puntoAcopioGrid[rowIndex] === title}
-                        onChange={() => handleGridChange(rowIndex, colIndex)}
-                      />
+                      {title}
                     </Grid>
                   ))}
                 </Grid>
-              ))}
-            </Grid>
-          </Paper>
+                {gridRowLabels.map((row, rowIndex) => (
+                  <Grid
+                    container
+                    item
+                    key={rowIndex}
+                    alignItems="center"
+                  >
+                    <Grid
+                      item
+                      xs={3}
+                      sx={{
+                        fontWeight: "bold",
+                        textAlign: "center",
+                        p: 1,
+                        borderRight: "1px solid gray",
+                      }}
+                    >
+                      {row}
+                    </Grid>
+                    {gridColumnTitles.map((title, colIndex) => (
+                      <Grid
+                        item
+                        xs={1.5}
+                        key={colIndex}
+                        sx={{ textAlign: "center", p: 1 }}
+                      >
+                        <Checkbox
+                          checked={
+                            formData.puntoAcopioGrid[rowIndex] === title
+                          }
+                          onChange={() =>
+                            handleGridChange(rowIndex, colIndex)
+                          }
+                        />
+                      </Grid>
+                    ))}
+                  </Grid>
+                ))}
+              </Grid>
+            </Paper>
+          )}
 
           {checkboxOptions.map((option, index) => (
             <FormControlLabel
@@ -213,20 +263,20 @@ const Page13 = () => {
               onChange={handleOtroChange}
             />
           )}
+
+          <Typography variant="h6" sx={{ mb: 2, mt: 3 }}>
+            Peligrosos - Otras observaciones / Sugerencias / Acciones a tomar
+          </Typography>
+          <TextField
+            label="Observaciones"
+            fullWidth
+            multiline
+            rows={4}
+            value={formData.puntoAcopioObservaciones}
+            onChange={handleObservationsChange}
+          />
         </>
       )}
-
-      <Typography variant="h6" sx={{ mb: 2, mt: 3 }}>
-        Peligrosos - Otras observaciones / Sugerencias / Acciones a tomar
-      </Typography>
-      <TextField
-        label="Observaciones"
-        fullWidth
-        multiline
-        rows={4}
-        value={formData.puntoAcopioObservaciones}
-        onChange={handleObservationsChange}
-      />
     </Box>
   );
 };

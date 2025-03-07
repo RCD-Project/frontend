@@ -10,6 +10,7 @@ import {
   FormGroup,
   FormControlLabel,
   TextField,
+  useMediaQuery,
 } from "@mui/material";
 import { useFormStore } from "../context/FormContext";
 
@@ -37,22 +38,18 @@ const Page7 = () => {
     escombroObservaciones: "",
   };
 
-  // Estado local para el formulario de esta página
   const [formData, setFormData] = useState(data[pageIndex] || defaultPage7);
 
-  // Si no existe data en el context para esta página, se inicializa una vez
   useEffect(() => {
     if (!data[pageIndex] || Object.keys(data[pageIndex]).length === 0) {
       updateData(pageIndex, defaultPage7);
     }
   }, [data, pageIndex, updateData]);
 
-  // Sincronizar el estado local con el context después de cada cambio
   useEffect(() => {
     updateData(pageIndex, formData);
   }, [formData, pageIndex, updateData]);
 
-  // Actualiza el estado local sin llamar directamente a updateData
   const handleChange = (field, value) => {
     setFormData((prevData) => ({
       ...prevData,
@@ -70,6 +67,8 @@ const Page7 = () => {
     });
   };
 
+  const isMobile = useMediaQuery("(max-width:768px)");
+
   return (
     <Box sx={{ width: "90%", margin: "auto", mt: 4 }}>
       <Typography variant="h6" sx={{ mb: 2 }}>
@@ -83,9 +82,9 @@ const Page7 = () => {
             const value = e.target.value;
             handleChange("escombro", value);
             if (value === "No Aplica") {
-              // Reiniciamos campos relacionados si se selecciona "No Aplica"
               handleChange("escombroChecks", {});
               handleChange("escombroOtroTexto", "");
+              handleChange("escombroObservaciones", "");
             }
           }}
         >
@@ -102,20 +101,37 @@ const Page7 = () => {
           <Typography variant="h6" sx={{ mb: 2 }}>
             Estado del escombro
           </Typography>
-          <FormGroup>
-            {opcionesCheck.map((op, index) => (
-              <FormControlLabel
-                key={index}
-                control={
-                  <Checkbox
-                    checked={!!formData.escombroChecks[op]}
-                    onChange={() => handleCheckboxChange(op)}
-                  />
-                }
-                label={op}
-              />
-            ))}
-          </FormGroup>
+          {isMobile ? (
+            <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
+              {opcionesCheck.map((op, index) => (
+                <FormControlLabel
+                  key={index}
+                  control={
+                    <Checkbox
+                      checked={!!formData.escombroChecks[op]}
+                      onChange={() => handleCheckboxChange(op)}
+                    />
+                  }
+                  label={op}
+                />
+              ))}
+            </Box>
+          ) : (
+            <FormGroup>
+              {opcionesCheck.map((op, index) => (
+                <FormControlLabel
+                  key={index}
+                  control={
+                    <Checkbox
+                      checked={!!formData.escombroChecks[op]}
+                      onChange={() => handleCheckboxChange(op)}
+                    />
+                  }
+                  label={op}
+                />
+              ))}
+            </FormGroup>
+          )}
 
           {formData.escombroChecks["Otro"] && (
             <TextField
@@ -128,22 +144,22 @@ const Page7 = () => {
               }
             />
           )}
+
+          <Typography variant="h6" sx={{ mt: 3, mb: 2 }}>
+            Escombro - Otras observaciones / Sugerencias / Acciones a tomar
+          </Typography>
+          <TextField
+            label="Observaciones"
+            fullWidth
+            multiline
+            rows={4}
+            value={formData.escombroObservaciones}
+            onChange={(e) =>
+              handleChange("escombroObservaciones", e.target.value)
+            }
+          />
         </>
       )}
-
-      <Typography variant="h6" sx={{ mt: 3, mb: 2 }}>
-        Escombro - Otras observaciones / Sugerencias / Acciones a tomar
-      </Typography>
-      <TextField
-        label="Observaciones"
-        fullWidth
-        multiline
-        rows={4}
-        value={formData.escombroObservaciones}
-        onChange={(e) =>
-          handleChange("escombroObservaciones", e.target.value)
-        }
-      />
     </Box>
   );
 };

@@ -64,13 +64,30 @@
   font-size: 30px; /* Ajusta el tamaño de la flecha */
 }
 
-/* Media Query para dispositivos móviles */
 @media (max-width: 768px) {
   .site-header {
     padding: 10px;
   }
+
+  /* Se oculta el título */
   .site-title {
-    font-size: 1.8rem;
-    padding: 0 10px;
+    display: none;
+  }
+
+  /* Se oculta el botón de regreso, si no se requiere en móvil */
+  .header-back-button {
+    display: none;
+  }
+
+  /* Se centra el logo */
+  .header-container {
+    position: relative;
+    justify-content: center;
+    align-items: center;
+  }
+  .header-logo {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
   }
 }

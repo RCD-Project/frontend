@@ -12,7 +12,7 @@ import {
   Alert,
   Box,
   CircularProgress,
-  MenuItem
+  MenuItem,
 } from "@mui/material";
 import { LocalizationProvider, DatePicker } from "@mui/x-date-pickers";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
@@ -46,15 +46,14 @@ const EditarCoordinacion = () => {
   const queryParams = new URLSearchParams(location.search);
   const id = queryParams.get("id");
 
-  // Se obtiene el token desde localStorage
-  const token = localStorage.getItem("token");
+  const token = sessionStorage.getItem('token');
 
-  // Opcional: listas para campos relacionales
+  // Listas para selects
   const [obras, setObras] = useState([]);
   const [empresas, setEmpresas] = useState([]);
   const [transportistas, setTransportistas] = useState([]);
 
-  // Cargar datos de la coordinación
+  // Carga los datos de la coordinación a editar
   useEffect(() => {
     if (id) {
       fetch(`http://localhost:8000/api/coordinacionretiro/${id}/`, {
@@ -88,7 +87,7 @@ const EditarCoordinacion = () => {
     }
   }, [id, token]);
 
-  // Cargar listas para select
+  // Carga las listas para selects
   useEffect(() => {
     fetch("http://localhost:8000/api/obras/aprobadas/", {
       headers: {
@@ -121,6 +120,37 @@ const EditarCoordinacion = () => {
       .catch((err) => console.error("Error al obtener transportistas:", err));
   }, [token]);
 
+  // 🔸 useEffect para limpiar transportista si no concuerda con tipo_material
+  useEffect(() => {
+    if (!formData.transportista) return;
+    const selectedTrans = transportistas.find(
+      (t) => t.id === Number(formData.transportista)
+    );
+    if (selectedTrans && selectedTrans.tipo_material !== formData.tipo_material) {
+      setFormData((prev) => ({ ...prev, transportista: "" }));
+    }
+  }, [formData.tipo_material, formData.transportista, transportistas]);
+
+  // 🔹 useEffect para limpiar empresa_tratamiento si no concuerda con tipo_material
+  useEffect(() => {
+    if (!formData.empresa_tratamiento) return;
+    const selectedEmpresa = empresas.find(
+      (e) => e.id === Number(formData.empresa_tratamiento)
+    );
+    // Asumiendo 'tipo_material' en EmpresaGestora
+    if (selectedEmpresa && selectedEmpresa.tipo_material !== formData.tipo_material) {
+      setFormData((prev) => ({ ...prev, empresa_tratamiento: "" }));
+    }
+  }, [formData.tipo_material, formData.empresa_tratamiento, empresas]);
+
+  // Filtrado de transportistas y empresas, según tipo_material
+  const filteredTransportistas = transportistas.filter(
+    (t) => t.tipo_material === formData.tipo_material
+  );
+  const filteredEmpresas = empresas.filter(
+    (e) => e.tipo_material === formData.tipo_material
+  );
+
   const validateStep = (step) => {
     let newErrors = {};
 
@@ -148,8 +178,6 @@ const EditarCoordinacion = () => {
         newErrors.transportista = "Debe seleccionar un transportista.";
       }
     }
-    // Validación para comentarios si es necesaria en el paso 2
-
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -185,28 +213,47 @@ const EditarCoordinacion = () => {
 
     setIsLoading(true);
     try {
+      // Convertir "" a null
+      const patchTransportista = formData.transportista
+        ? parseInt(formData.transportista, 10)
+        : null;
+      const patchEmpresa = formData.empresa_tratamiento
+        ? parseInt(formData.empresa_tratamiento, 10)
+        : null;
+
       const payload = {
         ...formData,
-        fecha_solicitud: formData.fecha_solicitud ? formData.fecha_solicitud.format("YYYY-MM-DD") : null,
-        fecha_retiro: formData.fecha_retiro ? formData.fecha_retiro.format("YYYY-MM-DD") : null,
+        fecha_solicitud: formData.fecha_solicitud
+          ? formData.fecha_solicitud.format("YYYY-MM-DD")
+          : null,
+        fecha_retiro: formData.fecha_retiro
+          ? formData.fecha_retiro.format("YYYY-MM-DD")
+          : null,
+        transportista: patchTransportista,
+        empresa_tratamiento: patchEmpresa,
       };
 
-      const response = await fetch(`http://localhost:8000/api/coordinacionretiro/${id}/actualizar/`, {
-        method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Token ${token}`,
-        },
-        body: JSON.stringify(payload),
-      });
+      const response = await fetch(
+        `http://localhost:8000/api/coordinacionretiro/${id}/actualizar/`,
+        {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Token ${token}`,
+          },
+          body: JSON.stringify(payload),
+        }
+      );
 
       if (response.ok) {
         const data = await response.json();
-        console.log("Coordinación actualizada:", data);
         navigate("/coordinaciones");
       } else {
         const errorData = await response.json();
-        setErrorMessage(errorData.detail || "Ocurrió un error al actualizar la coordinación.");
+        console.error("Error específico:", errorData);
+        setErrorMessage(
+          errorData.detail || "Ocurrió un error al actualizar la coordinación."
+        );
       }
     } catch (error) {
       console.error("Error en la petición:", error);
@@ -228,7 +275,6 @@ const EditarCoordinacion = () => {
     <ThemeProvider theme={theme}>
       <Container maxWidth="md">
         <Paper elevation={3} sx={{ padding: 6, marginTop: 6, borderRadius: 3 }}>
-          {/* Título con margen inferior */}
           <Box mb={3}>
             <Typography variant="h3" align="center">
               Editar Coordinación
@@ -247,7 +293,6 @@ const EditarCoordinacion = () => {
             </Alert>
           )}
 
-          {/* Stepper con margen inferior */}
           <Box mb={3}>
             <Stepper activeStep={activeStep} alternativeLabel>
               {steps.map((label, index) => (
@@ -258,10 +303,10 @@ const EditarCoordinacion = () => {
             </Stepper>
           </Box>
 
-          {/* Formulario con margen inferior */}
           <Box mb={3}>
             <form onSubmit={handleSubmit}>
               <Grid container spacing={3}>
+                {/* Paso 0 */}
                 {activeStep === 0 && (
                   <>
                     <Grid item xs={12}>
@@ -306,9 +351,21 @@ const EditarCoordinacion = () => {
                         helperText={errors.pesaje}
                       />
                     </Grid>
+                    <Grid item xs={12} sm={6}>
+                      <TextField
+                        label="Cantidad"
+                        fullWidth
+                        name="cantidad"
+                        value={formData.cantidad}
+                        onChange={handleChange}
+                        error={!!errors.cantidad}
+                        helperText={errors.cantidad}
+                      />
+                    </Grid>
                   </>
                 )}
 
+                {/* Paso 1 */}
                 {activeStep === 1 && (
                   <>
                     <Grid item xs={12} sm={6}>
@@ -357,6 +414,7 @@ const EditarCoordinacion = () => {
                       </TextField>
                     </Grid>
                     <Grid item xs={12} sm={4}>
+                      {/* Filtrar empresas según tipo_material */}
                       <TextField
                         select
                         label="Empresa de Tratamiento"
@@ -367,14 +425,17 @@ const EditarCoordinacion = () => {
                         error={!!errors.empresa_tratamiento}
                         helperText={errors.empresa_tratamiento}
                       >
-                        {empresas.map((empresa) => (
-                          <MenuItem key={empresa.id} value={empresa.id}>
-                            {empresa.nombre}
-                          </MenuItem>
-                        ))}
+                        {empresas
+                          .filter((e) => e.tipo_material === formData.tipo_material)
+                          .map((empresa) => (
+                            <MenuItem key={empresa.id} value={empresa.id}>
+                              {empresa.nombre}
+                            </MenuItem>
+                          ))}
                       </TextField>
                     </Grid>
                     <Grid item xs={12} sm={4}>
+                      {/* Filtrar transportistas según tipo_material */}
                       <TextField
                         select
                         label="Transportista"
@@ -385,7 +446,7 @@ const EditarCoordinacion = () => {
                         error={!!errors.transportista}
                         helperText={errors.transportista}
                       >
-                        {transportistas.map((trans) => (
+                        {filteredTransportistas.map((trans) => (
                           <MenuItem key={trans.id} value={trans.id}>
                             {trans.nombre}
                           </MenuItem>
@@ -395,6 +456,7 @@ const EditarCoordinacion = () => {
                   </>
                 )}
 
+                {/* Paso 2 */}
                 {activeStep === 2 && (
                   <Grid item xs={12}>
                     <TextField

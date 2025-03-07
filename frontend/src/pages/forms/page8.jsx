@@ -10,6 +10,7 @@ import {
   FormGroup,
   FormControlLabel,
   TextField,
+  useMediaQuery,
 } from "@mui/material";
 import { useFormStore } from "../context/FormContext";
 
@@ -31,29 +32,24 @@ const Page8 = () => {
   const pageIndex = "page8";
 
   const defaultPage8 = {
-    // Fijamos el valor por defecto de forma que coincida con las opciones disponibles
     plastico: "No Aplica",
-    plasticoOpciones: {}, // Siempre inicializado como objeto vacío
+    plasticoOpciones: {},
     plasticoOtro: "",
     plasticoObservaciones: "",
   };
 
-  // Estado local para esta página
   const [formData, setFormData] = useState(data[pageIndex] || defaultPage8);
 
-  // Si no existe data en el context para esta página, se inicializa
   useEffect(() => {
     if (!data[pageIndex] || Object.keys(data[pageIndex]).length === 0) {
       updateData(pageIndex, defaultPage8);
     }
   }, [data, pageIndex, updateData]);
 
-  // Sincronizamos el estado local con el context una vez renderizado
   useEffect(() => {
     updateData(pageIndex, formData);
   }, [formData, pageIndex, updateData]);
 
-  // Actualiza el estado local (sin llamar a updateData directamente aquí)
   const handleChange = (field, value) => {
     setFormData((prevData) => ({ ...prevData, [field]: value }));
   };
@@ -67,6 +63,8 @@ const Page8 = () => {
       return { ...prevData, plasticoOpciones: updatedChecks };
     });
   };
+
+  const isMobile = useMediaQuery("(max-width:768px)");
 
   return (
     <Box sx={{ width: "90%", margin: "auto", mt: 4 }}>
@@ -83,6 +81,7 @@ const Page8 = () => {
             if (value === "No Aplica") {
               handleChange("plasticoOpciones", {});
               handleChange("plasticoOtro", "");
+              handleChange("plasticoObservaciones", "");
             }
           }}
         >
@@ -94,26 +93,42 @@ const Page8 = () => {
         </Select>
       </FormControl>
 
-      {/* Mostramos las opciones adicionales solo si se selecciona "Aplica" */}
       {formData.plastico === "Aplica" && (
         <>
           <Typography variant="h6" sx={{ mb: 2 }}>
             Estado del plástico
           </Typography>
-          <FormGroup>
-            {opcionesCheck.map((op, index) => (
-              <FormControlLabel
-                key={index}
-                control={
-                  <Checkbox
-                    checked={!!formData.plasticoOpciones[op]}
-                    onChange={() => handleCheckboxChange(op)}
-                  />
-                }
-                label={op}
-              />
-            ))}
-          </FormGroup>
+          {isMobile ? (
+            <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
+              {opcionesCheck.map((op, index) => (
+                <FormControlLabel
+                  key={index}
+                  control={
+                    <Checkbox
+                      checked={!!formData.plasticoOpciones[op]}
+                      onChange={() => handleCheckboxChange(op)}
+                    />
+                  }
+                  label={op}
+                />
+              ))}
+            </Box>
+          ) : (
+            <FormGroup>
+              {opcionesCheck.map((op, index) => (
+                <FormControlLabel
+                  key={index}
+                  control={
+                    <Checkbox
+                      checked={!!formData.plasticoOpciones[op]}
+                      onChange={() => handleCheckboxChange(op)}
+                    />
+                  }
+                  label={op}
+                />
+              ))}
+            </FormGroup>
+          )}
 
           {formData.plasticoOpciones["Otro"] && (
             <TextField
@@ -124,20 +139,20 @@ const Page8 = () => {
               onChange={(e) => handleChange("plasticoOtro", e.target.value)}
             />
           )}
+
+          <Typography variant="h6" sx={{ mt: 3, mb: 2 }}>
+            Plástico - Otras observaciones / Sugerencias / Acciones a tomar
+          </Typography>
+          <TextField
+            label="Observaciones"
+            fullWidth
+            multiline
+            rows={4}
+            value={formData.plasticoObservaciones}
+            onChange={(e) => handleChange("plasticoObservaciones", e.target.value)}
+          />
         </>
       )}
-
-      <Typography variant="h6" sx={{ mt: 3, mb: 2 }}>
-        Plástico - Otras observaciones / Sugerencias / Acciones a tomar
-      </Typography>
-      <TextField
-        label="Observaciones"
-        fullWidth
-        multiline
-        rows={4}
-        value={formData.plasticoObservaciones}
-        onChange={(e) => handleChange("plasticoObservaciones", e.target.value)}
-      />
     </Box>
   );
 };

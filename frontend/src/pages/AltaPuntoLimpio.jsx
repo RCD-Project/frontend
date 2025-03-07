@@ -43,7 +43,7 @@ const AltaPuntoLimpio = () => {
     ubicacion: "",
     accesibilidad: "en_planta_baja",
     cantidad: "",
-    metros_cuadrados: "",
+    // Se eliminó metros_cuadrados
     tipo_contenedor: "",
     senaletica: true,
     observaciones: "",
@@ -110,16 +110,9 @@ const AltaPuntoLimpio = () => {
       if (!formData.ubicacion.trim())
         newErrors.ubicacion = "La ubicación es obligatoria.";
       if (!formData.cantidad || isNaN(formData.cantidad) || formData.cantidad <= 0) {
-        newErrors.cantidad = "Debe ingresar una cantidad válida.";
+        newErrors.cantidad = "Debe ingresar fracciones válidas.";
       }
-      if (
-        !formData.metros_cuadrados ||
-        isNaN(formData.metros_cuadrados) ||
-        formData.metros_cuadrados <= 0
-      ) {
-        newErrors.metros_cuadrados =
-          "Debe ingresar un valor válido en metros cuadrados.";
-      }
+      // Se eliminó la validación de metros_cuadrados
     } else if (step === 1) {
       if (!formData.tipo_contenedor.trim())
         newErrors.tipo_contenedor = "El tipo de contenedor es obligatorio.";
@@ -166,10 +159,8 @@ const AltaPuntoLimpio = () => {
 
   // Función para procesar la validación de datos antes de ejecutar cualquier API
   const canExecuteApi = () => {
-    // Validar que los datos del formulario sean correctos
     if (!validateStep(0) || !validateStep(1) || !validateStep(2)) return false;
 
-    // Calcular el arreglo de materiales
     const materialesArray = Object.entries(formData.materiales)
       .filter(([type, qty]) => parseInt(qty) > 0)
       .map(([type, qty]) => {
@@ -191,11 +182,9 @@ const AltaPuntoLimpio = () => {
           estado_del_contenedor: "No especificado",
           ventilacion: type === "peligrosos" ? "necesario" : "",
           obra: formData.obra,
-          // Se asignará el id del Punto Limpio luego de su creación
         };
       });
 
-    // Si el arreglo está vacío o contiene algún elemento null, no se ejecuta la API
     if (materialesArray.length === 0 || materialesArray.some((item) => item === null)) {
       setErrorMessage("Debe asignarse al menos un material con transportista válido.");
       return false;
@@ -211,13 +200,11 @@ const AltaPuntoLimpio = () => {
       setErrorMessage("No estás autenticado. Por favor, inicia sesión.");
       return;
     }
-    // Verificamos todos los datos antes de ejecutar cualquier llamada a la API
     if (!canExecuteApi()) return;
 
     setIsLoading(true);
     setErrorMessage("");
 
-    // Extraer y preparar datos para el Punto Limpio
     const { materiales, ...puntoData } = formData;
     const dataPuntoLimpio = {
       ...puntoData,
@@ -227,7 +214,6 @@ const AltaPuntoLimpio = () => {
     };
 
     try {
-      // Crear el Punto Limpio
       const responsePunto = await fetch(
         "http://127.0.0.1:8000/api/puntolimpio/registro/",
         {
@@ -247,7 +233,6 @@ const AltaPuntoLimpio = () => {
 
       const puntoDataResponse = await responsePunto.json();
 
-      // Preparar el arreglo de materiales ya que ahora contamos con el id del Punto Limpio
       const materialesArray = Object.entries(formData.materiales)
         .filter(([type, qty]) => parseInt(qty) > 0)
         .map(([type, qty]) => {
@@ -270,7 +255,6 @@ const AltaPuntoLimpio = () => {
           };
         });
 
-      // Crear cada material de forma individual
       for (const material of materialesArray) {
         const responseMaterial = await fetch(
           "http://127.0.0.1:8000/api/materiales/registro/",
@@ -405,7 +389,7 @@ const AltaPuntoLimpio = () => {
                     </Grid>
                     <Grid item xs={12}>
                       <TextField
-                        label="Cantidad"
+                        label="Fracciones"
                         fullWidth
                         name="cantidad"
                         type="number"
@@ -414,19 +398,6 @@ const AltaPuntoLimpio = () => {
                         required
                         error={!!errors.cantidad}
                         helperText={errors.cantidad}
-                      />
-                    </Grid>
-                    <Grid item xs={12}>
-                      <TextField
-                        label="Metros Cuadrados"
-                        fullWidth
-                        name="metros_cuadrados"
-                        type="number"
-                        value={formData.metros_cuadrados}
-                        onChange={handleChange}
-                        required
-                        error={!!errors.metros_cuadrados}
-                        helperText={errors.metros_cuadrados}
                       />
                     </Grid>
                   </>

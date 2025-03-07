@@ -8,26 +8,21 @@ import {
   Card, 
   CardMedia, 
   CardContent, 
-  Grid,
-  Dialog,
-  DialogContent,
+  Grid, 
   MenuItem, 
   TextField,
-  IconButton
+  Button 
 } from "@mui/material";
-import CloseIcon from "@mui/icons-material/Close";
 import { useLocation } from "react-router-dom";
 import dayjs from "dayjs";
 import { AuthContext } from "../pages/context/AuthContext";
+import { Download } from "lucide-react";  // Importa el ícono de descarga de Lucide
 
 const VerImagenesObra = () => {
   const [imagenes, setImagenes] = useState([]);
   const [obra, setObra] = useState(null);
   const [errorMessage, setErrorMessage] = useState("");
   const [loading, setLoading] = useState(true);
-
-  const [selectedImage, setSelectedImage] = useState(null);
-
   
   // Estado para filtrar
   const [filter, setFilter] = useState("todos"); // "todos", "hoy", "ultimo_mes", "ultimos_3_meses", "por_mes"
@@ -87,45 +82,39 @@ const VerImagenesObra = () => {
       });
   }, [obraId, token]);
 
-  // Función para filtrar imágenes según la opción seleccionada
   const filterImagenes = (imgs) => {
     const today = dayjs();
-    if (filter === "hoy") {
-      return imgs.filter((img) => {
-        if (!img.fecha) return false;
-        const imgDate = dayjs(img.fecha);
-        return imgDate.isSame(today, "day");
-      });
-    } else if (filter === "ultimo_mes") {
-      const oneMonthAgo = today.subtract(1, "month");
-      return imgs.filter((img) => {
-        if (!img.fecha) return false;
-        const imgDate = dayjs(img.fecha);
-        return imgDate.isAfter(oneMonthAgo);
-      });
-    } else if (filter === "ultimos_3_meses") {
-      const threeMonthsAgo = today.subtract(3, "month");
-      return imgs.filter((img) => {
-        if (!img.fecha) return false;
-        const imgDate = dayjs(img.fecha);
-        return imgDate.isAfter(threeMonthsAgo);
-      });
-    } else if (filter === "por_mes") {
-      // Si no se seleccionó un mes, no se muestran imágenes
-      if (selectedMonth === "") return [];
-      return imgs.filter((img) => {
-        if (!img.fecha) return false;
-        const imgDate = dayjs(img.fecha);
-        return imgDate.month() === parseInt(selectedMonth, 10);
-      });
-    }
-    return imgs;
+    
+    return imgs.filter((img) => {
+      if (!img.fecha) return false;
+      
+      const imgDate = dayjs(img.fecha);
+      if (!imgDate.isValid()) return false;
+  
+      switch(filter) {
+        case "hoy":
+          return imgDate.isSame(today, "day");
+          
+        case "ultimo_mes":
+          const oneMonthAgo = today.subtract(1, "month");
+          return imgDate.isAfter(oneMonthAgo) || imgDate.isSame(oneMonthAgo, "day");
+          
+        case "ultimos_6_meses":
+          const sixMonthsAgo = today.subtract(6, "month");
+          return imgDate.isAfter(sixMonthsAgo) || imgDate.isSame(sixMonthsAgo, "day");
+          
+        case "por_mes":
+          if (selectedMonth === "") return false;
+          return imgDate.month() === parseInt(selectedMonth, 10);
+          
+        default: // "todos"
+          return true;
+      }
+    });
   };
 
-  // Lista filtrada de imágenes
   const imagenesFiltradas = filterImagenes(imagenes);
 
-  // Opciones de meses (valor 0-11)
   const months = [
     { value: "0", label: "Enero" },
     { value: "1", label: "Febrero" },
@@ -141,13 +130,22 @@ const VerImagenesObra = () => {
     { value: "11", label: "Diciembre" },
   ];
 
-  const handleOpenImage = (imageUrl) => {
-    setSelectedImage(imageUrl);
-  };
-
-  // Función para cerrar la ventana emergente
-  const handleCloseImage = () => {
-    setSelectedImage(null);
+  // Función para descargar la imagen sin redireccionar
+  const downloadImage = (url, filename) => {
+    fetch(url)
+      .then((response) => response.blob())
+      .then((blob) => {
+        const blobUrl = window.URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.style.display = "none";
+        a.href = blobUrl;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        window.URL.revokeObjectURL(blobUrl);
+      })
+      .catch((err) => console.error("Error al descargar la imagen:", err));
   };
 
   if (loading) {
@@ -170,7 +168,6 @@ const VerImagenesObra = () => {
           </Alert>
         )}
 
-        {/* Filtro de fechas */}
         <Box sx={{ mb: 2 }}>
           <TextField
             select
@@ -178,7 +175,6 @@ const VerImagenesObra = () => {
             value={filter}
             onChange={(e) => {
               setFilter(e.target.value);
-              // Reiniciamos el mes seleccionado si cambia el filtro
               if (e.target.value !== "por_mes") {
                 setSelectedMonth("");
               }
@@ -188,12 +184,11 @@ const VerImagenesObra = () => {
             <MenuItem value="todos">Todas</MenuItem>
             <MenuItem value="hoy">Hoy</MenuItem>
             <MenuItem value="ultimo_mes">Imágenes del último mes</MenuItem>
-            <MenuItem value="ultimos_3_meses">Últimos 3 meses</MenuItem>
+            <MenuItem value="ultimos_6_meses">Últimos 6 meses</MenuItem>
             <MenuItem value="por_mes">Por Mes</MenuItem>
           </TextField>
         </Box>
 
-        {/* Si se selecciona "Por Mes", mostramos otro dropdown para elegir el mes */}
         {filter === "por_mes" && (
           <Box sx={{ mb: 2 }}>
             <TextField
@@ -218,74 +213,45 @@ const VerImagenesObra = () => {
           </Typography>
         ) : (
           <Grid container spacing={2}>
-            {imagenesFiltradas.map((img) => (
-              <Grid item xs={12} sm={6} md={4} key={img.id}>
-                <Card>
-                  <CardMedia
-                    component="img"
-                    height="200"
-                    image={
-                      img.imagen.startsWith("http")
-                        ? img.imagen
-                        : `http://127.0.0.1:8000${img.imagen}`
-                    }
-                    alt="Imagen de obra"
-                    sx={{ cursor: "pointer" }}
-    onClick={() => handleOpenImage(img.imagen.startsWith("http") ? img.imagen : `http://127.0.0.1:8000${img.imagen}`)} 
-                  />
-                  <CardContent>
-                    <Typography variant="body1">
-                      {img.descripcion || "Sin descripción"}
-                    </Typography>
-                    <Typography variant="body2" color="textSecondary">
-                      {img.fecha
-                        ? new Date(img.fecha).toLocaleDateString("es-ES")
-                        : "Sin fecha"}
-                    </Typography>
-                  </CardContent>
-                </Card>
-              </Grid>
-            ))}
+            {imagenesFiltradas.map((img) => {
+              const downloadUrl = img.imagen.startsWith("http")
+                ? img.imagen
+                : `http://127.0.0.1:8000${img.imagen}`;
+              return (
+                <Grid item xs={12} sm={6} md={4} key={img.id}>
+                  <Card>
+                    <CardMedia
+                      component="img"
+                      height="200"
+                      image={downloadUrl}
+                      alt="Imagen de obra"
+                    />
+                    <CardContent>
+                      <Typography variant="body1">
+                        {img.descripcion || "Sin descripción"}
+                      </Typography>
+                      <Typography variant="body2" color="textSecondary">
+                        {img.fecha
+                          ? new Date(img.fecha).toLocaleDateString("es-ES")
+                          : "Sin fecha"}
+                      </Typography>
+                    </CardContent>
+                    <Box sx={{ textAlign: "center", p: 1 }}>
+                      <Button
+                        variant="contained"
+                        color="white"
+                        onClick={() => downloadImage(downloadUrl, `imagen_${img.id}.jpg`)}
+                        startIcon={<Download size={16} />}
+                      >
+                        Descargar
+                      </Button>
+                    </Box>
+                  </Card>
+                </Grid>
+              );
+            })}
           </Grid>
         )}
-        <Dialog 
-          open={Boolean(selectedImage)} 
-          onClose={handleCloseImage} 
-          maxWidth="md"
-          PaperProps={{ style: { backgroundColor: "transparent", boxShadow: "none" } }} // 🔹 Quita el fondo blanco y sombras
-        >
-          <DialogContent 
-            sx={{ 
-              position: "relative", 
-              display: "flex", 
-              justifyContent: "center", 
-              padding: 0, 
-              backgroundColor: "transparent" // 🔹 Elimina bordes blancos
-            }}
-          >
-            {/* Botón de cerrar */}
-            <IconButton
-              onClick={handleCloseImage}
-              sx={{
-                position: "absolute",
-                top: 8,
-                right: 8,
-                backgroundColor: "rgba(0,0,0,0.5)",
-                color: "white",
-                "&:hover": { backgroundColor: "rgba(0,0,0,0.8)" }
-              }}
-            >
-              <CloseIcon />
-            </IconButton>
-
-            {/* Imagen ampliada sin bordes */}
-            <img 
-              src={selectedImage} 
-              alt="Imagen ampliada" 
-              style={{ maxWidth: "100%", maxHeight: "90vh", borderRadius: "8px" }} 
-            />
-          </DialogContent>
-        </Dialog>
       </Box>
     </Container>
   );

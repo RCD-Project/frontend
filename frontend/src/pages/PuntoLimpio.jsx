@@ -15,12 +15,20 @@ const PuntoLimpio = () => {
   const [puntosLimpios, setPuntosLimpios] = useState([]);
   const [value, setValue] = useState(0);
   const navigate = useNavigate();
-  const { token } = useContext(AuthContext);
+  const { token, role } = useContext(AuthContext);
 
   useEffect(() => {
     if (!token) return; 
 
-    fetch("http://localhost:8000/api/puntolimpio/lista/", {
+    // Por defecto se usa el endpoint de puntos limpios general
+    let url = "http://localhost:8000/api/puntolimpio/lista/";
+    // Si el usuario logueado tiene rol "cliente", usamos el endpoint que filtra por el cliente
+    if (role === "cliente") {
+      url = "http://localhost:8000/api/clientes/puntos-limpios/";
+    }
+    console.log("Fetching puntos limpios desde:", url);
+
+    fetch(url, {
       headers: {
         "Content-Type": "application/json",
         "Authorization": `Token ${token}`,
@@ -33,16 +41,16 @@ const PuntoLimpio = () => {
         return response.json();
       })
       .then((data) => {
-        // Verificamos que data sea un arreglo, de lo contrario forzamos a un arreglo vacío
+        console.log("Puntos limpios recibidos:", data);
         setPuntosLimpios(Array.isArray(data) ? data : []);
       })
       .catch((error) => console.error("Error al obtener puntos limpios:", error));
-  }, [token]);
+  }, [token, role]);
 
   const toggleEstado = (id) => {
-    const puntoLimpio = puntosLimpios.find((p) => p.id === id);
-    if (!puntoLimpio) return;
-    const newEstado = puntoLimpio.estado.trim().toLowerCase() === "activo" ? "inactivo" : "activo";
+    const punto = puntosLimpios.find((p) => p.id === id);
+    if (!punto) return;
+    const newEstado = punto.estado.trim().toLowerCase() === "activo" ? "inactivo" : "activo";
 
     fetch(`http://127.0.0.1:8000/api/puntos-limpios/modificar/${id}/`, {
       method: "PATCH",
@@ -58,11 +66,9 @@ const PuntoLimpio = () => {
         }
         return response.json();
       })
-      .then((data) => {
-        setPuntosLimpios((prevPuntosLimpios) =>
-          prevPuntosLimpios.map((p) =>
-            p.id === id ? { ...p, estado: newEstado } : p
-          )
+      .then(() => {
+        setPuntosLimpios((prev) =>
+          prev.map((p) => (p.id === id ? { ...p, estado: newEstado } : p))
         );
       })
       .catch((error) => {
@@ -71,16 +77,16 @@ const PuntoLimpio = () => {
   };
 
   const [anchorEl, setAnchorEl] = useState(null);
-  const [selectedPuntoLimpio, setSelectedPuntoLimpio] = useState(null);
+  const [selectedPunto, setSelectedPunto] = useState(null);
 
   const handleMenuOpen = (event, punto) => {
     setAnchorEl(event.currentTarget);
-    setSelectedPuntoLimpio(punto);
+    setSelectedPunto(punto);
   };
 
   const handleMenuClose = () => {
     setAnchorEl(null);
-    setSelectedPuntoLimpio(null);
+    setSelectedPunto(null);
   };
 
   const columnasPuntosLimpios = [
@@ -139,7 +145,8 @@ const PuntoLimpio = () => {
           <div>
             <Tabla
               datos={puntosLimpios.filter(
-                (p) => p.estado && p.estado.trim().toLowerCase() === "activo"
+                (p) =>
+                  p.estado && p.estado.trim().toLowerCase() === "activo"
               )}
               columnas={columnasPuntosLimpios}
               filtroClave="id"
@@ -152,7 +159,8 @@ const PuntoLimpio = () => {
           <div>
             <Tabla
               datos={puntosLimpios.filter(
-                (p) => p.estado && p.estado.trim().toLowerCase() === "inactivo"
+                (p) =>
+                  p.estado && p.estado.trim().toLowerCase() === "inactivo"
               )}
               columnas={columnasPuntosLimpios}
               filtroClave="nombre_obra"
@@ -182,7 +190,7 @@ const PuntoLimpio = () => {
         <MenuItem
           onClick={() => {
             handleMenuClose();
-            navigate(`/detallespuntolimpio?id=${selectedPuntoLimpio?.id}`);
+            navigate(`/detallespuntolimpio?id=${selectedPunto?.id}`);
           }}
         >
           <VisibilityIcon /> Ver detalles
@@ -190,10 +198,10 @@ const PuntoLimpio = () => {
         <MenuItem
           onClick={() => {
             handleMenuClose();
-            toggleEstado(selectedPuntoLimpio?.id);
+            toggleEstado(selectedPunto?.id);
           }}
         >
-          {selectedPuntoLimpio?.estado.trim().toLowerCase() === "activo" ? (
+          {selectedPunto?.estado.trim().toLowerCase() === "activo" ? (
             <ToggleOffIcon />
           ) : (
             <ToggleOnIcon />

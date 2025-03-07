@@ -1,8 +1,7 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { useNavigate, useLocation, Link } from 'react-router-dom';
 import Tabla from '../components/Table';
-import { Typography } from '@mui/material';
-import { Button, IconButton, Menu, MenuItem, Alert } from '@mui/material';
+import { Typography, Button, IconButton, Menu, MenuItem, Alert } from '@mui/material';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import EditIcon from '@mui/icons-material/Edit';
@@ -14,12 +13,19 @@ const ListaDeObras = () => {
   const [obras, setObras] = useState([]);
   const navigate = useNavigate();
   const location = useLocation();
-  const { role, user, token } = useContext(AuthContext);
+  const { role, token } = useContext(AuthContext);
 
   const successMessage = location.state?.successMessage || "";
 
   useEffect(() => {
-    fetch("http://127.0.0.1:8000/api/obras/aprobadas/", {
+    // Por defecto se usa el endpoint de obras aprobadas
+    let url = "http://127.0.0.1:8000/api/obras/aprobadas/";
+    // Si el usuario tiene rol "cliente", se usa el endpoint que filtra por el usuario logueado
+    if (role === "cliente") {
+      url = "http://127.0.0.1:8000/api/clientes/obras/";
+    }
+    
+    fetch(url, {
       headers: {
         "Content-Type": "application/json",
         "Authorization": `Token ${token}`, 
@@ -32,23 +38,20 @@ const ListaDeObras = () => {
         return res.json();
       })
       .then((data) => {
-        if (role === "cliente" && user) {
-          setObras(data.filter((obra) => obra.cliente === 1)); 
-        } else {
-          setObras(data);
-        }
+        setObras(data);
       })
-      .catch((err) => console.error("Error al obtener obras aprobadas:", err));
-  }, [role, user, token]);
-  
+      .catch((err) => console.error("Error al obtener obras:", err));
+  }, [role, token]);
 
   const eliminarObra = (id) => {
     const confirmacion = window.confirm("¿Seguro que deseas eliminar esta obra?");
     if (confirmacion) {
       fetch(`http://127.0.0.1:8000/api/obras/${id}/eliminar/`, {
         method: 'DELETE',
-        headers: { 'Content-Type': 'application/json',
-        "Authorization": `Token ${token}` },
+        headers: { 
+          'Content-Type': 'application/json',
+          "Authorization": `Token ${token}` 
+        },
       })
         .then((res) => {
           if (!res.ok) {
@@ -97,29 +100,62 @@ const ListaDeObras = () => {
       <Typography variant="h4" sx={{ textAlign: 'center', mb: 4 }}>
         Lista de Obras
       </Typography>
+      {successMessage && (
+        <Alert severity="success" sx={{ mb: 2 }}>
+          {successMessage}
+        </Alert>
+      )}
       
-
-      { successMessage && <Alert severity="success" sx={{ mb: 2 }}>{successMessage}</Alert> }
+      {/* Si el componente Tabla no muestra los datos, prueba descomentando el bloque de abajo para renderizar una tabla simple */}
+      {/*
+      <table>
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Nombre de Obra</th>
+            <th>Dirección</th>
+          </tr>
+        </thead>
+        <tbody>
+          {obras.map(obra => (
+            <tr key={obra.id}>
+              <td>{obra.id}</td>
+              <td>{obra.nombre_obra}</td>
+              <td>{obra.direccion}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+      */}
       
+      {/* Componente Tabla */}
       <Tabla
         datos={obras}
         columnas={columnasObras}
         filtroClave="id"
         filtroPlaceholder="Nombre de la obra"
       />
-
+      
       <Menu anchorEl={anchorEl} open={Boolean(anchorEl)} onClose={handleMenuClose}>
-        <MenuItem onClick={() => { handleMenuClose(); navigate(`/detallesobra?id=${selectedObra?.id}`); }}>
+        <MenuItem onClick={() => { 
+          handleMenuClose(); 
+          navigate(`/detallesobra?id=${selectedObra?.id}`); 
+        }}>
           <VisibilityIcon /> Ver detalles
         </MenuItem>
-        <MenuItem onClick={() => { handleMenuClose(); navigate(`/editarobra?id=${selectedObra?.id}`); }}>
+        <MenuItem onClick={() => { 
+          handleMenuClose(); 
+          navigate(`/editarobra?id=${selectedObra?.id}`); 
+        }}>
           <EditIcon /> Editar
         </MenuItem>
-        <MenuItem onClick={() => { handleMenuClose(); eliminarObra(selectedObra?.id); }}>
+        <MenuItem onClick={() => { 
+          handleMenuClose(); 
+          eliminarObra(selectedObra?.id); 
+        }}>
           <DeleteIcon style={{ color: 'red' }} /> Eliminar
         </MenuItem>
       </Menu>
-
       <Button
         variant="contained"
         startIcon={<AddIcon />}

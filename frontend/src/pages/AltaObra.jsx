@@ -36,7 +36,7 @@ const AltaObra = () => {
   // Estado para bloquear el dropdown (si se encontró el cliente por email)
   const [disableDropdown, setDisableDropdown] = useState(false);
 
-  // En caso de que el usuario sea cliente, usamos su id de inmediato.
+  // Si el usuario es cliente, usamos su id de inmediato.
   const initialCliente = user && user.rol === 'cliente' ? String(user.id) : "";
 
   const [formData, setFormData] = useState({
@@ -49,6 +49,7 @@ const AltaObra = () => {
     inicioObra: null,
     duracionObra: '',
     etapaObra: '',
+    // Campos del Equipo Responsable
     jefeObra: '',
     emailJefe: '',
     telefonoJefe: '',
@@ -58,6 +59,12 @@ const AltaObra = () => {
     encargado: '',
     emailEncargado: '',
     telefonoEncargado: '',
+    // Campos nuevos en "Detalles de la Obra"
+    archivos: [], // Ahora se permite múltiples archivos
+    tipoConstruccion: '',
+    metrosCuadrados: '',
+    cant_pisos: '',
+    // Campo existente (puedes dejarlo o quitarlo si no se usa)
     imagen: null,
     pedido: '',
   });
@@ -81,7 +88,7 @@ const AltaObra = () => {
         .then((data) => {
           console.log("Datos de clientes:", data);
           setClientesOptions(data);
-          // Buscamos el cliente cuyo email coincida (ya sea de client.email o client.usuario.email)
+          // Buscamos el cliente cuyo email coincida
           const clientMatch = data.find((client) => {
             const email = (client.email || (client.usuario && client.usuario.email))?.trim().toLowerCase();
             return email === user.email.trim().toLowerCase();
@@ -90,7 +97,6 @@ const AltaObra = () => {
             setSelectedCliente(String(clientMatch.id));
             setDisableDropdown(true);
           } else if (data.length > 0) {
-            // Si no se encuentra coincidencia, preseleccionamos el primer cliente.
             setSelectedCliente(String(data[0].id));
           }
         })
@@ -107,7 +113,6 @@ const AltaObra = () => {
     let newErrors = {};
 
     if (step === 0) {
-      // Si el usuario no es cliente y no se ha seleccionado ninguno, es error.
       if (!(user && user.rol === 'cliente') && !formData.cliente) {
         newErrors.cliente = "Debes seleccionar un cliente.";
       }
@@ -120,6 +125,7 @@ const AltaObra = () => {
       if (!formData.inicioObra) newErrors.inicioObra = "Fecha de inicio no válida.";
       if (!formData.duracionObra.trim()) newErrors.duracionObra = "La duración de la obra es obligatoria.";
       if (!formData.etapaObra.trim()) newErrors.etapaObra = "La etapa de la obra es obligatoria.";
+      // Aquí puedes agregar validaciones adicionales para los nuevos campos si lo requieres.
     } else if (step === 2) {
       if (!formData.jefeObra.trim()) newErrors.jefeObra = "El nombre del jefe de obra es obligatorio.";
       if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.emailJefe)) newErrors.emailJefe = "Correo electrónico inválido.";
@@ -144,12 +150,35 @@ const AltaObra = () => {
 
   const handleBack = () => setActiveStep((prev) => prev - 1);
 
-  const handleChange = (e) => {
+  const handleChangeCliente = (e) => {
     setSelectedCliente(e.target.value);
   };
 
   const handleDateChange = (newValue) => {
     setFormData((prev) => ({ ...prev, inicioObra: newValue }));
+  };
+
+  // Para actualizar los campos de texto y número
+  const handleFieldChange = (e) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  // Para actualizar los archivos seleccionados (permitiendo múltiples)
+  const handleFileChange = (e) => {
+    if (e.target.files) {
+      // Convertimos FileList a Array y agregamos al array existente
+      const nuevosArchivos = Array.from(e.target.files);
+      setFormData((prev) => ({ ...prev, archivos: [...prev.archivos, ...nuevosArchivos] }));
+    }
+  };
+
+  // Función para eliminar un archivo del array (por índice)
+  const handleFileRemove = (indexToRemove) => {
+    setFormData((prev) => ({
+      ...prev,
+      archivos: prev.archivos.filter((_, index) => index !== indexToRemove),
+    }));
   };
 
   const handleSubmit = (event) => {
@@ -161,7 +190,6 @@ const AltaObra = () => {
       return;
     }
 
-    // Convertimos el cliente a número
     const clienteId = formData.cliente ? Number(formData.cliente) : null;
     if (!clienteId) {
       setErrorMessage("No se encontró un cliente válido.");
@@ -169,33 +197,35 @@ const AltaObra = () => {
       return;
     }
 
-    const obraData = {
-      cliente: clienteId,
-      nombre_obra: formData.nombreObra,
-      localidad: formData.localidad,
-      barrio: formData.barrio,
-      direccion: formData.direccion,
-      inicio_obra: formData.inicioObra ? formData.inicioObra.toISOString().split('T')[0] : null,
-      duracion_obra: formData.duracionObra,
-      etapa_obra: formData.etapaObra,
-      nombre_jefe_obra: formData.jefeObra,
-      mail_jefe_obra: formData.emailJefe,
-      telefono_jefe_obra: formData.telefonoJefe,
-      nombre_capataz: formData.capataz,
-      mail_capataz: formData.emailCapataz,
-      telefono_capataz: formData.telefonoCapataz,
-      nombre_encargado_supervisor: formData.encargado,
-      mail_encargado_supervisor: formData.emailEncargado,
-      telefono_encargado_supervisor: formData.telefonoEncargado,
-      cant_visitas_mes: formData.visitasMes,
-      imagenes: formData.imagen,
-      cronograma: 'Sin cronograma',
-      pedido: formData.pedido || 'No especificado',
-    };
+    const data = new FormData();
+    data.append("cliente", clienteId);
+    data.append("nombre_obra", formData.nombreObra);
+    data.append("localidad", formData.localidad);
+    data.append("barrio", formData.barrio);
+    data.append("direccion", formData.direccion);
+    data.append("inicio_obra", formData.inicioObra ? formData.inicioObra.toISOString().split('T')[0] : "");
+    data.append("duracion_obra", formData.duracionObra);
+    data.append("etapa_obra", formData.etapaObra);
+    data.append("nombre_jefe_obra", formData.jefeObra);
+    data.append("mail_jefe_obra", formData.emailJefe);
+    data.append("telefono_jefe_obra", formData.telefonoJefe);
+    data.append("nombre_capataz", formData.capataz);
+    data.append("mail_capataz", formData.emailCapataz);
+    data.append("telefono_capataz", formData.telefonoCapataz);
+    data.append("nombre_encargado_supervisor", formData.encargado);
+    data.append("mail_encargado_supervisor", formData.emailEncargado);
+    data.append("telefono_encargado_supervisor", formData.telefonoEncargado);
+    data.append("cant_visitas_mes", formData.visitasMes);
+    data.append("pedido", formData.pedido || "No especificado");
+    data.append("cant_pisos", formData.cant_pisos || "No especificado");
+    // Campos nuevos:
+    formData.archivos.forEach((file) => {
+      data.append("archivo", file);
+    });
+    data.append("tipo_construccion", formData.tipoConstruccion);
+    data.append("m2_obra", formData.metrosCuadrados);
 
-    console.log("Enviando obraData:", obraData);
-
-    const tokenLocal = localStorage.getItem('token');
+    const tokenLocal = sessionStorage.getItem('token');
     if (!tokenLocal) {
       console.error('Token no encontrado. El usuario debe iniciar sesión.');
       setErrorMessage('Por favor, inicie sesión para registrar la obra.');
@@ -207,10 +237,9 @@ const AltaObra = () => {
     fetch('http://127.0.0.1:8000/api/obras/registro/', {
       method: 'POST',
       headers: {
-        'Content-Type': 'application/json',
         'Authorization': `Token ${tokenLocal}`,
       },
-      body: JSON.stringify(obraData),
+      body: data,
     })
       .then((res) => {
         if (!res.ok) {
@@ -296,7 +325,7 @@ const AltaObra = () => {
                           label="Cliente"
                           name="cliente"
                           value={selectedCliente}
-                          onChange={handleChange}
+                          onChange={handleChangeCliente}
                           disabled={disableDropdown}
                         >
                           {clientesOptions.length > 0 ? (
@@ -319,9 +348,7 @@ const AltaObra = () => {
                         fullWidth
                         name="nombreObra"
                         value={formData.nombreObra}
-                        onChange={(e) =>
-                          setFormData((prev) => ({ ...prev, nombreObra: e.target.value }))
-                        }
+                        onChange={(e) => setFormData((prev) => ({ ...prev, nombreObra: e.target.value }))}
                         error={!!errors.nombreObra}
                         helperText={errors.nombreObra}
                       />
@@ -332,9 +359,7 @@ const AltaObra = () => {
                         fullWidth
                         name="localidad"
                         value={formData.localidad}
-                        onChange={(e) =>
-                          setFormData((prev) => ({ ...prev, localidad: e.target.value }))
-                        }
+                        onChange={(e) => setFormData((prev) => ({ ...prev, localidad: e.target.value }))}
                         error={!!errors.localidad}
                         helperText={errors.localidad}
                       />
@@ -345,9 +370,7 @@ const AltaObra = () => {
                         fullWidth
                         name="barrio"
                         value={formData.barrio}
-                        onChange={(e) =>
-                          setFormData((prev) => ({ ...prev, barrio: e.target.value }))
-                        }
+                        onChange={(e) => setFormData((prev) => ({ ...prev, barrio: e.target.value }))}
                         error={!!errors.barrio}
                         helperText={errors.barrio}
                       />
@@ -358,9 +381,7 @@ const AltaObra = () => {
                         fullWidth
                         name="direccion"
                         value={formData.direccion}
-                        onChange={(e) =>
-                          setFormData((prev) => ({ ...prev, direccion: e.target.value }))
-                        }
+                        onChange={(e) => setFormData((prev) => ({ ...prev, direccion: e.target.value }))}
                         error={!!errors.direccion}
                         helperText={errors.direccion}
                       />
@@ -372,9 +393,7 @@ const AltaObra = () => {
                         name="visitasMes"
                         type="number"
                         value={formData.visitasMes}
-                        onChange={(e) =>
-                          setFormData((prev) => ({ ...prev, visitasMes: e.target.value }))
-                        }
+                        onChange={(e) => setFormData((prev) => ({ ...prev, visitasMes: e.target.value }))}
                         error={!!errors.visitasMes}
                         helperText={errors.visitasMes}
                       />
@@ -391,12 +410,7 @@ const AltaObra = () => {
                           value={formData.inicioObra}
                           onChange={handleDateChange}
                           renderInput={(params) => (
-                            <TextField
-                              {...params}
-                              fullWidth
-                              error={!!errors.inicioObra}
-                              helperText={errors.inicioObra}
-                            />
+                            <TextField {...params} fullWidth error={!!errors.inicioObra} helperText={errors.inicioObra} />
                           )}
                         />
                       </LocalizationProvider>
@@ -407,9 +421,7 @@ const AltaObra = () => {
                         fullWidth
                         name="duracionObra"
                         value={formData.duracionObra}
-                        onChange={(e) =>
-                          setFormData((prev) => ({ ...prev, duracionObra: e.target.value }))
-                        }
+                        onChange={handleFieldChange}
                         error={!!errors.duracionObra}
                         helperText={errors.duracionObra}
                       />
@@ -420,12 +432,66 @@ const AltaObra = () => {
                         fullWidth
                         name="etapaObra"
                         value={formData.etapaObra}
-                        onChange={(e) =>
-                          setFormData((prev) => ({ ...prev, etapaObra: e.target.value }))
-                        }
+                        onChange={handleFieldChange}
                         error={!!errors.etapaObra}
                         helperText={errors.etapaObra}
                       />
+                    </Grid>
+                    {/* Nuevos campos para "Detalles de la Obra" */}
+                    <Grid item xs={12}>
+                      <TextField
+                        label="Tipo de Construcción"
+                        fullWidth
+                        name="tipoConstruccion"
+                        value={formData.tipoConstruccion}
+                        onChange={handleFieldChange}
+                      />
+                    </Grid>
+                    <Grid item xs={12}>
+                      <TextField
+                        label="Metros Cuadrados"
+                        fullWidth
+                        name="metrosCuadrados"
+                        type="number"
+                        value={formData.metrosCuadrados}
+                        onChange={handleFieldChange}
+                      />
+                    </Grid>
+                    <Grid item xs={12}>
+                      <TextField
+                        label="Cantidad de Pisos"
+                        fullWidth
+                        name="cant_pisos"
+                        type="number"
+                        value={formData.cant_pisos}
+                        onChange={handleFieldChange}
+                      />
+                    </Grid>
+                    <Grid item xs={12}>
+                      <Button variant="contained" component="label">
+                        Subir Archivo (PDF o Excel)
+                        <input
+                          type="file"
+                          hidden
+                          accept=".pdf,.xls,.xlsx"
+                          onChange={handleFileChange}
+                          multiple
+                        />
+                      </Button>
+                      {formData.archivos.length > 0 && (
+                        <Box sx={{ mt: 1 }}>
+                          {formData.archivos.map((file, index) => (
+                            <Box key={index} sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
+                              <Typography variant="body2">
+                                {file.name}
+                              </Typography>
+                              <Button variant="outlined" color="error" onClick={() => handleFileRemove(index)}>
+                                Eliminar
+                              </Button>
+                            </Box>
+                          ))}
+                        </Box>
+                      )}
                     </Grid>
                   </>
                 )}
@@ -438,9 +504,7 @@ const AltaObra = () => {
                         fullWidth
                         name="jefeObra"
                         value={formData.jefeObra}
-                        onChange={(e) =>
-                          setFormData((prev) => ({ ...prev, jefeObra: e.target.value }))
-                        }
+                        onChange={handleFieldChange}
                         error={!!errors.jefeObra}
                         helperText={errors.jefeObra}
                       />
@@ -452,9 +516,7 @@ const AltaObra = () => {
                         name="emailJefe"
                         type="email"
                         value={formData.emailJefe}
-                        onChange={(e) =>
-                          setFormData((prev) => ({ ...prev, emailJefe: e.target.value }))
-                        }
+                        onChange={handleFieldChange}
                         error={!!errors.emailJefe}
                         helperText={errors.emailJefe}
                       />
@@ -466,9 +528,7 @@ const AltaObra = () => {
                         name="telefonoJefe"
                         type="tel"
                         value={formData.telefonoJefe}
-                        onChange={(e) =>
-                          setFormData((prev) => ({ ...prev, telefonoJefe: e.target.value }))
-                        }
+                        onChange={handleFieldChange}
                         error={!!errors.telefonoJefe}
                         helperText={errors.telefonoJefe}
                       />
@@ -479,9 +539,7 @@ const AltaObra = () => {
                         fullWidth
                         name="capataz"
                         value={formData.capataz}
-                        onChange={(e) =>
-                          setFormData((prev) => ({ ...prev, capataz: e.target.value }))
-                        }
+                        onChange={handleFieldChange}
                         error={!!errors.capataz}
                         helperText={errors.capataz}
                       />
@@ -493,9 +551,7 @@ const AltaObra = () => {
                         name="emailCapataz"
                         type="email"
                         value={formData.emailCapataz}
-                        onChange={(e) =>
-                          setFormData((prev) => ({ ...prev, emailCapataz: e.target.value }))
-                        }
+                        onChange={handleFieldChange}
                         error={!!errors.emailCapataz}
                         helperText={errors.emailCapataz}
                       />
@@ -507,50 +563,42 @@ const AltaObra = () => {
                         name="telefonoCapataz"
                         type="tel"
                         value={formData.telefonoCapataz}
-                        onChange={(e) =>
-                          setFormData((prev) => ({ ...prev, telefonoCapataz: e.target.value }))
-                        }
+                        onChange={handleFieldChange}
                         error={!!errors.telefonoCapataz}
                         helperText={errors.telefonoCapataz}
                       />
                     </Grid>
                     <Grid item xs={12}>
                       <TextField
-                        label="Encargado"
+                        label="Jornal Ambiental"
                         fullWidth
                         name="encargado"
                         value={formData.encargado}
-                        onChange={(e) =>
-                          setFormData((prev) => ({ ...prev, encargado: e.target.value }))
-                        }
+                        onChange={handleFieldChange}
                         error={!!errors.encargado}
                         helperText={errors.encargado}
                       />
                     </Grid>
                     <Grid item xs={6}>
                       <TextField
-                        label="Email del Encargado"
+                        label="Email del Jornal Ambiental"
                         fullWidth
                         name="emailEncargado"
                         type="email"
                         value={formData.emailEncargado}
-                        onChange={(e) =>
-                          setFormData((prev) => ({ ...prev, emailEncargado: e.target.value }))
-                        }
+                        onChange={handleFieldChange}
                         error={!!errors.emailEncargado}
                         helperText={errors.emailEncargado}
                       />
                     </Grid>
                     <Grid item xs={6}>
                       <TextField
-                        label="Teléfono del Encargado"
+                        label="Teléfono del Jornal Ambiental"
                         fullWidth
                         name="telefonoEncargado"
                         type="tel"
                         value={formData.telefonoEncargado}
-                        onChange={(e) =>
-                          setFormData((prev) => ({ ...prev, telefonoEncargado: e.target.value }))
-                        }
+                        onChange={handleFieldChange}
                         error={!!errors.telefonoEncargado}
                         helperText={errors.telefonoEncargado}
                       />

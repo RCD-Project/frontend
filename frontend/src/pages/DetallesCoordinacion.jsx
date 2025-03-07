@@ -89,8 +89,7 @@ const DetallesCoordinacion = () => {
     );
   }
 
-  // Se arma un arreglo con los detalles a mostrar. 
-  // Formateamos las fechas con dayjs en el formato "DD/MM/YYYY".
+  // Se arma un arreglo con los detalles a mostrar.
   const detalles = [
     { label: "Obra", value: coordinacion.nombre_obra },
     { label: "Tipo de Material", value: coordinacion.tipo_material },
@@ -106,14 +105,31 @@ const DetallesCoordinacion = () => {
         ? dayjs(coordinacion.fecha_retiro).format("DD/MM/YYYY")
         : "No disponible",
     },
-    { label: "Pesaje", value: coordinacion.pesaje },
     { label: "Transportista", value: coordinacion.transportista_nombre },
+    { label: "Cantidad", value: coordinacion.cantidad },
+    { label: "Contacto del Transportista", value: coordinacion.transportista_contacto },
     { label: "Descripción", value: coordinacion.descripcion },
     { label: "Observaciones", value: coordinacion.observaciones },
     { label: "Estado", value: coordinacion.estado },
-    { label: "Comentarios", value: coordinacion.comentarios },
     { label: "Empresa de Tratamiento", value: coordinacion.empresa_gestora_nombre },
+    { label: "Comentarios", value: coordinacion.comentarios },
+    { label: "Contacto de la Empresa", value: coordinacion.empresa_gestora_contacto },
+    { label: "Pesaje", value: coordinacion.pesaje },
   ];
+
+  // Función para decidir el color de fondo según el label
+  const getBackgroundColor = (label) => {
+    if (label.includes("Transportista")) {
+      // Fondo naranja claro
+      return "#ffefdb";
+    }
+    if (label.includes("Empresa")) {
+      // Fondo verde claro
+      return "#e2f7dc";
+    }
+    // Fondo por defecto
+    return "#f4f4f4";
+  };
 
   return (
     <ThemeProvider theme={theme}>
@@ -124,18 +140,23 @@ const DetallesCoordinacion = () => {
           </Typography>
           <Divider sx={{ mb: 2 }} />
           <Grid container spacing={2}>
-            {detalles.map((item, index) => (
-              <Grid item xs={12} sm={6} key={index}>
-                <Paper sx={{ padding: 2, backgroundColor: "#f4f4f4" }}>
-                  <Typography variant="body1" sx={{ fontWeight: "bold" }}>
-                    {item.label}
-                  </Typography>
-                  <Typography variant="body2">
-                    {item.value ? item.value : "No disponible"}
-                  </Typography>
-                </Paper>
-              </Grid>
-            ))}
+            {detalles.map((item, index) => {
+              // Obtenemos el color de fondo para esta fila
+              const bgColor = getBackgroundColor(item.label);
+
+              return (
+                <Grid item xs={12} sm={6} key={index}>
+                  <Paper sx={{ padding: 2, backgroundColor: bgColor }}>
+                    <Typography variant="body1" sx={{ fontWeight: "bold" }}>
+                      {item.label}
+                    </Typography>
+                    <Typography variant="body2">
+                      {item.value ? item.value : "No disponible"}
+                    </Typography>
+                  </Paper>
+                </Grid>
+              );
+            })}
           </Grid>
         </CardContent>
       </Card>

@@ -6,13 +6,11 @@ const Page6 = () => {
   const { data, updateData } = useFormStore();
   const pageIndex = "page6";
 
-  // Estado local para evitar problemas con la actualización asíncrona de FormContext
   const [formData, setFormData] = useState({
     accionesTomadas: data[pageIndex]?.accionesTomadas || "",
     otrasObservaciones: data[pageIndex]?.otrasObservaciones || "",
   });
 
-  // Sincroniza el estado local con FormContext cuando se actualiza
   useEffect(() => {
     updateData(pageIndex, formData);
   }, [formData, pageIndex, updateData]);
@@ -26,7 +24,6 @@ const Page6 = () => {
 
   return (
     <Box sx={{ width: "90%", margin: "auto", mt: 4 }}>
-      {/* Acciones tomadas */}
       <Typography variant="h6" sx={{ mb: 2 }}>
         Acciones tomadas - Gestiones realizadas el día de la visita. Ej: Se movió punto limpio / Se colocó señalética / etc.
       </Typography>
@@ -40,7 +37,6 @@ const Page6 = () => {
         sx={{ mb: 3 }}
       />
 
-      {/* Otras observaciones generales */}
       <Typography variant="h6" sx={{ mb: 2 }}>
         Otras observaciones generales
       </Typography>

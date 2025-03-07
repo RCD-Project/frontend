@@ -11,6 +11,8 @@ import {
   FormControlLabel,
   Radio,
   TextField,
+  FormGroup,
+  useMediaQuery,
 } from "@mui/material";
 import { useFormStore } from "../context/FormContext";
 
@@ -36,7 +38,7 @@ const Page12 = () => {
 
   const storedData = data[pageIndex] || defaultPage12;
   const formData = {
-    mezclados: storedData.mezclados ?? "no_aplica",
+    mezclados: storedData.mezclados ?? "No Aplica",
     gridSelection: storedData.gridSelection ?? null,
     mezcladosOpciones: storedData.mezcladosOpciones ?? [],
     mezcladosOtro: storedData.mezcladosOtro ?? "",
@@ -54,9 +56,10 @@ const Page12 = () => {
     handleChange("mezcladosOpciones", newOpciones);
   };
 
+  const isMobile = useMediaQuery("(max-width:768px)");
+
   return (
     <Box sx={{ width: "90%", margin: "auto", mt: 4 }}>
-      {/* Dropdown: Mezclados */}
       <Typography variant="h6" sx={{ mb: 2 }}>
         Mezclados
       </Typography>
@@ -71,70 +74,104 @@ const Page12 = () => {
         </Select>
       </FormControl>
 
-      {/* Mostrar grid y checkboxes solo si se selecciona "Aplica" */}
       {formData.mezclados === "Aplica" && (
         <>
-          {/* Grid con 1 fila y 3 columnas (radio buttons) */}
           <Typography variant="h6" sx={{ mb: 2 }}>
             Seleccione una opción:
           </Typography>
-          <Grid container spacing={2} sx={{ mb: 3 }} alignItems="center">
-            {["Correcto", "Aceptable (con observaciones)", "Incorrecto"].map(
-              (titulo, index) => (
-                <Grid item xs={4} key={index} sx={{ textAlign: "center" }}>
-                  <Typography variant="subtitle1" sx={{ mb: 1 }}>
-                    {titulo}
-                  </Typography>
-                  <Radio
-                    checked={formData.gridSelection === titulo}
-                    onChange={() => handleChange("gridSelection", titulo)}
-                  />
-                </Grid>
-              )
-            )}
-          </Grid>
+          {isMobile ? (
+            <Box sx={{ display: "flex", flexDirection: "column", gap: 2, mb: 3 }}>
+              {["Correcto", "Aceptable (con observaciones)", "Incorrecto"].map(
+                (titulo, index) => (
+                  <Box key={index} sx={{ textAlign: "center" }}>
+                    <Typography variant="subtitle1" sx={{ mb: 1 }}>
+                      {titulo}
+                    </Typography>
+                    <Radio
+                      checked={formData.gridSelection === titulo}
+                      onChange={() => handleChange("gridSelection", titulo)}
+                    />
+                  </Box>
+                )
+              )}
+            </Box>
+          ) : (
+            <Grid container spacing={2} sx={{ mb: 3 }} alignItems="center">
+              {["Correcto", "Aceptable (con observaciones)", "Incorrecto"].map(
+                (titulo, index) => (
+                  <Grid item xs={4} key={index} sx={{ textAlign: "center" }}>
+                    <Typography variant="subtitle1" sx={{ mb: 1 }}>
+                      {titulo}
+                    </Typography>
+                    <Radio
+                      checked={formData.gridSelection === titulo}
+                      onChange={() => handleChange("gridSelection", titulo)}
+                    />
+                  </Grid>
+                )
+              )}
+            </Grid>
+          )}
 
-          {/* Lista de checkboxes, dispuestas verticalmente */}
-          <Box sx={{ display: "flex", flexDirection: "column", mb: 2 }}>
-            {opcionesCheckbox.map((option, index) => (
-              <FormControlLabel
-                key={index}
-                control={
-                  <Checkbox
-                    checked={formData.mezcladosOpciones.includes(option)}
-                    onChange={() => handleCheckboxChange(option)}
-                  />
-                }
-                label={option}
-              />
-            ))}
-          </Box>
+          {isMobile ? (
+            <Box sx={{ display: "flex", flexDirection: "column", gap: 1, mb: 2 }}>
+              {opcionesCheckbox.map((option, index) => (
+                <FormControlLabel
+                  key={index}
+                  control={
+                    <Checkbox
+                      checked={formData.mezcladosOpciones.includes(option)}
+                      onChange={() => handleCheckboxChange(option)}
+                    />
+                  }
+                  label={option}
+                />
+              ))}
+            </Box>
+          ) : (
+            <FormGroup sx={{ mb: 2 }}>
+              {opcionesCheckbox.map((option, index) => (
+                <FormControlLabel
+                  key={index}
+                  control={
+                    <Checkbox
+                      checked={formData.mezcladosOpciones.includes(option)}
+                      onChange={() => handleCheckboxChange(option)}
+                    />
+                  }
+                  label={option}
+                />
+              ))}
+            </FormGroup>
+          )}
 
-          {/* Si "Otro" está seleccionado, se muestra un textbox para especificar */}
+          {/* Si "Otro" está seleccionado, se muestra textbox para especificar */}
           {formData.mezcladosOpciones.includes("Otro") && (
             <TextField
               label="Especificar Otro"
               fullWidth
-              sx={{ mt: 2 }}
+              sx={{ mt: 2, mb: 3 }}
               value={formData.mezcladosOtro}
               onChange={(e) => handleChange("mezcladosOtro", e.target.value)}
             />
           )}
+
+          {/* Observaciones generales */}
+          <Typography variant="h6" sx={{ mb: 2, mt: 3 }}>
+            Mezclados - Otras observaciones / Sugerencias / Acciones a tomar
+          </Typography>
+          <TextField
+            label="Observaciones"
+            fullWidth
+            multiline
+            rows={4}
+            value={formData.mezcladosObservaciones}
+            onChange={(e) =>
+              handleChange("mezcladosObservaciones", e.target.value)
+            }
+          />
         </>
       )}
-
-      {/* Observaciones generales */}
-      <Typography variant="h6" sx={{ mb: 2, mt: 3 }}>
-        Mezclados - Otras observaciones / Sugerencias / Acciones a tomar
-      </Typography>
-      <TextField
-        label="Observaciones"
-        fullWidth
-        multiline
-        rows={4}
-        value={formData.mezcladosObservaciones}
-        onChange={(e) => handleChange("mezcladosObservaciones", e.target.value)}
-      />
     </Box>
   );
 };

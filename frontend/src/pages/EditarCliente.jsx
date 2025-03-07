@@ -45,7 +45,7 @@ const EditarCliente = () => {
   const [isLoading, setIsLoading] = useState(false);
 
   // Se obtiene el token desde localStorage
-  const token = localStorage.getItem("token");
+  const token = sessionStorage.getItem('token');
 
   useEffect(() => {
     if (id) {

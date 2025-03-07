@@ -40,11 +40,11 @@ const AltaCliente = () => {
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
 
-  // Validación específica para cada paso
+
   const validateStep = (step) => {
     let newErrors = {};
     if (step === 0) {
-      // Validar Información General
+
       if (!formData.nombre.trim() || !/^[a-zA-Z\s]{3,}$/.test(formData.nombre)) {
         newErrors.nombre =
           "Nombre inválido. Mínimo 3 letras y solo caracteres alfabéticos.";
@@ -64,7 +64,7 @@ const AltaCliente = () => {
           "Nombre de contacto inválido. Mínimo 3 letras.";
       }
     } else if (step === 1) {
-      // Validar Detalles Fiscales
+
       if (!formData.razon_social.trim()) {
         newErrors.razon_social = "Razón Social es obligatoria.";
       }
@@ -118,11 +118,10 @@ const AltaCliente = () => {
 
   const handleSubmit = (event) => {
     event.preventDefault();
-    // Validar paso 2 antes de enviar
+
     if (!validateStep(activeStep)) return;
     setIsLoading(true);
 
-    // Convertir la fecha a formato "YYYY-MM-DD" si existe
     const clientData = {
       ...formData,
       fecha_ingreso: formData.fecha_ingreso

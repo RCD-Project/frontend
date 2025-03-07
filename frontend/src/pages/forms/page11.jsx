@@ -9,6 +9,8 @@ import {
   Checkbox,
   FormControlLabel,
   TextField,
+  FormGroup,
+  useMediaQuery,
 } from "@mui/material";
 import { useFormStore } from "../context/FormContext";
 
@@ -27,7 +29,7 @@ const Page11 = () => {
 
   const storedData = data[pageIndex] || {};
   const formData = {
-    madera: storedData.madera ?? "no_aplica",
+    madera: storedData.madera ?? "No Aplica",
     maderaOpciones: storedData.maderaOpciones ?? [],
     maderaOtro: storedData.maderaOtro ?? "",
     maderaObservaciones: storedData.maderaObservaciones ?? "",
@@ -44,9 +46,10 @@ const Page11 = () => {
     handleChange("maderaOpciones", newOpciones);
   };
 
+  const isMobile = useMediaQuery("(max-width:768px)");
+
   return (
     <Box sx={{ width: "90%", margin: "auto", mt: 4 }}>
-      {/* Título y Dropdown para Madera */}
       <Typography variant="h6" sx={{ mb: 2 }}>
         Madera
       </Typography>
@@ -61,45 +64,63 @@ const Page11 = () => {
         </Select>
       </FormControl>
 
-      {/* Lista de Checkboxes solo si se selecciona "Aplica" */}
       {formData.madera === "Aplica" && (
-        <Box sx={{ mb: 3, display: "flex", flexDirection: "column" }}>
-          {opcionesMadera.map((option, index) => (
-            <FormControlLabel
-              key={index}
-              control={
-                <Checkbox
-                  checked={formData.maderaOpciones.includes(option)}
-                  onChange={() => handleCheckboxChange(option)}
+        <>
+          {isMobile ? (
+            <Box sx={{ mb: 3, display: "flex", flexDirection: "column", gap: 1 }}>
+              {opcionesMadera.map((option, index) => (
+                <FormControlLabel
+                  key={index}
+                  control={
+                    <Checkbox
+                      checked={formData.maderaOpciones.includes(option)}
+                      onChange={() => handleCheckboxChange(option)}
+                    />
+                  }
+                  label={option}
                 />
-              }
-              label={option}
-            />
-          ))}
+              ))}
+            </Box>
+          ) : (
+            <FormGroup sx={{ mb: 3 }}>
+              {opcionesMadera.map((option, index) => (
+                <FormControlLabel
+                  key={index}
+                  control={
+                    <Checkbox
+                      checked={formData.maderaOpciones.includes(option)}
+                      onChange={() => handleCheckboxChange(option)}
+                    />
+                  }
+                  label={option}
+                />
+              ))}
+            </FormGroup>
+          )}
+
           {formData.maderaOpciones.includes("Otro") && (
             <TextField
               label="Especificar Otro"
               fullWidth
-              sx={{ mt: 2 }}
+              sx={{ mt: 2, mb: 3 }}
               value={formData.maderaOtro}
               onChange={(e) => handleChange("maderaOtro", e.target.value)}
             />
           )}
-        </Box>
-      )}
 
-      {/* Observaciones generales (label se mantiene como "Metales" según el requerimiento) */}
-      <Typography variant="h6" sx={{ mb: 2 }}>
-        Metales - Otras observaciones / Sugerencias / Acciones a tomar
-      </Typography>
-      <TextField
-        label="Observaciones"
-        fullWidth
-        multiline
-        rows={4}
-        value={formData.maderaObservaciones}
-        onChange={(e) => handleChange("maderaObservaciones", e.target.value)}
-      />
+          <Typography variant="h6" sx={{ mb: 2 }}>
+            Metales - Otras observaciones / Sugerencias / Acciones a tomar
+          </Typography>
+          <TextField
+            label="Observaciones"
+            fullWidth
+            multiline
+            rows={4}
+            value={formData.maderaObservaciones}
+            onChange={(e) => handleChange("maderaObservaciones", e.target.value)}
+          />
+        </>
+      )}
     </Box>
   );
 };

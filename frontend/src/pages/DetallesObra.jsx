@@ -9,15 +9,13 @@ import {
   Divider,
   Box,
   CircularProgress,
+  Link as MuiLink,
 } from "@mui/material";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
 import { AuthContext } from "../pages/context/AuthContext";
 
 const DetallesObra = () => {
-  // Obtener el token desde el contexto
   const { token } = useContext(AuthContext);
-
-  // Se obtiene el id de la obra desde la query string
   const location = useLocation();
   const queryParams = new URLSearchParams(location.search);
   const id = queryParams.get("id");
@@ -63,6 +61,13 @@ const DetallesObra = () => {
       });
   }, [id, token]);
 
+  // Agregamos un console.log para ver qué devuelve la API
+  useEffect(() => {
+    if (obra) {
+      console.log("Obra recibida:", obra);
+    }
+  }, [obra]);
+
   if (loading) {
     return (
       <ThemeProvider theme={theme}>
@@ -93,14 +98,10 @@ const DetallesObra = () => {
     );
   }
 
-  // Agregamos el detalle del cliente. 
-  // Si "obra.cliente" es un objeto anidado, usamos obra.cliente.nombre;
-  // de lo contrario, mostramos el id o "N/A".
-  const clienteDetalle =
-    typeof obra.cliente === "object" && obra.cliente.nombre
-      ? obra.cliente.nombre
-      : obra.cliente || "N/A";
+  // Se obtiene el nombre del cliente desde el serializer
+  const clienteDetalle = obra.cliente_nombre || "N/A";
 
+  // Se arma el array de detalles de la obra, incluyendo el listado de archivos
   const detalles = [
     { label: "Nombre de la Obra", value: obra.nombre_obra },
     { label: "Cliente", value: clienteDetalle },
@@ -111,6 +112,29 @@ const DetallesObra = () => {
     { label: "Inicio de la Obra", value: obra.inicio_obra },
     { label: "Duración de la Obra", value: obra.duracion_obra },
     { label: "Etapa de la Obra", value: obra.etapa_obra },
+    { label: "Tipo de Construcción", value: obra.tipo_construccion || "N/A" },
+    { label: "Metros Cuadrados", value: obra.m2_obra || "N/A" },
+    {
+      label: "Archivos Adjuntos",
+      value:
+        obra.archivos && obra.archivos.length > 0 ? (
+          <Box>
+            {obra.archivos.map((archivoObj, index) => (
+              <MuiLink
+                key={index}
+                href={archivoObj.archivo}
+                target="_blank"
+                rel="noopener noreferrer"
+                sx={{ display: "block", mb: 1 }}
+              >
+                Descargar Archivo {index + 1}
+              </MuiLink>
+            ))}
+          </Box>
+        ) : (
+          "No disponible"
+        ),
+    },
     { label: "Jefe de Obra", value: obra.nombre_jefe_obra },
     { label: "Email del Jefe", value: obra.mail_jefe_obra },
     { label: "Teléfono del Jefe", value: obra.telefono_jefe_obra },
@@ -120,6 +144,7 @@ const DetallesObra = () => {
     { label: "Encargado", value: obra.nombre_encargado_supervisor },
     { label: "Email del Encargado", value: obra.mail_encargado_supervisor },
     { label: "Teléfono del Encargado", value: obra.telefono_encargado_supervisor },
+    { label: "Cantidad de Pisos", value: obra.cant_pisos },
   ];
 
   return (
@@ -142,6 +167,7 @@ const DetallesObra = () => {
               </Grid>
             ))}
           </Grid>
+          {/* Se muestra la imagen si está disponible (opcional) */}
           {obra.imagenes && (
             <Box sx={{ textAlign: "center", mt: 4 }}>
               <img

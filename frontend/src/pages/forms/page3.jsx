@@ -7,6 +7,10 @@ import {
   Checkbox,
   CircularProgress,
   TextField,
+  MenuItem,
+  FormControl,
+  Select,
+  InputLabel
 } from "@mui/material";
 import { useFormStore } from "../context/FormContext";
 
@@ -16,12 +20,11 @@ const titulosColumnas = [
   "Incorrecta",
   "No aplica"
 ];
-
 const titulosFilas = [
   "Ubicacion",
   "Estructura",
   "Tipo de Contenedor",
-  "Estado Contenedores (bolsones, etc)",
+  "Estado de Contenedores (bolsones, etc)",
   "Señalética"
 ];
 
@@ -29,21 +32,28 @@ const Page3 = () => {
   const { data, updateData } = useFormStore();
   const pageIndex = "page3";
 
-  const obraSeleccionada = data.page1?.obra?.id || data.page1?.obraId;
-  console.log("Obra seleccionada (Page3):", obraSeleccionada);
+  const [puntoLimpioSelect, setPuntoLimpioSelect] = useState(
+    data[pageIndex]?.puntoLimpioSelect || "No Hay"
+  );
 
   const [loading, setLoading] = useState(false);
 
   const [formData, setFormData] = useState({
-    grillaPuntosLimpios: Array(titulosFilas.length).fill(""),  
-    puntoLimpioObservaciones: data[pageIndex]?.puntoLimpioObservaciones || "",
+    grillaPuntosLimpios:
+      data[pageIndex]?.grillaPuntosLimpios ||
+      Array(titulosFilas.length).fill(""),
+    puntoLimpioObservaciones: data[pageIndex]?.puntoLimpioObservaciones || ""
   });
 
-  useEffect(() => {
-    if (JSON.stringify(data[pageIndex]) !== JSON.stringify(formData)) {
-      updateData(pageIndex, formData);
+  const handlePuntoLimpioSelect = (e) => {
+    setPuntoLimpioSelect(e.target.value);
+    if (e.target.value === "No Hay") {
+      setFormData({
+        grillaPuntosLimpios: Array(titulosFilas.length).fill(""),
+        puntoLimpioObservaciones: ""
+      });
     }
-  }, [formData, pageIndex, updateData]);
+  };
 
   const handleCheckboxChange = (filaIndex, colIndex) => {
     const newGrilla = [...formData.grillaPuntosLimpios];
@@ -55,6 +65,13 @@ const Page3 = () => {
     setFormData({ ...formData, puntoLimpioObservaciones: e.target.value });
   };
 
+  useEffect(() => {
+    updateData(pageIndex, {
+      ...formData,
+      puntoLimpioSelect
+    });
+  }, [formData, puntoLimpioSelect]);
+
   return (
     <Box sx={{ width: "90%", margin: "auto", mt: 4 }}>
       <Typography variant="h4" sx={{ mb: 2 }}>
@@ -65,59 +82,94 @@ const Page3 = () => {
         <CircularProgress />
       ) : (
         <>
-          {/* 🔹 Grilla de evaluación */}
           <Typography variant="h6" sx={{ mb: 2 }}>
-            Estado General de los Puntos Limpios
+            ¿Hay punto limpio?
           </Typography>
-          <Paper elevation={3} sx={{ p: 2 }}>
-            <Grid container spacing={1}>
-              {/* 🔹 Encabezado de la grilla */}
-              <Grid container item>
-                <Grid item xs={3} sx={{ fontWeight: "bold", textAlign: "center", p: 1 }}>
-                  -
-                </Grid>
-                {titulosColumnas.map((titulo, colIndex) => (
-                  <Grid
-                    item
-                    xs={2.25}
-                    key={colIndex}
-                    sx={{ textAlign: "center", fontWeight: "bold", p: 1 }}
-                  >
-                    {titulo}
-                  </Grid>
-                ))}
-              </Grid>
+          <FormControl sx={{ mb: 2, minWidth: 200 }}>
+            <InputLabel id="puntoLimpioSelect-label">Punto Limpio</InputLabel>
+            <Select
+              labelId="puntoLimpioSelect-label"
+              id="puntoLimpioSelect"
+              value={puntoLimpioSelect}
+              label="Punto Limpio"
+              onChange={handlePuntoLimpioSelect}
+            >
+              <MenuItem value="Hay">Hay</MenuItem>
+              <MenuItem value="No Hay">No Hay</MenuItem>
+            </Select>
+          </FormControl>
 
-              {/* 🔹 Filas de la grilla */}
-              {titulosFilas.map((fila, rowIndex) => (
-                <Grid container item key={rowIndex} alignItems="center">
-                  <Grid item xs={3} sx={{ fontWeight: "bold", textAlign: "center", p: 1 }}>
-                    {fila}
+          {puntoLimpioSelect === "Hay" && (
+            <>
+              <Typography variant="h6" sx={{ mb: 2 }}>
+                Estado General de los Puntos Limpios
+              </Typography>
+              <Paper elevation={3} sx={{ p: 2 }}>
+                <Grid container spacing={1}>
+                  <Grid container item>
+                    <Grid
+                      item
+                      xs={3}
+                      sx={{ fontWeight: "bold", textAlign: "center", p: 1 }}
+                    >
+                      -
+                    </Grid>
+                    {titulosColumnas.map((titulo, colIndex) => (
+                      <Grid
+                        item
+                        xs={2.25}
+                        key={colIndex}
+                        sx={{ textAlign: "center", fontWeight: "bold", p: 1 }}
+                      >
+                        {titulo}
+                      </Grid>
+                    ))}
                   </Grid>
-                  {titulosColumnas.map((_, colIndex) => (
-                    <Grid item xs={2.25} key={colIndex} sx={{ textAlign: "center", p: 1 }}>
-                      <Checkbox
-                        checked={formData.grillaPuntosLimpios[rowIndex] === titulosColumnas[colIndex]}
-                        onChange={() => handleCheckboxChange(rowIndex, colIndex)}
-                      />
+
+                  {titulosFilas.map((fila, rowIndex) => (
+                    <Grid container item key={rowIndex} alignItems="center">
+                      <Grid
+                        item
+                        xs={3}
+                        sx={{ fontWeight: "bold", textAlign: "center", p: 1 }}
+                      >
+                        {fila}
+                      </Grid>
+                      {titulosColumnas.map((_, colIndex) => (
+                        <Grid
+                          item
+                          xs={2.25}
+                          key={colIndex}
+                          sx={{ textAlign: "center", p: 1 }}
+                        >
+                          <Checkbox
+                            checked={
+                              formData.grillaPuntosLimpios[rowIndex] ===
+                              titulosColumnas[colIndex]
+                            }
+                            onChange={() =>
+                              handleCheckboxChange(rowIndex, colIndex)
+                            }
+                          />
+                        </Grid>
+                      ))}
                     </Grid>
                   ))}
                 </Grid>
-              ))}
-            </Grid>
-          </Paper>
+              </Paper>
 
-          {/* 🔹 Observaciones generales */}
-          <Typography variant="h6" sx={{ mt: 2 }}>
-            Observaciones Generales
-          </Typography>
-          <TextField
-            fullWidth
-            multiline
-            rows={4}
-            value={formData.puntoLimpioObservaciones}
-            onChange={handleObservationChange}
-          />
+              <Typography variant="h6" sx={{ mt: 2 }}>
+                Observaciones Generales
+              </Typography>
+              <TextField
+                fullWidth
+                multiline
+                rows={4}
+                value={formData.puntoLimpioObservaciones}
+                onChange={handleObservationChange}
+              />
+            </>
+          )}
         </>
       )}
     </Box>

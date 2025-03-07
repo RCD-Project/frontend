@@ -11,7 +11,10 @@ import { Link } from 'react-router-dom';
 
 const Capacitaciones = () => {
   const [capacitaciones, setCapacitaciones] = useState([]);
-  const { token } = useContext(AuthContext); 
+  const [anchorEl, setAnchorEl] = useState(null);
+  const [selectedCapacitacion, setSelectedCapacitacion] = useState(null);
+
+  const { token, role, user } = useContext(AuthContext); 
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -30,9 +33,19 @@ const Capacitaciones = () => {
         }
         return response.json();
       })
-      .then((data) => setCapacitaciones(data))
+      .then((data) => {
+        // Filtrar si es tecnico
+        if (role === 'tecnico' && user?.email) {
+          const filtradas = data.filter(
+            (cap) => cap.tecnico_email === user.email
+          );
+          setCapacitaciones(filtradas);
+        } else {
+          setCapacitaciones(data);
+        }
+      })
       .catch((error) => console.error('Error al obtener capacitaciones:', error));
-  }, [token]);
+  }, [token, role, user]);
 
   const eliminarCapacitacion = (id) => {
     const confirmacion = window.confirm("¿Seguro que deseas eliminar esta capacitación?");
@@ -51,14 +64,13 @@ const Capacitaciones = () => {
           return res.text();
         })
         .then(() => {
-          setCapacitaciones(capacitaciones.filter((capacitacion) => capacitacion.id !== id));
+          setCapacitaciones(
+            capacitaciones.filter((capacitacion) => capacitacion.id !== id)
+          );
         })
         .catch((error) => console.error("Error al eliminar capacitación:", error));
     }
   };
-
-  const [anchorEl, setAnchorEl] = useState(null);
-  const [selectedCapacitacion, setSelectedCapacitacion] = useState(null);
 
   const handleMenuOpen = (event, capacitacion) => {
     setAnchorEl(event.currentTarget);
@@ -81,11 +93,9 @@ const Capacitaciones = () => {
       flex: 1,
       sortable: false,
       renderCell: (params) => (
-        <>
-          <IconButton onClick={(event) => handleMenuOpen(event, params.row)}>
-            <MoreVertIcon />
-          </IconButton>
-        </>
+        <IconButton onClick={(event) => handleMenuOpen(event, params.row)}>
+          <MoreVertIcon />
+        </IconButton>
       ),
     },
   ];

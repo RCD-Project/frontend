@@ -9,6 +9,8 @@ import {
   Checkbox,
   FormControlLabel,
   TextField,
+  FormGroup,
+  useMediaQuery,
 } from "@mui/material";
 import { useFormStore } from "../context/FormContext";
 
@@ -30,7 +32,7 @@ const Page9 = () => {
 
   const storedData = data[pageIndex] || {};
   const formData = {
-    papelCarton: storedData.papelCarton ?? "no_aplica",
+    papelCarton: storedData.papelCarton ?? "No Aplica",
     papelCartonOpciones: storedData.papelCartonOpciones ?? [],
     papelCartonObservaciones: storedData.papelCartonObservaciones ?? "",
     papelCartonOtro: storedData.papelCartonOtro ?? "",
@@ -46,6 +48,8 @@ const Page9 = () => {
       : [...formData.papelCartonOpciones, option];
     handleChange("papelCartonOpciones", newOpciones);
   };
+
+  const isMobile = useMediaQuery("(max-width:768px)");
 
   return (
     <Box sx={{ width: "90%", margin: "auto", mt: 4 }}>
@@ -63,47 +67,67 @@ const Page9 = () => {
         </Select>
       </FormControl>
 
-      {/* Mostrar checkboxes solo si se selecciona "Aplica" */}
       {formData.papelCarton === "Aplica" && (
-        <Box sx={{ mb: 3, display: "flex", flexDirection: "column" }}>
-          {opcionesPapelCarton.map((option, index) => (
-            <FormControlLabel
-              key={index}
-              control={
-                <Checkbox
-                  checked={formData.papelCartonOpciones.includes(option)}
-                  onChange={() => handleCheckboxChange(option)}
-                />
-              }
-              label={option}
-            />
-          ))}
-          {/* Si se selecciona "Otro", se habilita un textbox para especificar */}
-          {formData.papelCartonOpciones.includes("Otro") && (
-            <TextField
-              label="Especificar Otro"
-              fullWidth
-              sx={{ mt: 2 }}
-              value={formData.papelCartonOtro}
-              onChange={(e) => handleChange("papelCartonOtro", e.target.value)}
-            />
-          )}
-        </Box>
-      )}
+        <>
+          <Box sx={{ mb: 3 }}>
+            {isMobile ? (
+              <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
+                {opcionesPapelCarton.map((option, index) => (
+                  <FormControlLabel
+                    key={index}
+                    control={
+                      <Checkbox
+                        checked={formData.papelCartonOpciones.includes(option)}
+                        onChange={() => handleCheckboxChange(option)}
+                      />
+                    }
+                    label={option}
+                  />
+                ))}
+              </Box>
+            ) : (
+              <FormGroup>
+                {opcionesPapelCarton.map((option, index) => (
+                  <FormControlLabel
+                    key={index}
+                    control={
+                      <Checkbox
+                        checked={formData.papelCartonOpciones.includes(option)}
+                        onChange={() => handleCheckboxChange(option)}
+                      />
+                    }
+                    label={option}
+                  />
+                ))}
+              </FormGroup>
+            )}
 
-      <Typography variant="h6" sx={{ mb: 2 }}>
-        Papel y Cartón - Otras observaciones / Sugerencias / Acciones a tomar
-      </Typography>
-      <TextField
-        label="Observaciones"
-        fullWidth
-        multiline
-        rows={4}
-        value={formData.papelCartonObservaciones}
-        onChange={(e) =>
-          handleChange("papelCartonObservaciones", e.target.value)
-        }
-      />
+            {formData.papelCartonOpciones.includes("Otro") && (
+              <TextField
+                label="Especificar Otro"
+                fullWidth
+                sx={{ mt: 2 }}
+                value={formData.papelCartonOtro}
+                onChange={(e) => handleChange("papelCartonOtro", e.target.value)}
+              />
+            )}
+          </Box>
+
+          <Typography variant="h6" sx={{ mb: 2 }}>
+            Papel y Cartón - Otras observaciones / Sugerencias / Acciones a tomar
+          </Typography>
+          <TextField
+            label="Observaciones"
+            fullWidth
+            multiline
+            rows={4}
+            value={formData.papelCartonObservaciones}
+            onChange={(e) =>
+              handleChange("papelCartonObservaciones", e.target.value)
+            }
+          />
+        </>
+      )}
     </Box>
   );
 };

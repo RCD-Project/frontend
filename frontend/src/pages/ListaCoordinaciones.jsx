@@ -1,23 +1,35 @@
-import React, { useState, useEffect, useContext } from 'react';
-import { useNavigate, useLocation, Link } from 'react-router-dom';
-import Tabla from '../components/Table';
-import { Typography, Button, IconButton, Menu, MenuItem, Alert, CircularProgress } from '@mui/material';
-import MoreVertIcon from '@mui/icons-material/MoreVert';
-import VisibilityIcon from '@mui/icons-material/Visibility';
-import EditIcon from '@mui/icons-material/Edit';
-import DeleteIcon from '@mui/icons-material/Delete';
-import AddIcon from '@mui/icons-material/Add';
-import { AuthContext } from '../pages/context/AuthContext';
-import dayjs from 'dayjs';
-import 'dayjs/locale/es';
+import React, { useState, useEffect, useContext } from "react";
+import { useNavigate, useLocation, Link } from "react-router-dom";
+import Tabla from "../components/Table";
+import {
+  Typography,
+  Button,
+  IconButton,
+  Menu,
+  MenuItem,
+  Alert,
+} from "@mui/material";
+import MoreVertIcon from "@mui/icons-material/MoreVert";
+import VisibilityIcon from "@mui/icons-material/Visibility";
+import EditIcon from "@mui/icons-material/Edit";
+import DeleteIcon from "@mui/icons-material/Delete";
+import AddIcon from "@mui/icons-material/Add";
+import { AuthContext } from "../pages/context/AuthContext";
+import dayjs from "dayjs";
+import "dayjs/locale/es";
 
-dayjs.locale('es');
+dayjs.locale("es");
+
+const allowedRoles = ["superadmin", "coordinador", "coordinadorlogistico"];
 
 const ListaDeCoordinaciones = () => {
   const [coordinaciones, setCoordinaciones] = useState([]);
+  const [anchorEl, setAnchorEl] = useState(null);
+  const [selectedCoordinacion, setSelectedCoordinacion] = useState(null);
+  const [showVincularMessage, setShowVincularMessage] = useState(false);
+  const { token, role } = useContext(AuthContext);
   const navigate = useNavigate();
   const location = useLocation();
-  const { token } = useContext(AuthContext);
 
   const successMessage = location.state?.successMessage || "";
 
@@ -25,26 +37,21 @@ const ListaDeCoordinaciones = () => {
     fetch("http://127.0.0.1:8000/api/coordinacionretiro/aceptadas/", {
       headers: {
         "Content-Type": "application/json",
-        "Authorization": `Token ${token}`,
+        Authorization: `Token ${token}`,
       },
     })
-      .then((res) => {
-        if (!res.ok) {
-          throw new Error(`Error HTTP: ${res.status}`);
-        }
-        return res.json();
-      })
+      .then((res) => (res.ok ? res.json() : Promise.reject(res.status)))
       .then((data) => {
-
         setCoordinaciones(data);
+        setShowVincularMessage(
+          data.some((coord) => !coord.transportista || !coord.empresa_tratamiento)
+        );
       })
       .catch((err) =>
         console.error("Error al obtener coordinaciones aceptadas:", err)
       );
   }, [token]);
-
-  const [anchorEl, setAnchorEl] = useState(null);
-  const [selectedCoordinacion, setSelectedCoordinacion] = useState(null);
+  
 
   const handleMenuOpen = (event, coordinacion) => {
     setAnchorEl(event.currentTarget);
@@ -57,64 +64,41 @@ const ListaDeCoordinaciones = () => {
   };
 
   const columnasCoordinaciones = [
+    { field: "nombre_obra", headerName: "Obra", flex: 1 },
+    { field: "tipo_material", headerName: "Tipo de Material", flex: 1 },
+    { field: "transportista_nombre", headerName: "Transportista", flex: 1 },
+    { field: "fecha_solicitud", headerName: "Fecha de Solicitud", flex: 1 },
+    { field: "fecha_retiro", headerName: "Fecha de Retiro", flex: 1 },
     {
-      field: "nombre_obra",
-      headerName: "Obra",
-      flex: 1,
-      renderCell: (params) => params.row.nombre_obra || "Sin nombre",
-    },
-    { field: 'tipo_material', headerName: 'Tipo de Material', flex: 1 },
-    {
-      field: "transportista_nombre",
-      headerName: "Transportista",
-      flex: 1,
-      renderCell: (params) => params.row.transportista_nombre || "Sin nombre",
-    },
-    {
-      field: 'fecha_solicitud',
-      headerName: 'Fecha de Solicitud',
-      flex: 1,
-      renderCell: (params) =>
-        params.row.fecha_solicitud
-          ? dayjs(params.row.fecha_solicitud).format('DD/MM/YYYY')
-          : "-",
-    },
-    {
-      field: 'fecha_retiro',
-      headerName: 'Fecha de Retiro',
-      flex: 1,
-      renderCell: (params) =>
-        params.row.fecha_retiro
-          ? dayjs(params.row.fecha_retiro).format('DD/MM/YYYY')
-          : "-",
-    },
-    {
-      field: 'acciones',
-      headerName: 'Acciones',
+      field: "acciones",
+      headerName: "Acciones",
       flex: 1,
       sortable: false,
-      align: 'center',
+      align: "center",
       renderCell: (params) => (
-        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-          <IconButton onClick={(event) => handleMenuOpen(event, params.row)}>
-            <MoreVertIcon />
-          </IconButton>
-        </div>
+        <IconButton onClick={(event) => handleMenuOpen(event, params.row)}>
+          <MoreVertIcon />
+        </IconButton>
       ),
     },
   ];
-  
-  
 
   return (
     <div>
-      <Typography variant="h4" sx={{ textAlign: 'center', mb: 4 }}>
+      <Typography variant="h4" sx={{ textAlign: "center", mb: 4 }}>
         Lista de Coordinaciones Aceptadas
       </Typography>
 
       {successMessage && (
         <Alert severity="success" sx={{ mb: 2 }}>
           {successMessage}
+        </Alert>
+      )}
+
+      {showVincularMessage && role !== "supervisor" && (
+        <Alert severity="warning" sx={{ mb: 2 }}>
+          Hay coordinaciones sin Transportista o Empresa de Tratamiento.
+          ¡Vincúlalos!
         </Alert>
       )}
 
@@ -125,40 +109,57 @@ const ListaDeCoordinaciones = () => {
         filtroPlaceholder="Buscar por obra"
       />
 
-      <Menu anchorEl={anchorEl} open={Boolean(anchorEl)} onClose={handleMenuClose}>
-        <MenuItem onClick={() => { 
-            handleMenuClose(); 
+      <Menu
+        anchorEl={anchorEl}
+        open={Boolean(anchorEl)}
+        onClose={handleMenuClose}
+      >
+        <MenuItem
+          onClick={() => {
+            handleMenuClose();
             navigate(`/detallescoordinacion?id=${selectedCoordinacion?.id}`);
-          }}>
-          <VisibilityIcon /> Ver detalles
+          }}
+        >
+          <VisibilityIcon sx={{ mr: 1 }} /> Ver detalles
         </MenuItem>
-        <MenuItem onClick={() => { 
-            handleMenuClose(); 
-            navigate(`/editarcoordinacion?id=${selectedCoordinacion?.id}`);
-          }}>
-          <EditIcon /> Editar
-        </MenuItem>
-        <MenuItem onClick={() => { 
-            handleMenuClose(); 
-            /* Lógica de eliminación aquí */
-          }}>
-          <DeleteIcon style={{ color: 'red' }} /> Eliminar
-        </MenuItem>
+
+        {allowedRoles.includes(role) && (
+          <>
+            <MenuItem
+              onClick={() => {
+                handleMenuClose();
+                navigate(`/editarcoordinacion?id=${selectedCoordinacion?.id}`);
+              }}
+            >
+              <EditIcon sx={{ mr: 1 }} /> Editar
+            </MenuItem>
+            <MenuItem
+              onClick={() => {
+                handleMenuClose(); /* lógica eliminar aquí */
+              }}
+            >
+              <DeleteIcon sx={{ color: "red", mr: 1 }} /> Eliminar
+            </MenuItem>
+          </>
+        )}
       </Menu>
 
-      <Button
-        variant="contained"
-        startIcon={<AddIcon />}
-        component={Link}
-        to="/altacoordinaciones"
-        sx={{
-          marginTop: '20px',
-          backgroundColor: '#abbf9d',
-          '&:hover': { backgroundColor: '#d1e063' },
-        }}
-      >
-        Añadir Coordinación
-      </Button>
+      {/* El botón solo se muestra si el rol NO es "tecnico" */}
+      {role !== "tecnico" && (
+        <Button
+          variant="contained"
+          startIcon={<AddIcon />}
+          component={Link}
+          to="/altacoordinaciones"
+          sx={{
+            marginTop: "20px",
+            backgroundColor: "#abbf9d",
+            "&:hover": { backgroundColor: "#d1e063" },
+          }}
+        >
+          Añadir Coordinación
+        </Button>
+      )}
     </div>
   );
 };

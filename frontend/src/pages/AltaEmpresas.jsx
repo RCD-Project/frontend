@@ -9,10 +9,21 @@ import {
   Box,
   Alert,
   CircularProgress,
+  MenuItem
 } from "@mui/material";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
 import { useNavigate } from "react-router-dom";
 import { AuthContext } from "./context/AuthContext";
+
+const TIPO_MATERIAL_OPTIONS = [
+  { value: "escombro_limpio", label: "Escombro Limpio" },
+  { value: "plastico", label: "Plástico" },
+  { value: "papel_carton", label: "Papel y Cartón" },
+  { value: "metales", label: "Metales" },
+  { value: "madera", label: "Madera" },
+  { value: "mezclados", label: "Mezclados" },
+  { value: "peligrosos", label: "Peligrosos" },
+];
 
 const AltaEmpresasGestoras = () => {
   const [formData, setFormData] = useState({
@@ -20,6 +31,7 @@ const AltaEmpresasGestoras = () => {
     ubicacion: "",
     contacto: "",
     email: "",
+    tipo_material: "",
   });
   const [errors, setErrors] = useState({});
   const [successMessage, setSuccessMessage] = useState("");
@@ -28,7 +40,7 @@ const AltaEmpresasGestoras = () => {
   const navigate = useNavigate();
   const { token } = useContext(AuthContext);
 
-
+  // Validación básica
   const validateForm = () => {
     let newErrors = {};
 
@@ -43,6 +55,9 @@ const AltaEmpresasGestoras = () => {
     }
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
       newErrors.email = "Correo electrónico inválido.";
+    }
+    if (!formData.tipo_material) {
+      newErrors.tipo_material = "Debe seleccionar un tipo de material.";
     }
 
     setErrors(newErrors);
@@ -80,9 +95,11 @@ const AltaEmpresasGestoras = () => {
         const errorData = await response.json();
         throw new Error(errorData.message || "Error al registrar la empresa gestora");
       }
+      // Si todo va bien
       const data = await response.json();
       setSuccessMessage("Empresa registrada con éxito.");
       setIsLoading(false);
+      // Navegamos a la lista
       navigate("/empresasgestoras", { state: { successMessage: "Empresa registrada con éxito." } });
     } catch (error) {
       setErrorMessage(error.message);
@@ -100,7 +117,10 @@ const AltaEmpresasGestoras = () => {
 
   return (
     <ThemeProvider theme={theme}>
-      <Container maxWidth="md" sx={{ minHeight: "100vh", display: "flex", justifyContent: "center", alignItems: "center" }}>
+      <Container
+        maxWidth="md"
+        sx={{ minHeight: "100vh", display: "flex", justifyContent: "center", alignItems: "center" }}
+      >
         <Box sx={{ width: "100%" }}>
           <Paper elevation={3} sx={{ padding: 6, borderRadius: 3 }}>
             <Typography variant="h3" gutterBottom sx={{ mb: 4, textAlign: "center" }}>
@@ -166,9 +186,34 @@ const AltaEmpresasGestoras = () => {
                     helperText={errors.email}
                   />
                 </Grid>
+
+                <Grid item xs={12}>
+                  <TextField
+                    select
+                    label="Tipo de Material"
+                    name="tipo_material"
+                    value={formData.tipo_material}
+                    onChange={handleChange}
+                    fullWidth
+                    error={!!errors.tipo_material}
+                    helperText={errors.tipo_material}
+                  >
+                    {TIPO_MATERIAL_OPTIONS.map((opt) => (
+                      <MenuItem key={opt.value} value={opt.value}>
+                        {opt.label}
+                      </MenuItem>
+                    ))}
+                  </TextField>
+                </Grid>
               </Grid>
               <Box sx={{ textAlign: "right", mt: 4 }}>
-                <Button type="submit" variant="contained" color="primary" disabled={isLoading} startIcon={isLoading && <CircularProgress size={20} color="inherit" />}>
+                <Button
+                  type="submit"
+                  variant="contained"
+                  color="primary"
+                  disabled={isLoading}
+                  startIcon={isLoading && <CircularProgress size={20} color="inherit" />}
+                >
                   {isLoading ? "Registrando..." : "Registrar"}
                 </Button>
               </Box>

@@ -8,6 +8,9 @@ import {
   Typography,
   Grid,
   Checkbox,
+  useMediaQuery,
+  FormControlLabel,
+  Box,
 } from "@mui/material";
 import { useFormStore } from "../context/FormContext";
 
@@ -28,7 +31,6 @@ const titulosFilas = [
 const Page5 = () => {
   const { data, updateData } = useFormStore();
 
-  // Valor por defecto: la grilla es un objeto donde cada clave es el nombre de la fila
   const defaultPage5 = {
     grilla: titulosFilas.reduce((acc, fila) => {
       acc[fila] = "";
@@ -38,7 +40,6 @@ const Page5 = () => {
     observaciones: "",
   };
 
-  // Si no existe, usamos el valor por defecto
   const page5Data = data.page5 || defaultPage5;
 
   // Inicializa page5 en el estado global si aún no existe.
@@ -48,17 +49,14 @@ const Page5 = () => {
     }
   }, [data.page5, updateData]);
 
-  // Maneja el cambio en el dropdown
   const handleDropdownChange = (event) => {
     updateData("page5", { ...page5Data, acopioContenedores: event.target.value });
   };
 
-  // Maneja el cambio en las observaciones
   const handleObservationChange = (event) => {
     updateData("page5", { ...page5Data, observaciones: event.target.value });
   };
 
-  // Actualiza la grilla para la fila indicada (clave) se guarda el string de la columna seleccionada.
   const handleCheckboxChange = (fila, colIndex) => {
     updateData("page5", {
       ...page5Data,
@@ -69,9 +67,10 @@ const Page5 = () => {
     });
   };
 
+  const isMobile = useMediaQuery("(max-width:768px)");
+
   return (
     <div>
-      {/* Dropdown: Lugar de acopio de contenedores llenos */}
       <FormControl fullWidth margin="normal">
         <InputLabel>
           Lugar de acopio de contenedores llenos para su traspaso al camión de retiro
@@ -85,56 +84,98 @@ const Page5 = () => {
         </Select>
       </FormControl>
 
-      {/* Grilla: Estado del Punto de Acopio */}
-      <Typography variant="h6" sx={{ mt: 3 }}>
-        ¿Cómo se encuentra el Punto de Acopio?
-      </Typography>
-      <Grid container spacing={1} sx={{ mt: 2 }}>
-        {/* Encabezado */}
-        <Grid container item>
-          <Grid item xs={3} sx={{ fontWeight: "bold", textAlign: "center", p: 1 }}>
-            -
-          </Grid>
-          {titulosColumnas.map((titulo, index) => (
-            <Grid
-              item
-              xs={2.25}
-              key={index}
-              sx={{ textAlign: "center", fontWeight: "bold", p: 1 }}
-            >
-              {titulo}
-            </Grid>
-          ))}
-        </Grid>
-        {/* Filas */}
-        {titulosFilas.map((fila) => (
-          <Grid container item key={fila} alignItems="center">
-            <Grid item xs={3} sx={{ fontWeight: "bold", textAlign: "center", p: 1 }}>
-              {fila}
-            </Grid>
-            {titulosColumnas.map((_, colIndex) => (
-              <Grid item xs={2.25} key={colIndex} sx={{ textAlign: "center", p: 1 }}>
-                <Checkbox
-                  checked={page5Data.grilla?.[fila] === titulosColumnas[colIndex]}
-                  onChange={() => handleCheckboxChange(fila, colIndex)}
-                  disabled={page5Data.acopioContenedores === "No hay"}
-                />
+      {page5Data.acopioContenedores === "Si hay" && (
+        <>
+          <Typography variant="h6" sx={{ mt: 3 }}>
+            ¿Cómo se encuentra el Punto de Acopio?
+          </Typography>
+          {!isMobile ? (
+            <Grid container spacing={1} sx={{ mt: 2 }}>
+              <Grid container item>
+                <Grid
+                  item
+                  xs={3}
+                  sx={{ fontWeight: "bold", textAlign: "center", p: 1 }}
+                >
+                  -
+                </Grid>
+                {titulosColumnas.map((titulo, index) => (
+                  <Grid
+                    item
+                    xs={2.25}
+                    key={index}
+                    sx={{ textAlign: "center", fontWeight: "bold", p: 1 }}
+                  >
+                    {titulo}
+                  </Grid>
+                ))}
               </Grid>
-            ))}
-          </Grid>
-        ))}
-      </Grid>
+              {titulosFilas.map((fila) => (
+                <Grid container item key={fila} alignItems="center">
+                  <Grid
+                    item
+                    xs={3}
+                    sx={{ fontWeight: "bold", textAlign: "center", p: 1 }}
+                  >
+                    {fila}
+                  </Grid>
+                  {titulosColumnas.map((_, colIndex) => (
+                    <Grid
+                      item
+                      xs={2.25}
+                      key={colIndex}
+                      sx={{ textAlign: "center", p: 1 }}
+                    >
+                      <Checkbox
+                        checked={page5Data.grilla?.[fila] === titulosColumnas[colIndex]}
+                        onChange={() => handleCheckboxChange(fila, colIndex)}
+                      />
+                    </Grid>
+                  ))}
+                </Grid>
+              ))}
+            </Grid>
+          ) : (
+            titulosFilas.map((fila) => (
+              <Box
+                key={fila}
+                sx={{
+                  border: "1px solid gray",
+                  borderRadius: 1,
+                  p: 1,
+                  mb: 1,
+                }}
+              >
+                <Typography variant="subtitle1" sx={{ fontWeight: "bold", mb: 1 }}>
+                  {fila}
+                </Typography>
+                {titulosColumnas.map((opcion, colIndex) => (
+                  <FormControlLabel
+                    key={colIndex}
+                    control={
+                      <Checkbox
+                        checked={page5Data.grilla?.[fila] === opcion}
+                        onChange={() => handleCheckboxChange(fila, colIndex)}
+                      />
+                    }
+                    label={opcion}
+                  />
+                ))}
+              </Box>
+            ))
+          )}
 
-      {/* TextBox: Observaciones */}
-      <TextField
-        label="Punto de Acopio - Observaciones / Sugerencias / Acciones a tomar"
-        multiline
-        rows={4}
-        fullWidth
-        margin="normal"
-        value={page5Data.observaciones || ""}
-        onChange={handleObservationChange}
-      />
+          <TextField
+            label="Punto de Acopio - Observaciones / Sugerencias / Acciones a tomar"
+            multiline
+            rows={4}
+            fullWidth
+            margin="normal"
+            value={page5Data.observaciones || ""}
+            onChange={handleObservationChange}
+          />
+        </>
+      )}
     </div>
   );
 };

@@ -93,6 +93,7 @@ const DetallesTransportista = () => {
           <Divider sx={{ mb: 4 }} />
           <Grid container spacing={3}>
             {[
+              { label: "Nombre Transportista", value: transportista.nombre },
               { label: "Contacto", value: transportista.contacto },
               { label: "Correo Electrónico", value: transportista.email },
               { label: "Tipo de Vehículo", value: transportista.tipo_vehiculo },

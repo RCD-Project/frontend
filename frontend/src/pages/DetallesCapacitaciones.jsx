@@ -55,6 +55,7 @@ const DetallesCapacitacion = () => {
       })
       .then((data) => {
         setCapacitacion(data);
+        console.log(data);
         setLoading(false);
       })
       .catch((err) => {
@@ -100,7 +101,10 @@ const DetallesCapacitacion = () => {
     { label: "Obra", value: capacitacion.obra_nombre },
     { label: "Fecha", value: capacitacion.fecha },
     { label: "Técnico", value: capacitacion.tecnico_nombre },
-  ];
+    { 
+      label: "Supervisor a Cargo", 
+      value: capacitacion.supervisor_nombre || "No asignado" 
+    },  ];
 
   return (
     <ThemeProvider theme={theme}>

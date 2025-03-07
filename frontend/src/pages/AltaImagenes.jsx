@@ -15,8 +15,7 @@ import { AuthContext } from "../pages/context/AuthContext";
 
 const AltaImagenes = () => {
   const [obra, setObra] = useState(null);
-  // Cada elemento del array contendrá: { file, descripcion, fecha }
-  // Inicializamos con un objeto vacío para mostrar al menos un formulario
+
   const [selectedFiles, setSelectedFiles] = useState([
     { file: null, descripcion: "", fecha: null },
   ]);
@@ -27,7 +26,6 @@ const AltaImagenes = () => {
   const navigate = useNavigate();
   const location = useLocation();
 
-  // Obtener el ID de la obra desde la query string
   const queryParams = new URLSearchParams(location.search);
   const obraId = queryParams.get("obraId");
 
@@ -78,7 +76,7 @@ const AltaImagenes = () => {
     });
   };
 
-  // Agrega un nuevo objeto en el array para poder subir otra imagen
+
   const handleAddImage = () => {
     setSelectedFiles((prev) => [
       ...prev,
@@ -88,7 +86,7 @@ const AltaImagenes = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    // Verificar que al menos una imagen tenga archivo
+
     if (selectedFiles.length === 0 || !selectedFiles.some((item) => item.file)) {
       setErrorMessage("Debes agregar al menos una imagen.");
       return;
@@ -98,8 +96,6 @@ const AltaImagenes = () => {
     setSuccessMessage("");
     const formData = new FormData();
 
-    // Para cada imagen agregamos el archivo, descripción y fecha.
-    // Si el backend espera arrays, podrías usar "imagenes[]", "descripciones[]" y "fechas[]"
     selectedFiles.forEach((item) => {
       if (item.file) {
         formData.append("imagenes", item.file);

@@ -134,30 +134,34 @@
 
 /* Media Query para dispositivos móviles */
 @media (max-width: 768px) {
+  /* Drawer: oculto inicialmente fuera de la pantalla y se desliza al abrirse */
   .drawer {
-    width: 100%;
-    height: 100%;
+    width: 220px; /* o el ancho deseado cuando se despliega */
+    height: calc(100vh - var(--header-height));
     position: fixed;
     top: var(--header-height, 70px);
     left: 0;
-    max-width: none;
-    padding: 10px 0;
-    box-shadow: none;
-    transform: translateX(-100%); /* Oculto por defecto */
+    transform: translateX(-100%);
     transition: transform 0.3s ease-in-out;
+    z-index: 150; /* Asegura que se superponga al contenido */
   }
-
-  /* Cuando se active la clase "open", se desliza a la vista */
+  
+  /* Cuando se abra, el drawer se desliza a la vista */
   .drawer.open {
     transform: translateX(0);
   }
-
-  /* Opcionales: ajustar tamaños para mejorar usabilidad */
-  .drawer-item {
-    height: 60px;
+  
+  /* Body Content: se asegura que ocupe el 100% del ancho y se elimina el margen lateral que empuja el contenido */
+  .body-content {
+    width: 100%;
+    margin-left: 0 !important;
+    padding: var(--body-padding);
   }
-  .drawer-link {
-    font-size: 1rem;
-    padding: 10px 15px;
+  
+  /* Si utilizas un contenedor principal que en desktop organiza en flex, puedes posicionarlo de forma relativa */
+  .main-content {
+    position: relative;
+    margin-top: var(--header-height);
+    overflow: hidden;
   }
 }

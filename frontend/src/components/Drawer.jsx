@@ -1,3 +1,4 @@
+// Drawer.jsx
 import React, { useState, useContext } from "react";
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
@@ -14,60 +15,122 @@ import {
   MapPinCheck,
   LogOut,
   UserPlus,
-  Camera
+  Camera,
 } from "lucide-react";
 import "../styles/drawer.css";
 import { AuthContext } from "../pages/context/AuthContext";
+import { SolicitudesContext } from "../pages/context/SolicitudContext";
 
 const menuItems = [
-  { path: "/altausuario", label: "Alta Usuario", icon: <UserPlus size={24} />, roles: ["superadmin"] },
-  { path: "/clientes", label: "Clientes", icon: <Users size={24} />, roles: ["superadmin", "coordinador", "coordinadorlogistico"] },
-  { path: "/listadeobras", label: "Obras", icon: <Hammer size={24} />, roles: ["superadmin", "cliente"] },
-  { path: "/solicitudes", label: "Solicitudes", icon: <ClipboardList size={24} />, roles: ["superadmin", "coordinador", "coordinadorlogistico"] },
-  { path: "/coordinaciones", label: "Coordinaciones", icon: <Calendar size={24} />, roles: ["superadmin", "supervisor", "cliente"] },
-  { path: "/transportistas", label: "Transportistas", icon: <Truck size={24} />, roles: ["superadmin", "coordinadorlogistico"] },
-  { path: "/empresasgestoras", label: "Empresa Gestora", icon: <Factory size={24} />, roles: ["superadmin", "coordinadorlogistico"] },
-  { path: "/capacitaciones", label: "Capacitaciones", icon: <GraduationCap size={24} />, roles: ["superadmin", "tecnico"] },
-  { path: "/informes", label: "Informes", icon: <FileText size={24} />, roles: ["superadmin", "coordinadorlogistico", "coordinador"] },
-  { path: "/imagenes", label: "Imagenes", icon: <Camera size={24} />, roles: ["superadmin", "tecnico"] },
-  { path: "/obraslist", label: "Formularios", icon: <ClipboardPenLine size={24} />, roles: ["superadmin", "tecnico"] },
-  { path: "/puntolimpio", label: "Puntos Limpios", icon: <MapPinCheck size={24} />, roles: ["superadmin", "cliente"] },
+  {
+    path: "/listarusuarios",
+    label: "Usuarios",
+    icon: <UserPlus size={24} />,
+    roles: ["superadmin"],
+  },
+  {
+    path: "/clientes",
+    label: "Clientes",
+    icon: <Users size={24} />,
+    roles: ["superadmin", "coordinador", "coordinadorlogistico"],
+  },
+  {
+    path: "/listadeobras",
+    label: "Obras",
+    icon: <Hammer size={24} />,
+    roles: ["superadmin", "cliente", "coordinadorlogistico"],
+  },
+  {
+    path: "/solicitudes",
+    label: "Solicitudes",
+    icon: <ClipboardList size={24} />,
+    roles: ["superadmin", "coordinador", "coordinadorlogistico"],
+  },
+  {
+    path: "/coordinaciones",
+    label: "Coordinaciones",
+    icon: <Calendar size={24} />,
+    roles: ["superadmin", "supervisor", "cliente", "tecnico", "coordinadorlogistico"],
+  },
+  {
+    path: "/transportistas",
+    label: "Transportistas",
+    icon: <Truck size={24} />,
+    roles: ["superadmin", "coordinadorlogistico"],
+  },
+  {
+    path: "/empresasgestoras",
+    label: "Empresa Gestora",
+    icon: <Factory size={24} />,
+    roles: ["superadmin", "coordinadorlogistico"],
+  },
+  {
+    path: "/capacitaciones",
+    label: "Capacitaciones",
+    icon: <GraduationCap size={24} />,
+    roles: ["superadmin", "tecnico"],
+  },
+  {
+    path: "/informes",
+    label: "Informes",
+    icon: <FileText size={24} />,
+    roles: ["superadmin", "coordinador", 'tecnico'],
+  },
+  {
+    path: "/imagenes",
+    label: "Imagenes",
+    icon: <Camera size={24} />,
+    roles: ["superadmin", "tecnico"],
+  },
+  {
+    path: "/obraslist",
+    label: "Formularios",
+    icon: <ClipboardPenLine size={24} />,
+    roles: ["superadmin", "tecnico"],
+  },
+  {
+    path: "/puntolimpio",
+    label: "Puntos Limpios",
+    icon: <MapPinCheck size={24} />,
+    roles: ["superadmin", "coordinador", "coordinadorlogistico"],
+  },
 ];
 
 const Drawer = () => {
   const [isOpen, setIsOpen] = useState(false);
   const { role, logout } = useContext(AuthContext);
+  const { pendingSolicitudes } = useContext(SolicitudesContext);
+  const showVincularMessage = pendingSolicitudes.length > 0;
 
-  const filteredMenuItems = menuItems.filter(item => item.roles.includes(role));
+  const filteredMenuItems = menuItems.filter((item) =>
+    item.roles.includes(role)
+  );
 
   const handleLogout = () => {
     logout();
   };
 
-  // Función para alternar el menú en dispositivos móviles
   const toggleDrawer = () => {
     setIsOpen(!isOpen);
   };
 
-  // Función para cerrar el Drawer y volver a la posición inicial
   const closeDrawer = () => {
     setIsOpen(false);
   };
 
   return (
     <>
-      {/* Botón para mostrar/ocultar el Drawer en móviles */}
-      <button 
+      <button
         className="drawer-toggle"
         onClick={toggleDrawer}
         style={{
           position: "fixed",
-          top: "80px", // Ajusta según la altura de tu header
+          top: "80px",
           left: "10px",
           zIndex: 110,
           background: "transparent",
           border: "none",
-          cursor: "pointer"
+          cursor: "pointer",
         }}
       >
         ☰
@@ -82,7 +145,6 @@ const Drawer = () => {
         onMouseEnter={() => window.innerWidth > 768 && setIsOpen(true)}
         onMouseLeave={() => window.innerWidth > 768 && setIsOpen(false)}
       >
-        {/* Botón para cerrar el Drawer (visible en móviles cuando esté abierto) */}
         {window.innerWidth <= 768 && isOpen && (
           <button
             className="close-drawer-button"
@@ -93,7 +155,7 @@ const Drawer = () => {
               background: "transparent",
               border: "none",
               cursor: "pointer",
-              fontSize: "1.5rem"
+              fontSize: "1.5rem",
             }}
           >
             ×
@@ -110,8 +172,27 @@ const Drawer = () => {
               transition={{ duration: 0.1, delay: isOpen ? 0.15 : 0 }}
             >
               <Link to={item.path} className="drawer-link">
-                <div className="drawer-icon">{item.icon}</div>
-                <motion.span className="drawer-text" animate={{ opacity: isOpen ? 1 : 0 }}>
+                <div className="drawer-icon" style={{ position: "relative" }}>
+                  {item.icon}
+                  {item.label === "Solicitudes" && showVincularMessage && (
+                    <span
+                      className="notification-dot"
+                      style={{
+                        position: "absolute",
+                        top: 0,
+                        right: 0,
+                        width: "8px",
+                        height: "8px",
+                        background: "red",
+                        borderRadius: "50%",
+                      }}
+                    ></span>
+                  )}
+                </div>
+                <motion.span
+                  className="drawer-text"
+                  animate={{ opacity: isOpen ? 1 : 0 }}
+                >
                   {item.label}
                 </motion.span>
               </Link>

@@ -1,5 +1,12 @@
 import React, { useState, useEffect, useContext } from "react";
-import { Container, Typography, Button, Box, Alert, CircularProgress } from "@mui/material";
+import { 
+  Container, 
+  Typography, 
+  Button, 
+  Box, 
+  Alert, 
+  CircularProgress 
+} from "@mui/material";
 import Tabla from "../components/Table"; // Asegúrate de tener este componente
 import { useNavigate } from "react-router-dom";
 import { AuthContext } from "../pages/context/AuthContext";
@@ -36,12 +43,10 @@ const Imagenes = () => {
   }, [token]);
 
   const handleAgregarImagenes = (obraId) => {
-    // Redirige a la página para agregar imágenes, pasando el ID de la obra en la query string
     navigate(`/altaimagenes?obraId=${obraId}`);
   };
 
   const handleVerImagenes = (obraId) => {
-    // Redirige a la página para ver imágenes de la obra, pasando el ID de la obra en la query string
     navigate(`/verimagenes?obraId=${obraId}`);
   };
 
@@ -61,27 +66,34 @@ const Imagenes = () => {
             onClick={() => handleAgregarImagenes(params.row.id)}
             sx={{
               backgroundColor: "#abbf9d",
+              color: "white",
               "&:hover": {
-                backgroundColor: "#d1e063",
+                backgroundColor: "#abbf9d",
               },
+              fontSize: ".7rem",
+              padding: "10px 20px",
+              textTransform: "none",
             }}
           >
-            Agregar imágenes
+            Agregar imagenes
           </Button>
           <Button
             variant="contained"
             onClick={() => handleVerImagenes(params.row.id)}
             sx={{
-              backgroundColor: "#abbf9d",
+              backgroundColor: "#2D2E80",
+              color: "white",
               "&:hover": {
-                backgroundColor: "#d1e063",
+                backgroundColor: "#2D2E80",
               },
+              fontSize: ".7rem",
+              padding: "12px 20px",
+              textTransform: "none",
             }}
           >
-            Ver imágenes
+            Ver imagenes
           </Button>
         </Box>
-
       ),
     },
   ];

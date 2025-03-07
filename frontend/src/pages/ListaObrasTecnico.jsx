@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useContext } from "react";
 import {
   Container,
   Table,
@@ -13,20 +13,26 @@ import {
 } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import { useFormStore } from "./context/FormContext";
+import { AuthContext } from "./context/AuthContext";
 
 const ObrasList = () => {
   const [obras, setObras] = useState([]);
   const navigate = useNavigate();
   const { data, updateData } = useFormStore();
+  
+  // Obtenemos user, role, token
+  const { user, role, token } = useContext(AuthContext);
+  // email se obtiene directamente de user?.email
+  const email = user?.email;
 
   useEffect(() => {
-    const token = localStorage.getItem("token");
+    const authToken = sessionStorage.getItem('token');
 
     fetch("http://localhost:8000/api/obras/aprobadas/", {
       headers: {
         "Content-Type": "application/json",
-        "Authorization": `Token ${token}`
-      }
+        "Authorization": `Token ${authToken}`,
+      },
     })
       .then((res) => {
         if (!res.ok) {
@@ -35,12 +41,20 @@ const ObrasList = () => {
         return res.json();
       })
       .then((data) => {
-        setObras(data); // Guardar obras en el estado
+        // Si el rol es "tecnico", filtramos aquellas obras 
+        // cuya tecnico_email coincide con user?.email
+        if (role === "tecnico" && email) {
+          const obrasTecnico = data.filter(
+            (obra) => obra.tecnico_email === email
+          );
+          setObras(obrasTecnico);
+        } else {
+          // Caso contrario (rol distinto de tecnico), mostramos todas
+          setObras(data);
+        }
       })
-      .catch((err) =>
-        console.error("Error al obtener obras aprobadas:", err)
-      );
-  }, []);
+      .catch((err) => console.error("Error al obtener obras aprobadas:", err));
+  }, [role, token, email]);
 
   const handleSelectObra = (obra) => {
     updateData("page1", {
@@ -97,7 +111,7 @@ const ObrasList = () => {
             ) : (
               <TableRow>
                 <TableCell colSpan={3} align="center">
-                  No hay obras aprobadas disponibles.
+                  No hay obras disponibles.
                 </TableCell>
               </TableRow>
             )}

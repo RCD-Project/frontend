@@ -2,7 +2,6 @@
 import React, { useState, useEffect, useContext } from 'react';
 import Tabla from '../components/Table';
 import { Button, Tab, Tabs, Box, Alert, CircularProgress, Typography } from '@mui/material';
-import '../styles/Solicitudes.css';
 import { AuthContext } from '../pages/context/AuthContext';
 
 const Solicitudes = () => {
@@ -12,7 +11,7 @@ const Solicitudes = () => {
   const [loadingSolicitudId, setLoadingSolicitudId] = useState(null);
   const { token } = useContext(AuthContext);
 
-  // Función para formatear la fecha a dd/MM/yyyy
+
   const formatDate = (dateString) => {
     if (!dateString) return 'Sin fecha';
     const date = new Date(dateString);
@@ -22,6 +21,8 @@ const Solicitudes = () => {
       year: 'numeric',
     });
   };
+
+  const tokenLocal = sessionStorage.getItem('token');
 
   useEffect(() => {
     if (!token) return;
@@ -324,7 +325,7 @@ const Solicitudes = () => {
     },
     "& .Mui-selected": {
       backgroundColor: "#abbf9d",
-      color: "white",
+      color: "#ffff",
     },
     "& .MuiTabs-indicator": { backgroundColor: "#abbf9d" },
   }}

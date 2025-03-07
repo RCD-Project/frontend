@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { AuthContext } from './context/AuthContext'; // Importar el contexto
+import { AuthContext } from './context/AuthContext';
 import Tabla from '../components/Table';
 import { Button, IconButton, Menu, MenuItem, Typography } from '@mui/material';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
@@ -35,12 +35,28 @@ const EmpresasGestoras = () => {
       })
       .then((data) => setEmpresas(data))
       .catch((error) => console.error('Error al obtener empresas:', error));
-  }, [token]); // Dependencia del token
+  }, [token]);
 
-  const eliminarEmpresa = (id) => {
+  const eliminarEmpresa = async (id) => {
     const confirmacion = window.confirm("¿Seguro que deseas eliminar esta empresa?");
     if (confirmacion) {
-      setEmpresas(empresas.filter((empresa) => empresa.id !== id));
+      try {
+        const response = await fetch(`http://127.0.0.1:8000/api/empresas/eliminar/${id}/`, {
+          method: 'DELETE',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Token ${token}`,
+          },
+        });
+        if (!response.ok) {
+          throw new Error(`Error HTTP: ${response.status}`);
+        }
+        // Actualiza el estado eliminando la empresa eliminada
+        setEmpresas(empresas.filter((empresa) => empresa.id !== id));
+      } catch (error) {
+        console.error('Error al eliminar la empresa:', error);
+        alert('Error al eliminar la empresa');
+      }
     }
   };
 
@@ -88,13 +104,28 @@ const EmpresasGestoras = () => {
         open={Boolean(anchorEl)}
         onClose={handleMenuClose}
       >
-        <MenuItem onClick={() => { handleMenuClose(); navigate(`/detalleempresa?id=${selectedEmpresa?.id}`); }}>
+        <MenuItem
+          onClick={() => {
+            handleMenuClose();
+            navigate(`/detalleempresa?id=${selectedEmpresa?.id}`);
+          }}
+        >
           <VisibilityIcon /> Ver detalles
         </MenuItem>
-        <MenuItem onClick={() => { handleMenuClose(); navigate(`/editarempresasgestoras?id=${selectedEmpresa?.id}`); }}>
+        <MenuItem
+          onClick={() => {
+            handleMenuClose();
+            navigate(`/editarempresasgestoras?id=${selectedEmpresa?.id}`);
+          }}
+        >
           <EditIcon /> Editar
         </MenuItem>
-        <MenuItem onClick={() => { handleMenuClose(); eliminarEmpresa(selectedEmpresa?.id); }}>
+        <MenuItem
+          onClick={() => {
+            handleMenuClose();
+            eliminarEmpresa(selectedEmpresa?.id);
+          }}
+        >
           <DeleteIcon style={{ color: 'red' }} /> Eliminar
         </MenuItem>
       </Menu>

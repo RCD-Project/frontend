@@ -9,6 +9,8 @@ import {
   Checkbox,
   FormControlLabel,
   TextField,
+  FormGroup,
+  useMediaQuery,
 } from "@mui/material";
 import { useFormStore } from "../context/FormContext";
 
@@ -27,7 +29,7 @@ const Page10 = () => {
 
   const storedData = data[pageIndex] || {};
   const formData = {
-    metales: storedData.metales ?? "no_aplica",
+    metales: storedData.metales ?? "No Aplica",
     metalesOpciones: storedData.metalesOpciones ?? [],
     metalesOtroTexto: storedData.metalesOtroTexto ?? "",
     metalesObservaciones: storedData.metalesObservaciones ?? "",
@@ -43,6 +45,8 @@ const Page10 = () => {
       : [...formData.metalesOpciones, option];
     handleChange("metalesOpciones", newOpciones);
   };
+
+  const isMobile = useMediaQuery("(max-width:768px)");
 
   return (
     <Box sx={{ width: "90%", margin: "auto", mt: 4 }}>
@@ -60,48 +64,63 @@ const Page10 = () => {
         </Select>
       </FormControl>
 
-      {/* Checkboxes se muestran solo si se selecciona "Aplica" */}
       {formData.metales === "Aplica" && (
-        <Box sx={{ mb: 3, display: "flex", flexDirection: "column" }}>
-          {opcionesMetales.map((option, index) => (
-            <FormControlLabel
-              key={index}
-              control={
-                <Checkbox
-                  checked={formData.metalesOpciones.includes(option)}
-                  onChange={() => handleCheckboxChange(option)}
+        <>
+          {isMobile ? (
+            <Box sx={{ mb: 3, display: "flex", flexDirection: "column", gap: 1 }}>
+              {opcionesMetales.map((option, index) => (
+                <FormControlLabel
+                  key={index}
+                  control={
+                    <Checkbox
+                      checked={formData.metalesOpciones.includes(option)}
+                      onChange={() => handleCheckboxChange(option)}
+                    />
+                  }
+                  label={option}
                 />
-              }
-              label={option}
-            />
-          ))}
+              ))}
+            </Box>
+          ) : (
+            <FormGroup sx={{ mb: 3 }}>
+              {opcionesMetales.map((option, index) => (
+                <FormControlLabel
+                  key={index}
+                  control={
+                    <Checkbox
+                      checked={formData.metalesOpciones.includes(option)}
+                      onChange={() => handleCheckboxChange(option)}
+                    />
+                  }
+                  label={option}
+                />
+              ))}
+            </FormGroup>
+          )}
+
           {formData.metalesOpciones.includes("Otro") && (
             <TextField
               label="Especificar otro"
               fullWidth
-              sx={{ mt: 2 }}
+              sx={{ mt: 2, mb: 3 }}
               value={formData.metalesOtroTexto}
-              onChange={(e) =>
-                handleChange("metalesOtroTexto", e.target.value)
-              }
+              onChange={(e) => handleChange("metalesOtroTexto", e.target.value)}
             />
           )}
-        </Box>
-      )}
 
-      <Typography variant="h6" sx={{ mb: 2 }}>
-        Metales - Otras observaciones / Sugerencias / Acciones a tomar
-      </Typography>
-      <TextField
-        label="Observaciones"
-        fullWidth
-        multiline
-        rows={4}
-        value={formData.metalesObservaciones}
-        onChange={(e) =>
-          handleChange("metalesObservaciones", e.target.value)
-        }
-      />
+          <Typography variant="h6" sx={{ mb: 2 }}>
+            Metales - Otras observaciones / Sugerencias / Acciones a tomar
+          </Typography>
+          <TextField
+            label="Observaciones"
+            fullWidth
+            multiline
+            rows={4}
+            value={formData.metalesObservaciones}
+            onChange={(e) => handleChange("metalesObservaciones", e.target.value)}
+          />
+        </>
+      )}
     </Box>
   );
 };

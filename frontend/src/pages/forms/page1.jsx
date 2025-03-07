@@ -9,7 +9,6 @@ import {
   Checkbox,
   FormControlLabel,
   FormGroup,
-  Button,
 } from "@mui/material";
 import { LocalizationProvider, DatePicker } from "@mui/x-date-pickers";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
@@ -21,7 +20,6 @@ const motivos = [
   "Capacitación Inicial",
   "Capacitación Intermedia",
   "Recorrido y Control de centro de acopio y PL",
-  "Relevamiento Fotográfico",
   "Reunión",
 ];
 
@@ -31,9 +29,11 @@ const Page1 = ({ nextStep }) => {
   const [selectedTecnico, setSelectedTecnico] = useState("");
   const navigate = useNavigate();
 
-  const userData = JSON.parse(localStorage.getItem("user") || "{}");
+  // Recupera datos del usuario, token y rol desde sessionStorage
+  const userData = JSON.parse(sessionStorage.getItem("user") || "{}");
   const loggedEmail = userData?.email || "";
-  const token = localStorage.getItem("token");
+  const token = sessionStorage.getItem("token");
+  const userRole = (sessionStorage.getItem("role") || "").toLowerCase();
 
   useEffect(() => {
     const fetchTecnicos = async () => {
@@ -44,32 +44,36 @@ const Page1 = ({ nextStep }) => {
             Authorization: `Token ${token}`,
           },
         });
-
         if (!res.ok) throw new Error(`Error HTTP: ${res.status}`);
 
         const techs = await res.json();
         if (!Array.isArray(techs)) throw new Error("Formato de respuesta inválido");
 
-        const filteredTecnicos = techs.filter((tecnico) => {
-          const emailCandidate = tecnico?.usuario?.email || tecnico.email;
-          return emailCandidate?.toLowerCase() === loggedEmail.toLowerCase();
-        });
+        // Si el usuario tiene rol "tecnico", se filtra por email; de lo contrario, se listan todos.
+        const filteredTecnicos =
+          userRole === "tecnico"
+            ? techs.filter((tecnico) => {
+                const emailCandidate = tecnico?.usuario?.email || tecnico.email;
+                return emailCandidate?.toLowerCase() === loggedEmail.toLowerCase();
+              })
+            : techs;
 
         setTecnicoList(filteredTecnicos);
         if (filteredTecnicos.length > 0) {
+          // Se guarda el ID del primer técnico encontrado
           const firstId = String(filteredTecnicos[0].id);
           setSelectedTecnico(firstId);
           updateData("page1", { ...data.page1, tecnico: firstId });
         }
       } catch (error) {
-        console.error("❌ Error al obtener técnicos:", error);
+        console.error("Error al obtener técnicos:", error);
       }
     };
 
-    if (token && loggedEmail) {
+    if (token) {
       fetchTecnicos();
     }
-  }, [loggedEmail, token, updateData]);
+  }, [loggedEmail, token, userRole, updateData, data.page1]);
 
   const safeFormData = {
     obra: data?.page1?.obraId || "",
@@ -91,13 +95,13 @@ const Page1 = ({ nextStep }) => {
     const nuevosMotivos = (safeFormData.motivos || []).includes(motivo)
       ? safeFormData.motivos.filter((m) => m !== motivo)
       : [...safeFormData.motivos, motivo];
-  
+
     updateData("page1", { ...data.page1, motivos: nuevosMotivos });
   };
-  
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    // Valida que se haya seleccionado un técnico, obra y fecha
     if (!selectedTecnico || !safeFormData.obra || !safeFormData.fecha) {
       alert("⚠ Todos los campos obligatorios deben completarse");
       return;

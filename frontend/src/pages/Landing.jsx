@@ -2,7 +2,7 @@ import React, { useEffect } from "react";
 import { Container, Typography, Button, Grid, Paper } from "@mui/material";
 import { Link } from "react-router-dom";
 import logo from "../assets/logo.png"; 
-import section4 from "../assets/section6.jpg";
+import section4 from "../assets/section6.png";
 import recurso from "../assets/recurso.png";
 
 
