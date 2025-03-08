@@ -51,6 +51,7 @@ import EditarUsuario from "./pages/EditarUsuario";
 import ListarUsuarios from "./pages/ListarUsuarios";
 import ListaMezclados from "./pages/ListadoMezclados";
 import RegistrarMezclado from "./pages/AltaMezclado";
+import DetallesMezclado from "./pages/DetalleMezclados";
 
 import "./styles/App.css";
 
@@ -346,6 +347,14 @@ const AppContent = () => {
                 element={
                   <RoleBasedRoute allowedRoles={["cliente", "superadmin", "coordinadorlogistico", 'coordinador']}>
                     <RegistrarMezclado />
+                  </RoleBasedRoute>
+                }
+              />
+              <Route
+                path="/detallesmezclados"
+                element={
+                  <RoleBasedRoute allowedRoles={["cliente", "superadmin", "coordinadorlogistico", 'coordinador']}>
+                    <DetallesMezclado />
                   </RoleBasedRoute>
                 }
               />

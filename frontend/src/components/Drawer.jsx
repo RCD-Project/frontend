@@ -16,6 +16,7 @@ import {
   LogOut,
   UserPlus,
   Camera,
+  Blend
 } from "lucide-react";
 import "../styles/drawer.css";
 import { AuthContext } from "../pages/context/AuthContext";
@@ -92,6 +93,12 @@ const menuItems = [
     path: "/puntolimpio",
     label: "Puntos Limpios",
     icon: <MapPinCheck size={24} />,
+    roles: ["superadmin", "coordinador", "coordinadorlogistico"],
+  },
+  {
+    path: "/listamezclados",
+    label: "Mezclados",
+    icon: <Blend size={24} />,
     roles: ["superadmin", "coordinador", "coordinadorlogistico"],
   },
 ];

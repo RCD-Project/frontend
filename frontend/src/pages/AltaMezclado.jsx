@@ -1,4 +1,4 @@
-import React, { useState, useContext } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import {
   Container,
   TextField,
@@ -6,99 +6,127 @@ import {
   Grid,
   Typography,
   Paper,
-  Alert,
   Box,
+  Alert,
   CircularProgress,
-  IconButton,
+  MenuItem,
+  FormControl,
+  InputLabel,
+  Select,
 } from "@mui/material";
-import { useNavigate } from "react-router-dom";
-import { AuthContext } from "../pages/context/AuthContext";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
-import DeleteIcon from "@mui/icons-material/Delete";
+import { useNavigate } from "react-router-dom";
+import { AuthContext } from "./context/AuthContext";
 
-const RegistroMezclado = () => {
-  const { token } = useContext(AuthContext);
+const RegistrarMezclado = () => {
   const [formData, setFormData] = useState({
+    obra: "",
     pesaje: "",
-    observaciones: "",
     imagenes: [],
   });
+  const [obrasOptions, setObrasOptions] = useState([]);
   const [errors, setErrors] = useState({});
   const [successMessage, setSuccessMessage] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
+  const { token } = useContext(AuthContext);
 
-  // Validaciones
+  // Obtenemos las obras aprobadas para llenar el dropdown
+  useEffect(() => {
+    if (token) {
+      fetch("http://127.0.0.1:8000/api/obras/aprobadas/", {
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Token ${token}`,
+        },
+      })
+        .then((res) => {
+          if (!res.ok) {
+            throw new Error(`Error HTTP: ${res.status}`);
+          }
+          return res.json();
+        })
+        .then((data) => {
+          setObrasOptions(data);
+        })
+        .catch((err) => console.error("Error al obtener obras:", err));
+    }
+  }, [token]);
+
+  // Validación básica del formulario
   const validateForm = () => {
     let newErrors = {};
-
-    if (!formData.pesaje || isNaN(formData.pesaje) || parseFloat(formData.pesaje) <= 0) {
-      newErrors.pesaje = "El pesaje debe ser un número mayor a 0.";
+    if (!formData.obra) {
+      newErrors.obra = "Debes seleccionar una obra.";
     }
-
-    if (formData.imagenes.length === 0) {
-      newErrors.imagenes = "Debe subir al menos una imagen.";
+    if (!formData.pesaje || isNaN(formData.pesaje)) {
+      newErrors.pesaje = "El pesaje es obligatorio y debe ser un número.";
     }
-
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
-  // Manejo de cambios en inputs
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  // Manejo de subida de imágenes
-  const handleImageChange = (e) => {
-    const files = Array.from(e.target.files);
-    setFormData({ ...formData, imagenes: [...formData.imagenes, ...files] });
+  // Para actualizar los archivos (permite seleccionar múltiples)
+  const handleFileChange = (e) => {
+    if (e.target.files) {
+      const files = Array.from(e.target.files);
+      setFormData((prev) => ({ ...prev, imagenes: [...prev.imagenes, ...files] }));
+    }
   };
 
-  // Eliminar imagen seleccionada antes de enviar
-  const handleRemoveImage = (index) => {
-    const updatedImages = [...formData.imagenes];
-    updatedImages.splice(index, 1);
-    setFormData({ ...formData, imagenes: updatedImages });
+  // Función para eliminar un archivo del array
+  const handleFileRemove = (index) => {
+    setFormData((prev) => ({
+      ...prev,
+      imagenes: prev.imagenes.filter((_, i) => i !== index),
+    }));
   };
 
-  // Enviar datos al backend
   const handleSubmit = async (event) => {
     event.preventDefault();
+    setSuccessMessage("");
+    setErrorMessage("");
     if (!validateForm()) return;
-
     setIsLoading(true);
-    const formDataToSend = new FormData();
-    formDataToSend.append("pesaje", formData.pesaje);
-    formDataToSend.append("observaciones", formData.observaciones);
 
-    formData.imagenes.forEach((image) => {
-      formDataToSend.append("imagenes", image);
-    });
+    if (!token) {
+      setErrorMessage("No estás autenticado. Por favor, inicia sesión.");
+      setIsLoading(false);
+      return;
+    }
 
     try {
+      const data = new FormData();
+      data.append("obra", formData.obra);
+      data.append("pesaje", formData.pesaje);
+      // Adjuntamos cada archivo con la misma clave 'imagenes'
+      formData.imagenes.forEach((file) => {
+        data.append("imagenes", file);
+      });
+
       const response = await fetch("http://127.0.0.1:8000/api/mezclados/registrar/", {
         method: "POST",
         headers: {
-          Authorization: `Token ${token}`,
+          "Authorization": `Token ${token}`,
         },
-        body: formDataToSend,
+        body: data,
       });
 
-      if (response.ok) {
-        setSuccessMessage("Mezclado registrado con éxito.");
-        setErrorMessage("");
-        setIsLoading(false);
-        navigate("/", { state: { successMessage: "Mezclado registrado con éxito." } });
-      } else {
+      if (!response.ok) {
         const errorData = await response.json();
-        setErrorMessage("Error al registrar el mezclado: " + JSON.stringify(errorData));
-        setIsLoading(false);
+        throw new Error(errorData.message || "Error al registrar el mezclado");
       }
+      const result = await response.json();
+      setSuccessMessage("Mezclado registrado con éxito.");
+      setIsLoading(false);
+      navigate("/mezclados", { state: { successMessage: "Mezclado registrado con éxito." } });
     } catch (error) {
-      console.error("Error en la petición:", error);
-      setErrorMessage("Error de red. Intenta nuevamente.");
+      setErrorMessage(error.message);
       setIsLoading(false);
     }
   };
@@ -116,31 +144,62 @@ const RegistroMezclado = () => {
       <Container
         maxWidth="md"
         sx={{
-          minHeight: "calc(100vh - var(--header-height))",
+          minHeight: "100vh",
           display: "flex",
           justifyContent: "center",
           alignItems: "center",
         }}
       >
-        <Box
-          className="inner-content"
-          sx={{
-            width: "100%",
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-          }}
-        >
+        <Box sx={{ width: "100%" }}>
           <Paper elevation={3} sx={{ padding: 6, borderRadius: 3 }}>
             <Typography variant="h3" gutterBottom sx={{ mb: 4, textAlign: "center" }}>
               Registrar Mezclado
             </Typography>
 
-            {successMessage && <Alert severity="success" sx={{ mb: 4 }}>{successMessage}</Alert>}
-            {errorMessage && <Alert severity="error" sx={{ mb: 4 }}>{errorMessage}</Alert>}
+            {successMessage && (
+              <Alert severity="success" sx={{ mb: 4 }}>
+                {successMessage}
+              </Alert>
+            )}
+
+            {errorMessage && (
+              <Alert severity="error" sx={{ mb: 4 }}>
+                {errorMessage}
+              </Alert>
+            )}
 
             <form onSubmit={handleSubmit}>
               <Grid container spacing={4}>
+                <Grid item xs={12}>
+                  <FormControl fullWidth>
+                    <InputLabel id="obra-label">Obra</InputLabel>
+                    <Select
+                      labelId="obra-label"
+                      label="Obra"
+                      name="obra"
+                      value={formData.obra}
+                      onChange={handleChange}
+                      error={!!errors.obra}
+                    >
+                      {obrasOptions.length > 0 ? (
+                        obrasOptions.map((obra) => (
+                          <MenuItem key={obra.id} value={obra.id}>
+                            {obra.nombre_obra}
+                          </MenuItem>
+                        ))
+                      ) : (
+                        <MenuItem value="">
+                          No se encontraron obras
+                        </MenuItem>
+                      )}
+                    </Select>
+                    {errors.obra && (
+                      <Typography color="error" variant="caption">
+                        {errors.obra}
+                      </Typography>
+                    )}
+                  </FormControl>
+                </Grid>
                 <Grid item xs={12}>
                   <TextField
                     label="Pesaje (kg)"
@@ -151,92 +210,38 @@ const RegistroMezclado = () => {
                     onChange={handleChange}
                     error={!!errors.pesaje}
                     helperText={errors.pesaje}
-                    required
                   />
                 </Grid>
-
-                <Grid item xs={12}>
-                  <TextField
-                    label="Observaciones"
-                    fullWidth
-                    name="observaciones"
-                    multiline
-                    rows={4}
-                    value={formData.observaciones}
-                    onChange={handleChange}
-                  />
-                </Grid>
-
                 <Grid item xs={12}>
                   <Button variant="contained" component="label">
-                    Subir Imágenes
-                    <input
-                      type="file"
-                      hidden
-                      multiple
-                      accept="image/*"
-                      onChange={handleImageChange}
-                    />
+                    Subir Imágenes (JPG, JPEG, PNG)
+                    <input type="file" hidden accept=".jpg,.jpeg,.png" multiple onChange={handleFileChange} />
                   </Button>
-                  {errors.imagenes && <Alert severity="error" sx={{ mt: 2 }}>{errors.imagenes}</Alert>}
-                </Grid>
-
-                {/* Vista previa de imágenes seleccionadas */}
-                <Grid item xs={12}>
                   {formData.imagenes.length > 0 && (
-                    <Box sx={{ mt: 2 }}>
-                      <Typography>Imágenes seleccionadas:</Typography>
-                      <Grid container spacing={2}>
-                        {formData.imagenes.map((image, index) => (
-                          <Grid item key={index}>
-                            <Box
-                              sx={{
-                                position: "relative",
-                                display: "inline-block",
-                                width: 100,
-                                height: 100,
-                              }}
-                            >
-                              <img
-                                src={URL.createObjectURL(image)}
-                                alt={`imagen-${index}`}
-                                style={{ width: "100%", height: "100%", objectFit: "cover", borderRadius: 8 }}
-                              />
-                              <IconButton
-                                size="small"
-                                sx={{
-                                  position: "absolute",
-                                  top: 0,
-                                  right: 0,
-                                  backgroundColor: "rgba(0,0,0,0.5)",
-                                  color: "white",
-                                }}
-                                onClick={() => handleRemoveImage(index)}
-                              >
-                                <DeleteIcon fontSize="small" />
-                              </IconButton>
-                            </Box>
-                          </Grid>
-                        ))}
-                      </Grid>
+                    <Box sx={{ mt: 1 }}>
+                      {formData.imagenes.map((file, index) => (
+                        <Box key={index} sx={{ display: "flex", alignItems: "center", gap: 1, mb: 1 }}>
+                          <Typography variant="body2">{file.name}</Typography>
+                          <Button variant="outlined" color="error" onClick={() => handleFileRemove(index)}>
+                            Eliminar
+                          </Button>
+                        </Box>
+                      ))}
                     </Box>
                   )}
                 </Grid>
               </Grid>
-
-              <Grid container spacing={2} sx={{ mt: 4 }}>
-                <Grid item xs={12} sx={{ textAlign: "right" }}>
-                  <Button
-                    type="submit"
-                    variant="contained"
-                    color="primary"
-                    disabled={isLoading}
-                    startIcon={isLoading && <CircularProgress size={20} color="inherit" />}
-                  >
-                    {isLoading ? "Procesando..." : "Registrar Mezclado"}
-                  </Button>
-                </Grid>
-              </Grid>
+              <Box sx={{ textAlign: "right", mt: 4 }}>
+                <Button
+                  type="submit"
+                  variant="contained"
+                  color="primary"
+                  disabled={isLoading}
+                  startIcon={isLoading && <CircularProgress size={20} color="inherit" />}
+                >
+                  {isLoading ? "Registrando..." : "Registrar"}
+                </Button>
+              </Box>
             </form>
           </Paper>
         </Box>
@@ -245,4 +250,4 @@ const RegistroMezclado = () => {
   );
 };
 
-export default RegistroMezclado;
+export default RegistrarMezclado;

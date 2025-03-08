@@ -1,26 +1,29 @@
-import React, { useState, useEffect, useContext } from "react";
-import { useNavigate, useLocation, Link } from "react-router-dom";
-import Tabla from "../components/Table";
-import { Typography, Button, IconButton, Menu, MenuItem, Alert } from "@mui/material";
-import MoreVertIcon from "@mui/icons-material/MoreVert";
-import VisibilityIcon from "@mui/icons-material/Visibility";
-import DeleteIcon from "@mui/icons-material/Delete";
-import AddIcon from "@mui/icons-material/Add";
-import { AuthContext } from "../pages/context/AuthContext";
+import React, { useState, useEffect, useContext } from 'react';
+import { useNavigate, useLocation, Link } from 'react-router-dom';
+import Tabla from '../components/Table';
+import { Typography, Button, IconButton, Menu, MenuItem, Alert } from '@mui/material';
+import MoreVertIcon from '@mui/icons-material/MoreVert';
+import VisibilityIcon from '@mui/icons-material/Visibility';
+import EditIcon from '@mui/icons-material/Edit';
+import DeleteIcon from '@mui/icons-material/Delete';
+import AddIcon from '@mui/icons-material/Add';
+import { AuthContext } from '../pages/context/AuthContext';
+import dayjs from 'dayjs';
 
 const ListaMezclados = () => {
   const [mezclados, setMezclados] = useState([]);
   const navigate = useNavigate();
   const location = useLocation();
-  const { token } = useContext(AuthContext);
-
+  const { role, token } = useContext(AuthContext);
   const successMessage = location.state?.successMessage || "";
 
   useEffect(() => {
-    fetch("http://127.0.0.1:8000/api/mezclados/listar/", {
+    // Endpoint para obtener todos los mezclados
+    const url = "http://127.0.0.1:8000/api/mezclados/lista/";
+    fetch(url, {
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Token ${token}`,
+        "Authorization": `Token ${token}`, 
       },
     })
       .then((res) => {
@@ -30,19 +33,19 @@ const ListaMezclados = () => {
         return res.json();
       })
       .then((data) => {
-        setMezclados(data.results);
+        setMezclados(data);
       })
       .catch((err) => console.error("Error al obtener mezclados:", err));
-  }, [token]);
+  }, [role, token]);
 
   const eliminarMezclado = (id) => {
     const confirmacion = window.confirm("¿Seguro que deseas eliminar este mezclado?");
     if (confirmacion) {
       fetch(`http://127.0.0.1:8000/api/mezclados/${id}/eliminar/`, {
-        method: "DELETE",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Token ${token}`,
+        method: 'DELETE',
+        headers: { 
+          'Content-Type': 'application/json',
+          "Authorization": `Token ${token}` 
         },
       })
         .then((res) => {
@@ -72,12 +75,17 @@ const ListaMezclados = () => {
   };
 
   const columnasMezclados = [
-    { field: "cliente", headerName: "Cliente", flex: 1, valueGetter: (params) => params.row.cliente?.nombre || "Sin Cliente" },
-    { field: "fecha_registro", headerName: "Fecha", flex: 1 },
-    { field: "pesaje", headerName: "Pesaje (kg)", flex: 1 },
+    { field: 'nombre_obra', headerName: 'Obra', flex: 1 },
+    { field: 'pesaje', headerName: 'Pesaje (kg)', flex: 1 },
+    { 
+      field: 'fecha_registro', 
+      headerName: 'Fecha Registro', 
+      flex: 1,
+      renderCell: (params) => dayjs(params.value).format('DD/MM/YYYY')
+    },
     {
-      field: "acciones",
-      headerName: "Acciones",
+      field: 'acciones',
+      headerName: 'Acciones',
       flex: 1,
       sortable: false,
       renderCell: (params) => (
@@ -90,35 +98,54 @@ const ListaMezclados = () => {
 
   return (
     <div>
-      <Typography variant="h4" sx={{ textAlign: "center", mb: 4 }}>
+      <Typography variant="h4" sx={{ textAlign: 'center', mb: 4 }}>
         Lista de Mezclados
       </Typography>
-
-      {successMessage && <Alert severity="success" sx={{ mb: 2 }}>{successMessage}</Alert>}
-
-      <Tabla datos={mezclados} columnas={columnasMezclados} filtroClave="cliente" filtroPlaceholder="Nombre del cliente" />
-
+      {successMessage && (
+        <Alert severity="success" sx={{ mb: 2 }}>
+          {successMessage}
+        </Alert>
+      )}
+      
+      <Tabla
+        datos={mezclados}
+        columnas={columnasMezclados}
+        filtroClave="nombre_obra"
+        filtroPlaceholder="Nombre de la obra"
+      />
+      
       <Menu anchorEl={anchorEl} open={Boolean(anchorEl)} onClose={handleMenuClose}>
-        <MenuItem onClick={() => { handleMenuClose(); navigate(`/detallesmezclado?id=${selectedMezclado?.id}`); }}>
+        <MenuItem onClick={() => { 
+          handleMenuClose(); 
+          navigate(`/detallesmezclados?id=${selectedMezclado?.id}`); 
+        }}>
           <VisibilityIcon /> Ver detalles
         </MenuItem>
-        <MenuItem onClick={() => { handleMenuClose(); eliminarMezclado(selectedMezclado?.id); }}>
-          <DeleteIcon style={{ color: "red" }} /> Eliminar
+        <MenuItem onClick={() => { 
+          handleMenuClose(); 
+          navigate(`/editarmezclado?id=${selectedMezclado?.id}`); 
+        }}>
+          <EditIcon /> Editar
+        </MenuItem>
+        <MenuItem onClick={() => { 
+          handleMenuClose(); 
+          eliminarMezclado(selectedMezclado?.id); 
+        }}>
+          <DeleteIcon style={{ color: 'red' }} /> Eliminar
         </MenuItem>
       </Menu>
-
       <Button
         variant="contained"
         startIcon={<AddIcon />}
         component={Link}
-        to="/altamezclado"
+        to="/altamezclados"
         sx={{
-          marginTop: "20px",
-          backgroundColor: "#abbf9d",
-          "&:hover": { backgroundColor: "#d1e063" },
+          marginTop: '20px',
+          backgroundColor: '#abbf9d',
+          '&:hover': { backgroundColor: '#d1e063' },
         }}
       >
-        Registrar Mezclado
+        Añadir Mezclado
       </Button>
     </div>
   );
