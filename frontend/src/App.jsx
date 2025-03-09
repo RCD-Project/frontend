@@ -52,6 +52,7 @@ import ListarUsuarios from "./pages/ListarUsuarios";
 import ListaMezclados from "./pages/ListadoMezclados";
 import RegistrarMezclado from "./pages/AltaMezclado";
 import DetallesMezclado from "./pages/DetalleMezclados";
+import RegistroCliente from "./pages/RegistroCliente";
 
 import "./styles/App.css";
 
@@ -243,6 +244,7 @@ const AppContent = () => {
                 }
               />
               <Route path="/altacliente" element={<AltaCliente />} />
+              <Route path="/registrocliente" element={<RegistroCliente />} />
               <Route
                 path="/altausuario"
                 element={
@@ -337,7 +339,7 @@ const AppContent = () => {
               <Route
                 path="/listamezclados"
                 element={
-                  <RoleBasedRoute allowedRoles={["cliente", "superadmin", "coordinadorlogistico", 'coordinador']}>
+                  <RoleBasedRoute allowedRoles={["cliente", "superadmin", "coordinadorlogistico", 'coordinador', 'supervisor']}>
                     <ListaMezclados />
                   </RoleBasedRoute>
                 }
@@ -345,7 +347,7 @@ const AppContent = () => {
               <Route
                 path="/altamezclados"
                 element={
-                  <RoleBasedRoute allowedRoles={["cliente", "superadmin", "coordinadorlogistico", 'coordinador']}>
+                  <RoleBasedRoute allowedRoles={["cliente", "superadmin", "coordinadorlogistico", 'coordinador', 'supervisor']}>
                     <RegistrarMezclado />
                   </RoleBasedRoute>
                 }
@@ -353,7 +355,7 @@ const AppContent = () => {
               <Route
                 path="/detallesmezclados"
                 element={
-                  <RoleBasedRoute allowedRoles={["cliente", "superadmin", "coordinadorlogistico", 'coordinador']}>
+                  <RoleBasedRoute allowedRoles={["cliente", "superadmin", "coordinadorlogistico", 'coordinador', 'supervisor']}>
                     <DetallesMezclado />
                   </RoleBasedRoute>
                 }

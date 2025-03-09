@@ -16,7 +16,7 @@ import {
   LogOut,
   UserPlus,
   Camera,
-  Blend
+  Blend,
 } from "lucide-react";
 import "../styles/drawer.css";
 import { AuthContext } from "../pages/context/AuthContext";
@@ -75,7 +75,7 @@ const menuItems = [
     path: "/informes",
     label: "Informes",
     icon: <FileText size={24} />,
-    roles: ["superadmin", "coordinador", 'tecnico'],
+    roles: ["superadmin", "coordinador", "tecnico"],
   },
   {
     path: "/imagenes",
@@ -99,7 +99,7 @@ const menuItems = [
     path: "/listamezclados",
     label: "Mezclados",
     icon: <Blend size={24} />,
-    roles: ["superadmin", "coordinador", "coordinadorlogistico"],
+    roles: ["superadmin", "coordinador", "coordinadorlogistico", "supervisor"],
   },
 ];
 
@@ -125,6 +125,9 @@ const Drawer = () => {
     setIsOpen(false);
   };
 
+  // Determina si se está en móvil según el ancho de la ventana
+  const isMobile = window.innerWidth <= 768;
+
   return (
     <>
       <button
@@ -148,11 +151,19 @@ const Drawer = () => {
         initial={{ width: "60px" }}
         animate={{ width: isOpen ? "220px" : "60px" }}
         transition={{ duration: 0.3 }}
-        style={{ overflowX: "hidden", maxWidth: "100vw" }}
-        onMouseEnter={() => window.innerWidth > 768 && setIsOpen(true)}
-        onMouseLeave={() => window.innerWidth > 768 && setIsOpen(false)}
+        style={{
+          overflowX: "hidden",
+          maxWidth: "100vw",
+          position: "fixed",
+          top: "var(--header-height)",
+          left: 0,
+          height: `calc(100% - var(--header-height))`,
+          zIndex: 150,
+        }}
+        onMouseEnter={() => !isMobile && setIsOpen(true)}
+        onMouseLeave={() => !isMobile && setIsOpen(false)}
       >
-        {window.innerWidth <= 768 && isOpen && (
+        {isMobile && isOpen && (
           <button
             className="close-drawer-button"
             onClick={closeDrawer}
@@ -178,7 +189,11 @@ const Drawer = () => {
               animate={{ opacity: 1 }}
               transition={{ duration: 0.1, delay: isOpen ? 0.15 : 0 }}
             >
-              <Link to={item.path} className="drawer-link">
+              <Link
+                to={item.path}
+                className="drawer-link"
+                onClick={() => isMobile && closeDrawer()}
+              >
                 <div className="drawer-icon" style={{ position: "relative" }}>
                   {item.icon}
                   {item.label === "Solicitudes" && showVincularMessage && (
@@ -216,6 +231,23 @@ const Drawer = () => {
           </Link>
         </div>
       </motion.nav>
+
+      {/* Backdrop en móviles: cierra el drawer al hacer tap fuera del área del mismo */}
+      {isMobile && isOpen && (
+        <div
+          className="drawer-backdrop"
+          onClick={closeDrawer}
+          style={{
+            position: "fixed",
+            top: "var(--header-height)",
+            left: "220px",
+            width: `calc(100% - 220px)`,
+            height: `calc(100% - var(--header-height))`,
+            backgroundColor: "rgba(0, 0, 0, 0)",
+            zIndex: 100,
+          }}
+        ></div>
+      )}
     </>
   );
 };

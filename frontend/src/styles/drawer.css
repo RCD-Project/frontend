@@ -164,4 +164,14 @@
     margin-top: var(--header-height);
     overflow: hidden;
   }
+
+  .drawer-backdrop {
+    position: fixed;
+    top: var(--header-height);
+    left: 0;
+    width: 100%;
+    height: calc(100% - var(--header-height));
+    background-color: rgb(255, 249, 249);
+    z-index: 100;
+  }
 }

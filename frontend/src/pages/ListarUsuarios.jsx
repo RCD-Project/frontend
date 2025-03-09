@@ -1,7 +1,17 @@
 import React, { useContext, useEffect, useState } from 'react';
 import {
-  Container, Paper, Table, TableBody, TableCell, TableHead,
-  TableRow, Typography, CircularProgress, Button, Box
+  Container,
+  Paper,
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableRow,
+  Typography,
+  CircularProgress,
+  Button,
+  Box,
+  TableContainer,
 } from '@mui/material';
 import { AuthContext } from '../pages/context/AuthContext';
 import { useNavigate } from 'react-router-dom';
@@ -35,42 +45,44 @@ const ListarUsuarios = () => {
         {loading ? (
           <CircularProgress />
         ) : (
-          <Table>
-            <TableHead>
-              <TableRow>
-                <TableCell>ID</TableCell>
-                <TableCell>Usuario</TableCell>
-                <TableCell>Email</TableCell>
-                <TableCell>Rol</TableCell>
-                <TableCell>Acciones</TableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {usuarios.map((usuario) => (
-                <TableRow key={usuario.email}>
-                  <TableCell>{usuario.id}</TableCell>
-                  <TableCell>{usuario.username}</TableCell>
-                  <TableCell>{usuario.email}</TableCell>
-                  <TableCell>{usuario.rol}</TableCell>
-                  <TableCell>
-                    <Button
-                      variant="outlined"
-                      size="small"
-                      onClick={() => navigate(`/editarusuario/${usuario.email}`)}
-                      sx={{
-                        backgroundColor: "#abbf9d",
-                        "&:hover": { backgroundColor: "#d1e063" },
-                        color: "white",
-                        borderColor: "#abbf9d",
-                      }}
-                    >
-                      Editar
-                    </Button>
-                  </TableCell>
+          <TableContainer sx={{ overflowX: 'auto' }}>
+            <Table>
+              <TableHead>
+                <TableRow>
+                  <TableCell>ID</TableCell>
+                  <TableCell>Usuario</TableCell>
+                  <TableCell>Email</TableCell>
+                  <TableCell>Rol</TableCell>
+                  <TableCell>Acciones</TableCell>
                 </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+              </TableHead>
+              <TableBody>
+                {usuarios.map((usuario) => (
+                  <TableRow key={usuario.email}>
+                    <TableCell>{usuario.id}</TableCell>
+                    <TableCell>{usuario.username}</TableCell>
+                    <TableCell>{usuario.email}</TableCell>
+                    <TableCell>{usuario.rol}</TableCell>
+                    <TableCell>
+                      <Button
+                        variant="outlined"
+                        size="small"
+                        onClick={() => navigate(`/editarusuario/${usuario.email}`)}
+                        sx={{
+                          backgroundColor: "#abbf9d",
+                          "&:hover": { backgroundColor: "#d1e063" },
+                          color: "white",
+                          borderColor: "#abbf9d",
+                        }}
+                      >
+                        Editar
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </TableContainer>
         )}
 
         <Box sx={{ display: 'flex', justifyContent: 'center', mt: 3 }}>

@@ -1,8 +1,9 @@
 import React, { useEffect, useState, useContext } from "react";
 import { useLocation } from "react-router-dom";
-import { Card, CardContent, Typography, Grid, Paper, Divider, Box, CircularProgress, Link as MuiLink } from "@mui/material";
+import { Card, CardContent, Typography, Grid, Paper, Divider, Box, CircularProgress } from "@mui/material";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
 import { AuthContext } from "../pages/context/AuthContext";
+import dayjs from "dayjs"; // Importa dayjs
 
 const DetallesPuntoLimpio = () => {
   const { token } = useContext(AuthContext);
@@ -33,7 +34,7 @@ const DetallesPuntoLimpio = () => {
       headers: {
         "Content-Type": "application/json",
         Authorization: `Token ${token}`,
-      }
+      },
     })
       .then(response => {
         if (!response.ok) {
@@ -82,15 +83,19 @@ const DetallesPuntoLimpio = () => {
     );
   }
 
+  // Se formatea la fecha con dayjs al formato "dd/MM/yyyy"
+  const fechaFormateada = puntoLimpio.fecha_ingreso
+    ? dayjs(puntoLimpio.fecha_ingreso).format("DD/MM/YYYY")
+    : "N/A";
 
-  // Se agregan los detalles: se incluyen "Nombre de la Obra" y "Fracciones" (tomando la propiedad "cantidad")
+  // Se agregan los detalles, incluyendo "Fecha de Ingreso" formateada
   const detalles = [
     { label: "Nombre de la Obra", value: puntoLimpio.nombre_obra },
     { label: "Fracciones", value: puntoLimpio.cantidad || "N/A" },
     { label: "Ubicación", value: puntoLimpio.ubicacion },
     { label: "Accesibilidad", value: puntoLimpio.accesibilidad },
     { label: "Tipo de Contenedor", value: puntoLimpio.tipo_contenedor },
-    { label: "Fecha de Ingreso", value: puntoLimpio.fecha_ingreso },
+    { label: "Fecha de Ingreso", value: fechaFormateada },
   ];
 
   return (

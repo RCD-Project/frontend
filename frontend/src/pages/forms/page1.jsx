@@ -73,7 +73,7 @@ const Page1 = ({ nextStep }) => {
     if (token) {
       fetchTecnicos();
     }
-  }, [loggedEmail, token, userRole, updateData, data.page1]);
+  }, [loggedEmail, token, userRole, updateData]);
 
   const safeFormData = {
     obra: data?.page1?.obraId || "",

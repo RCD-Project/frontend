@@ -1,3 +1,4 @@
+// EditarUsuario.jsx
 import React, { useState, useContext, useEffect } from "react";
 import {
   Container,
@@ -25,7 +26,7 @@ const theme = createTheme({
 
 const EditarUsuario = () => {
   const { token } = useContext(AuthContext);
-  const { id } = useParams();
+  const { id, email } = useParams();
   const navigate = useNavigate();
 
   const [formData, setFormData] = useState({
@@ -34,13 +35,13 @@ const EditarUsuario = () => {
     rol: "",
     obra: "",
   });
-
   const [errors, setErrors] = useState({});
   const [successMessage, setSuccessMessage] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [obrasList, setObrasList] = useState([]);
 
+  // Carga de datos del usuario (puedes ajustar si tienes redundancia entre id y email)
   useEffect(() => {
     fetch(`http://127.0.0.1:8000/api/usuarios/${id}/`, {
       headers: { Authorization: `Token ${token}` },
@@ -50,17 +51,41 @@ const EditarUsuario = () => {
       .catch((err) => console.error(err));
   }, [id, token]);
 
-  const { email } = useParams();
+  useEffect(() => {
+    if (email) {
+      fetch(`http://127.0.0.1:8000/api/usuarios/editar/${email}/`, {
+        headers: { Authorization: `Token ${token}` },
+      })
+        .then((res) => res.json())
+        .then((data) => setFormData(data))
+        .catch((err) => console.error(err));
+    }
+  }, [email, token]);
 
-useEffect(() => {
-  fetch(`http://127.0.0.1:8000/api/editarusuario/${email}/`, {
-    headers: { Authorization: `Token ${token}` },
-  })
-    .then(res => res.json())
-    .then(data => setFormData(data))
-    .catch(err => console.error(err));
-}, [email, token]);
+  // Cargar todas las obras aprobadas
+  useEffect(() => {
+    const fetchObras = async () => {
+      try {
+        const res = await fetch("http://127.0.0.1:8000/api/obras/aprobadas/", {
+          headers: { Authorization: `Token ${token}` },
+        });
+        if (!res.ok) throw new Error("Error al cargar obras aprobadas");
+        const data = await res.json();
+        setObrasList(data);
+      } catch (err) {
+        console.error(err);
+        setErrorMessage("Error al cargar obras aprobadas");
+      }
+    };
 
+    // Si el rol es "técnico" o "supervisor" se muestra la lista de obras
+    if (formData.rol === "tecnico" || formData.rol === "supervisor") {
+      fetchObras();
+    } else {
+      setObrasList([]);
+      setFormData((prev) => ({ ...prev, obra: "" }));
+    }
+  }, [formData.rol, token]);
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -150,7 +175,7 @@ useEffect(() => {
                   >
                     {obrasList.map((obra) => (
                       <MenuItem key={obra.id} value={obra.id}>
-                        {obra.nombre_obra}
+                        {obra.nombre_obra} - {obra.direccion}
                       </MenuItem>
                     ))}
                   </TextField>

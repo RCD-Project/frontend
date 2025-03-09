@@ -103,7 +103,7 @@ const Formularios = () => {
       punto_limpio_estructura: puntoLimpioSeleccionado && grilla[1] ? grilla[1] : "",
       punto_limpio_tipo_contenedor: puntoLimpioSeleccionado && grilla[2] ? grilla[2] : "",
       punto_limpio_estado_contenedor: puntoLimpioSeleccionado && grilla[3] ? grilla[3] : "",
-      punto_limpio_señaletica: puntoLimpioSeleccionado && grilla[4] ? grilla[4] : "",
+      punto_limpio_senaletica: puntoLimpioSeleccionado && grilla[4] ? grilla[4] : "",
       punto_limpio_observaciones: puntoLimpioSeleccionado ? (page3Data.puntoLimpioObservaciones || "") : "",
 
       // Página 4:

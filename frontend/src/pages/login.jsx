@@ -14,7 +14,8 @@ import EmailIcon from "@mui/icons-material/Email";
 import LockIcon from "@mui/icons-material/Lock";
 import { useNavigate } from "react-router-dom";
 import { AuthContext } from "./context/AuthContext";
-import section4 from "../assets/section4.png"; 
+import section4 from "../assets/section4.jpg"; 
+import { ChevronLeft } from "lucide-react";
 
 const LoginForm = () => {
   const [email, setEmail] = useState("");
@@ -75,6 +76,20 @@ const LoginForm = () => {
         overflowY: "hidden",
       }}
     >
+      <Button
+          onClick={() => navigate(-1)}
+          sx={{
+            position: "absolute",
+            top: 20,
+            left: 20,
+            minWidth: "auto",
+            padding: 1,
+            color: "white",
+          }}
+        >
+          <ChevronLeft />
+        </Button>
+
       <Paper
         elevation={3}
         sx={{
@@ -87,6 +102,9 @@ const LoginForm = () => {
           borderRadius: "8px", // Bordes redondeados
         }}
       >
+
+
+
         <Typography variant="h5" gutterBottom sx={{ color: "#fff" }}>
           Iniciar Sesión
         </Typography>

@@ -108,7 +108,7 @@ const Landing = () => {
             <Button
               variant="contained"
               component={Link}
-              to="/altacliente"
+              to="/registrocliente"
               aria-label="Registrarse"
               sx={{
                 backgroundColor: "#abbf9d",

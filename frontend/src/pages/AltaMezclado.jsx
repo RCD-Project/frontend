@@ -124,7 +124,7 @@ const RegistrarMezclado = () => {
       const result = await response.json();
       setSuccessMessage("Mezclado registrado con éxito.");
       setIsLoading(false);
-      navigate("/mezclados", { state: { successMessage: "Mezclado registrado con éxito." } });
+      navigate("/listamezclados", { state: { successMessage: "Mezclado registrado con éxito." } });
     } catch (error) {
       setErrorMessage(error.message);
       setIsLoading(false);
